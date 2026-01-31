@@ -1,0 +1,53 @@
+.authPage {
+  max-width: 400px;
+  margin: 40px auto;
+  padding: 20px;
+}
+
+.authPage__title {
+  margin: 0 0 20px;
+}
+
+.authPage__form {
+  display: flex;
+  flex-direction: column;
+}
+
+.authPage__error {
+  color: #c00;
+  margin-bottom: 12px;
+}
+
+.authPage__field {
+  margin-bottom: 12px;
+}
+
+.authPage__label {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.authPage__input {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+}
+
+.authPage__actions {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.authPage__submit {
+  padding: 8px 16px;
+}
+
+.authPage__link {
+  color: #0066cc;
+}
+
+.authPage__link:hover {
+  text-decoration: underline;
+}

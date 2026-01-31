@@ -1,0 +1,48 @@
+.home {
+  padding: 20px;
+}
+
+.home__title {
+  margin: 0 0 12px;
+}
+
+.home__text {
+  margin: 0 0 12px;
+}
+
+.home__nav {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.home__user {
+  color: #333;
+}
+
+.home__logout {
+  padding: 6px 12px;
+  cursor: pointer;
+  color: #0066cc;
+  background: transparent;
+  border: 1px solid #0066cc;
+  border-radius: 4px;
+}
+
+.home__logout:hover {
+  background: #f0f0f0;
+}
+
+.home__link {
+  color: #0066cc;
+}
+
+.home__link:hover {
+  text-decoration: underline;
+}
+
+.home__separator {
+  margin: 0 8px;
+  color: #666;
+}

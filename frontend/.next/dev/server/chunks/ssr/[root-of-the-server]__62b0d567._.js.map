@@ -1,6 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 10, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/%D0%BC%D0%B0%D0%BA%D1%81%D0%B8%D0%BC/OneDrive/%D0%A0%D0%B0%D0%B1%D0%BE%D1%87%D0%B8%D0%B9%20%D1%81%D1%82%D0%BE%D0%BB/%D0%94%D0%B8%D0%BF%D0%BB%D0%BE%D0%BC/%D0%BF%D1%80%D0%BE%D0%B5%D0%BA%D1%82/project1/frontend/pages/index.js"],"sourcesContent":["export default function Home() {\r\n  return (\r\n    <div>\r\n      <h1>Добро пожаловать в Next.js!</h1>\r\n      <p>Это главная страница вашего приложения.</p>\r\n    </div>\r\n  )\r\n}"],"names":[],"mappings":";;;;;;AAAe,SAAS;IACtB,qBACE,qKAAC;;0BACC,qKAAC;0BAAG;;;;;;0BACJ,qKAAC;0BAAE;;;;;;;;;;;;AAGT"}}]
-}

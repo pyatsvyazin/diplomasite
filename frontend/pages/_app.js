@@ -2,6 +2,9 @@ import '../styles/globals.css';
 import '../styles/home.css';
 import '../styles/auth/common.css';
 import '../styles/navigation.css';
+import '../styles/admin.css';
+import '../styles/home/services.css';
+import '../styles/home/request-form.css';
 import { AuthProvider } from '../context/AuthContext';
 import Navigation from '../components/Navigation';
 

@@ -1,12 +1,22 @@
 import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
+import ServicesSection from '../components/home/ServicesSection';
+import RequestFormSection from '../components/home/RequestFormSection';
 
 export default function HomePage() {
   const { user, loading, logout } = useAuth();
 
   return (
-    <div className="home">
-      <h1 className="home__title">Добро пожаловать!</h1>
+    <div className="home"> 
+    
+      <ServicesSection />
+      <RequestFormSection />
+    </div>
+  );
+}
+
+/*
+ <h1 className="home__title">Добро пожаловать!</h1>
       <p className="home__text">Это главная страница вашего приложения.</p>
       <div className="home__nav">
         {loading ? (
@@ -26,6 +36,4 @@ export default function HomePage() {
           </>
         )}
       </div>
-    </div>
-  );
-}
+*/

@@ -21,3 +21,20 @@ export function clearAuthToken() {
     localStorage.removeItem('auth_token');
   }
 }
+
+export async function submitRequest(data) {
+  const url = getApiUrl('/request');
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeaders(),
+    },
+    body: JSON.stringify(data),
+  });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(body.message || 'Не удалось отправить заявку');
+  }
+  return body;
+}

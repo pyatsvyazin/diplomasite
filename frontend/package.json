@@ -4,10 +4,9 @@
   "description": "Next.js frontend for project",
   "main": "index.js",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "dev": "concurrently \"npm run dev:next\" \"npm run dev:laravel\"",
+    "dev:next": "next dev",
+    "dev:laravel": "cd ../backend && php artisan serve"
   },
   "keywords": [],
   "author": "",
@@ -16,5 +15,9 @@
     "next": "^14.2.35",
     "react": "^18.0.0",
     "react-dom": "^18.0.0"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
   }
 }
+

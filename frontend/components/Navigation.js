@@ -35,6 +35,8 @@ export default function Navigation() {
     return name[0].toUpperCase();
   }
 
+  const isAdminOrLawyer = user?.roles?.some((r) => r.name === 'admin' || r.name === 'lawyer');
+
   return (
     <header className="nav">
       <div className="nav__inner">
@@ -107,8 +109,20 @@ export default function Navigation() {
                     </span>
                     <p className="nav__profile-name">{user.full_name}</p>
                     <p className="nav__profile-email">{user.email}</p>
+                    {isAdminOrLawyer && (
+                      <p className="nav__profile-badge">Доступ: Админ-панель</p>
+                    )}
                   </div>
                   <div className="nav__profile-actions">
+                    {isAdminOrLawyer && (
+                      <Link
+                        href="/admin/users"
+                        className="nav__profile-action nav__profile-action--admin"
+                        onClick={() => setProfileOpen(false)}
+                      >
+                        Админ-панель
+                      </Link>
+                    )}
                     <Link
                       href="/profile"
                       className="nav__profile-action"

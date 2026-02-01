@@ -1,28 +1,28 @@
 .nav {
-  background: #1a1a2e;
-  color: #eee;
+  background: #BBA478;
+  color: #000000;
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .nav__inner {
-  max-width: 1200px;
+  max-width: 1350px;
   margin: 0 auto;
   padding: 0 20px;
   display: flex;
   align-items: center;
   gap: 32px;
-  min-height: 56px;
+  min-height: 80px;
 }
 
 .nav__logo {
   font-weight: 700;
-  font-size: 1.15rem;
-  color: #fff;
+  font-size: 1.50rem;
+  color: #000000;
   flex-shrink: 0;
 }
 
 .nav__logo:hover {
-  color: #c9b896;
+  color: #494130;
 }
 
 .nav__menu {
@@ -30,6 +30,7 @@
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
+  margin: auto;
 }
 
 .nav__link {
@@ -37,9 +38,10 @@
   align-items: center;
   gap: 4px;
   padding: 8px 12px;
-  color: #ddd;
+  color: #000000;
   border-radius: 6px;
   transition: background 0.15s, color 0.15s;
+  font-size: 1.20rem;
 }
 
 .nav__link:hover {
@@ -52,10 +54,11 @@
   border: none;
   font: inherit;
   cursor: pointer;
+  font-size: 1.20rem;
 }
 
 .nav__dropdown-arrow {
-  font-size: 0.6em;
+  font-size: 0.8em;
   opacity: 0.8;
   transition: transform 0.2s;
 }
@@ -200,6 +203,21 @@
   word-break: break-all;
 }
 
+.nav__profile-badge {
+  margin: 8px 0 0;
+  font-size: 0.8rem;
+  color: #c9b896;
+}
+
+.nav__profile-action--admin {
+  color: #c9b896;
+  font-weight: 500;
+}
+
+.nav__profile-action--admin:hover {
+  color: #d4c4a0;
+}
+
 .nav__profile-actions {
   padding: 8px 0;
 }
@@ -234,11 +252,11 @@
 }
 
 .nav__login-btn {
-  padding: 8px 18px;
-  font-size: 0.95rem;
+  padding: 8px 25px;
+  font-size: 1.20rem;
   color: #1a1a2e;
   background: #c9b896;
-  border-radius: 6px;
+
   font-weight: 500;
   transition: background 0.15s, color 0.15s;
 }

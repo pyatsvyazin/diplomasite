@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -18,4 +19,8 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user()->load('roles');
     });
     Route::post('/logout', [AuthController::class, 'logout']);
+
+    Route::middleware('admin.or.lawyer')->prefix('admin')->group(function () {
+        Route::get('/users', [AdminController::class, 'users']);
+    });
 });

@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import { submitRequest } from '../../lib/api';
 
 export default function RequestFormSection() {
+  const { user } = useAuth();
   const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -18,7 +20,10 @@ export default function RequestFormSection() {
     setError('');
     setLoading(true);
     try {
-      await submitRequest(form);
+      const payload = user
+        ? { message: form.message }
+        : { name: form.name, email: form.email, phone: form.phone, message: form.message };
+      await submitRequest(payload);
       setSuccess(true);
       setForm({ name: '', email: '', phone: '', message: '' });
     } catch (err) {
@@ -32,39 +37,56 @@ export default function RequestFormSection() {
     <section className="request-form-section">
       <h2 className="request-form-section__title">Заявка</h2>
       <form className="request-form-section__form" onSubmit={handleSubmit}>
-        <label className="request-form-section__label">
-          Имя
-          <input
-            type="text"
-            name="name"
-            className="request-form-section__input"
-            value={form.name}
-            onChange={handleChange}
-            required
-          />
-        </label>
-        <label className="request-form-section__label">
-          Email
-          <input
-            type="email"
-            name="email"
-            className="request-form-section__input"
-            value={form.email}
-            onChange={handleChange}
-            required
-          />
-        </label>
-        <label className="request-form-section__label">
-          Телефон
-          <input
-            type="tel"
-            name="phone"
-            className="request-form-section__input"
-            value={form.phone}
-            onChange={handleChange}
-            required
-          />
-        </label>
+        {user ? (
+          <div className="request-form-section__profile">
+            <div className="request-form-section__profile-avatar">
+              {user.full_name?.charAt(0)?.toUpperCase() || '?'}
+            </div>
+            <div className="request-form-section__profile-info">
+              <div className="request-form-section__profile-name">{user.full_name}</div>
+              <div className="request-form-section__profile-meta">{user.email}</div>
+              {user.phone && (
+                <div className="request-form-section__profile-meta">{user.phone}</div>
+              )}
+            </div>
+          </div>
+        ) : (
+          <>
+            <label className="request-form-section__label">
+              Имя
+              <input
+                type="text"
+                name="name"
+                className="request-form-section__input"
+                value={form.name}
+                onChange={handleChange}
+                required
+              />
+            </label>
+            <label className="request-form-section__label">
+              Email
+              <input
+                type="email"
+                name="email"
+                className="request-form-section__input"
+                value={form.email}
+                onChange={handleChange}
+                required
+              />
+            </label>
+            <label className="request-form-section__label">
+              Телефон
+              <input
+                type="tel"
+                name="phone"
+                className="request-form-section__input"
+                value={form.phone}
+                onChange={handleChange}
+                required
+              />
+            </label>
+          </>
+        )}
         <label className="request-form-section__label">
           Сообщение
           <textarea

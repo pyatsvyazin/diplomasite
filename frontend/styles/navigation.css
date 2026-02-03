@@ -1,5 +1,5 @@
 .nav {
-  background: #BBA478;
+  background: #C59D6C;
   color: #000000;
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06);
 }
@@ -22,7 +22,7 @@
 }
 
 .nav__logo:hover {
-  color: #494130;
+  color: #5c442a;
 }
 
 .nav__menu {

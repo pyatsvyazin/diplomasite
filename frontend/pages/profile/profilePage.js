@@ -1,4 +1,14 @@
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { getMyRequests } from '../../lib/api';
+
+const STATUS_LABELS = {
+  new: 'Новая',
+  reviewing: 'Рассматривается',
+  in_progress: 'В работе',
+  rejected: 'Отклонена',
+  closed: 'Закрыта',
+};
 
 function getInitials(name) {
   if (!name || !name.trim()) return '?';
@@ -9,8 +19,50 @@ function getInitials(name) {
   return name[0].toUpperCase();
 }
 
+function ProfileRequestCard({ request, currentUserId }) {
+  const isClient = request.client_id === currentUserId;
+  const other = isClient ? request.lawyer : request.client;
+  const createdAt = request.created_at
+    ? new Date(request.created_at).toLocaleString('ru-RU', { dateStyle: 'short', timeStyle: 'short' })
+    : '—';
+
+  return (
+    <div className="profile-request-card">
+      <div className="profile-request-card__head">
+        <span className="profile-request-card__date">{createdAt}</span>
+        <span className={`profile-request-card__status profile-request-card__status--${request.status}`}>
+          {STATUS_LABELS[request.status] ?? request.status}
+        </span>
+      </div>
+      <p className="profile-request-card__message">{request.message || '—'}</p>
+      {other && (
+        <div className="profile-request-card__other">
+          {isClient ? 'Юрист: ' : 'Клиент: '}
+          <span className="profile-request-card__other-name">{other.full_name}</span>
+          {other.email && <span className="profile-request-card__other-email"> ({other.email})</span>}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function ProfilePage() {
   const { user, loading } = useAuth();
+  const [requests, setRequests] = useState([]);
+  const [requestsLoading, setRequestsLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user) {
+      setRequests([]);
+      setRequestsLoading(false);
+      return;
+    }
+    setRequestsLoading(true);
+    getMyRequests()
+      .then(setRequests)
+      .catch(() => setRequests([]))
+      .finally(() => setRequestsLoading(false));
+  }, [user?.id]);
 
   if (loading) {
     return (
@@ -44,6 +96,23 @@ export default function ProfilePage() {
           )}
         </div>
       </div>
+
+      <section className="profile-requests">
+        <h2 className="profile-requests__title">Мои заявки</h2>
+        {requestsLoading ? (
+          <p className="profile-requests__loading">Загрузка заявок...</p>
+        ) : requests.length === 0 ? (
+          <p className="profile-requests__empty">Нет заявок</p>
+        ) : (
+          <ul className="profile-requests__list">
+            {requests.map((r) => (
+              <li key={r.id}>
+                <ProfileRequestCard request={r} currentUserId={user.id} />
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
     </div>
   );
 }

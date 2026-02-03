@@ -1,0 +1,81 @@
+.profile-requests {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e0e0e0;
+  }
+  
+  .profile-requests__title {
+    margin: 0 0 1rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1a1a2e;
+  }
+  
+  .profile-requests__loading,
+  .profile-requests__empty {
+    margin: 0;
+    color: #666;
+    font-size: 0.95rem;
+  }
+  
+  .profile-requests__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .profile-request-card {
+    padding: 1rem;
+    background: #f5f5f5;
+    border-radius: 8px;
+    border: 1px solid #eee;
+  }
+  
+  .profile-request-card__head {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .profile-request-card__date {
+    font-size: 0.9rem;
+    color: #666;
+  }
+  
+  .profile-request-card__status {
+    font-size: 0.85rem;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+  
+  .profile-request-card__status--new { background: #e3f2fd; color: #1565c0; }
+  .profile-request-card__status--reviewing { background: #fff3e0; color: #e65100; }
+  .profile-request-card__status--in_progress { background: #e8f5e9; color: #2e7d32; }
+  .profile-request-card__status--rejected { background: #ffebee; color: #c62828; }
+  .profile-request-card__status--closed { background: #f3e5f5; color: #6a1b9a; }
+  
+  .profile-request-card__message {
+    margin: 0 0 0.5rem;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: #333;
+    white-space: pre-wrap;
+  }
+  
+  .profile-request-card__other {
+    font-size: 0.9rem;
+    color: #555;
+  }
+  
+  .profile-request-card__other-name {
+    font-weight: 500;
+  }
+  
+  .profile-request-card__other-email {
+    color: #777;
+  }

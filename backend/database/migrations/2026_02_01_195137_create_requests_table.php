@@ -33,8 +33,10 @@ return new class extends Migration {
             // Статус заявки
             $table->enum('status', [
                 'new',
+                'reviewing',
                 'in_progress',
-                'closed'
+                'closed',
+                'rejected'
             ])->default('new');
 
             $table->timestamps();

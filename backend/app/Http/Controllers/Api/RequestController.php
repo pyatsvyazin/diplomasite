@@ -23,8 +23,12 @@ class RequestController extends Controller
 
         if ($user) {
             $validator = Validator::make($request->all(), [
+                'subject' => 'required|string|max:255',
                 'message' => 'required|string|max:5000',
-            ], ['message.required' => 'Введите сообщение.']);
+            ], [
+                'subject.required' => 'Укажите тему.',
+                'message.required' => 'Введите сообщение.',
+            ]);
 
             if ($validator->fails()) {
                 return response()->json([
@@ -38,13 +42,15 @@ class RequestController extends Controller
                 'name'      => $user->full_name,
                 'email'     => $user->email,
                 'phone'     => $user->phone ?? '',
+                'subject'   => $request->input('subject'),
                 'message'   => $request->input('message'),
             ];
         } else {
             $validator = Validator::make($request->all(), [
-                'name'   => 'required|string|max:255',
-                'email'  => 'required|email',
-                'phone'  => 'required|string|max:50',
+                'name'    => 'required|string|max:255',
+                'email'   => 'required|email',
+                'phone'   => 'required|string|max:50',
+                'subject' => 'required|string|max:255',
                 'message' => 'required|string|max:5000',
             ], [
                 'name.required'   => 'Укажите имя.',
@@ -52,6 +58,7 @@ class RequestController extends Controller
                 'email.email'    => 'Некорректный email.',
                 'phone.required' => 'Укажите телефон.',
                 'message.required' => 'Введите сообщение.',
+                'subject.required' => 'Укажите тему.',
             ]);
 
             if ($validator->fails()) {
@@ -86,7 +93,7 @@ class RequestController extends Controller
         $items = RequestModel::query()
             ->where('client_id', $user->id)
             ->orWhere('lawyer_id', $user->id)
-            ->with(['client', 'lawyer'])
+            ->with(['client', 'lawyer', 'review', 'review.lawyer'])
             ->orderByDesc('created_at')
             ->get();
 

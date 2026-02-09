@@ -11,6 +11,7 @@ body {
   padding: 0;
   margin: 0;
   font-family:geometriaMedium;
+  background-color: #f5f5f5;
 }
 
 a {
@@ -22,6 +23,11 @@ a {
   box-sizing: border-box;
 }
 
+textarea {
+  resize: none;
+}
+
+
 .app-main {
   max-width: 1350px;
   margin: 0 auto;
@@ -32,7 +38,17 @@ a {
 .page {
   padding: 0;
 }
-
+/* блоки */
+.block-section {
+  background-color: white;
+  border-radius: 20px;
+  padding: 15px 15px;
+}
+/* */
+.button-block {
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
 .page h1 {
   margin: 0 0 16px;
   font-size: 1.75rem;
@@ -65,4 +81,31 @@ a {
   font-size: 1.5rem;
   font-weight: 600;
   flex-shrink: 0;
+}
+
+.star-rating {
+  display: inline-flex;
+  gap: 2px;
+  align-items: center;
+}
+
+.star-rating__star {
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.star-rating__star-bg {
+  color: #ddd;
+  display: block;
+  line-height: 1;
+}
+
+.star-rating__star-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: #e6b800;
+  line-height: 1;
+  pointer-events: none;
 }

@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useAuth } from '../context/AuthContext';
+import Avatar from './Avatar';
+import { getAvatarUrl } from '../lib/api';
 
 export default function Navigation() {
   const router = useRouter();
@@ -25,15 +27,6 @@ export default function Navigation() {
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
   }, [profileOpen]);
-
-  function getInitials(name) {
-    if (!name || !name.trim()) return '?';
-    const parts = name.trim().split(/\s+/);
-    if (parts.length >= 2) {
-      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-    }
-    return name[0].toUpperCase();
-  }
 
   const isAdminOrLawyer = user?.roles?.some((r) => r.name === 'admin' || r.name === 'lawyer');
 
@@ -96,17 +89,13 @@ export default function Navigation() {
                 aria-expanded={profileOpen}
                 aria-haspopup="true"
               >
-                <span className="nav__avatar" aria-hidden>
-                  {getInitials(user.full_name)}
-                </span>
+                <Avatar name={user.full_name} size={36} className="nav__avatar" src={getAvatarUrl(user)} />
                 <span className="nav__profile-arrow" aria-hidden>▼</span>
               </button>
               {profileOpen && (
                 <div className="nav__profile-panel">
                   <div className="nav__profile-header">
-                    <span className="nav__profile-avatar" aria-hidden>
-                      {getInitials(user.full_name)}
-                    </span>
+                  <Avatar name={user.full_name} size={36} className="nav__avatar" src={getAvatarUrl(user)} />
                     <p className="nav__profile-name">{user.full_name}</p>
                     <p className="nav__profile-email">{user.email}</p>
                     {isAdminOrLawyer && (

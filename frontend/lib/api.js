@@ -82,6 +82,36 @@ export async function getMyRequests() {
   return data.data || [];
 }
 
+export async function getAdminStaff() {
+  const url = getApiUrl('/admin/staff');
+  const res = await fetch(url, { headers: getAuthHeaders() });
+  if (!res.ok) throw new Error('Не удалось загрузить сотрудников');
+  const data = await res.json();
+  return data.data || [];
+}
+
+export async function updateAdminStaffMember(id, payload) {
+  const url = getApiUrl(`/admin/staff/${id}`);
+  const isFormData = payload instanceof FormData;
+  const headers = { ...getAuthHeaders() };
+  if (!isFormData) {
+    headers['Content-Type'] = 'application/json';
+  }
+  const method = isFormData ? 'POST' : 'PATCH';
+  const body = isFormData ? payload : JSON.stringify(payload);
+  if (isFormData) {
+    payload.append('_method', 'PATCH');
+  }
+  const res = await fetch(url, {
+    method,
+    headers,
+    body,
+  });
+  const bodyRes = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(bodyRes.message || 'Не удалось обновить данные');
+  return bodyRes.data;
+}
+
 export async function getAdminUsers(search = '', role = '') {
   const params = new URLSearchParams();
   if (search) params.set('search', search);
@@ -91,4 +121,39 @@ export async function getAdminUsers(search = '', role = '') {
   if (!res.ok) throw new Error('Не удалось загрузить пользователей');
   const data = await res.json();
   return data.users || [];
+}
+
+export async function getReviews() {
+  const url = getApiUrl('/reviews');
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('Не удалось загрузить отзывы');
+  const data = await res.json();
+  return data.data || [];
+}
+
+export async function createReview(payload) {
+  const url = getApiUrl('/reviews');
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeaders(),
+    },
+    body: JSON.stringify(payload),
+  });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(body.message || 'Не удалось отправить отзыв');
+  return body.data;
+}
+
+const PLACEHOLDER_AVATAR = '/images/avatars/placeholder_avatar.png';
+
+export function getAvatarUrl(userOrPath) {
+  const path = typeof userOrPath === 'object' ? userOrPath?.avatar_path : userOrPath;
+  if (!path) return PLACEHOLDER_AVATAR;
+  if (path.startsWith('http')) return path;
+  // путь вида /images/... — это фронт (заглушка), отдаём как есть
+  if (path.startsWith('/images/')) return path;
+  const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  return base + '/storage/' + path.replace(/^\/+/, '');
 }

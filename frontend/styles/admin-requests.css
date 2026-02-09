@@ -311,3 +311,9 @@
     flex: 1;
     min-width: 0;
   }
+
+  .request-card__subject {
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #1a1a2e;
+  }

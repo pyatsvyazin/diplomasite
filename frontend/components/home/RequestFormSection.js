@@ -1,14 +1,20 @@
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { submitRequest } from '../../lib/api';
+import { REQUEST_TOPICS } from '../../constants/requestTopics';
+import Avatar from '../Avatar';
+import { getAvatarUrl } from '../../lib/api';
 
 export default function RequestFormSection() {
   const { user } = useAuth();
-  const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' });
+  const [form, setForm] = useState({
+    name: '', email: '', phone: '', subject: '', message: ''
+  });
+  const [customTopic, setCustomTopic] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
-
+  
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -17,15 +23,21 @@ export default function RequestFormSection() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const subjectValue = form.subject === '__other__' ? customTopic.trim() : form.subject;
+    if (form.subject === '__other__' && !customTopic.trim()) {
+      setError('Укажите тему.');
+      return;
+    }
     setError('');
     setLoading(true);
     try {
       const payload = user
-        ? { message: form.message }
-        : { name: form.name, email: form.email, phone: form.phone, message: form.message };
+        ? { subject: subjectValue, message: form.message }
+        : { name: form.name, email: form.email, phone: form.phone, subject: subjectValue, message: form.message };
       await submitRequest(payload);
       setSuccess(true);
-      setForm({ name: '', email: '', phone: '', message: '' });
+      setForm({ name: '', email: '', phone: '', subject: '', message: '' });
+      setCustomTopic('');
     } catch (err) {
       setError(err.message || 'Ошибка отправки');
     } finally {
@@ -39,9 +51,7 @@ export default function RequestFormSection() {
       <form className="request-form-section__form" onSubmit={handleSubmit}>
         {user ? (
           <div className="request-form-section__profile">
-            <div className="request-form-section__profile-avatar">
-              {user.full_name?.charAt(0)?.toUpperCase() || '?'}
-            </div>
+            <Avatar name={user.full_name} size="lg" className="request-form-section__profile-avatar" src={getAvatarUrl(user)} />
             <div className="request-form-section__profile-info">
               <div className="request-form-section__profile-name">{user.full_name}</div>
               <div className="request-form-section__profile-meta">{user.email}</div>
@@ -87,6 +97,36 @@ export default function RequestFormSection() {
             </label>
           </>
         )}
+        <label className="request-form-section__label">
+          Тема
+          <select
+            name="subject"
+            className="request-form-section__input"
+            value={form.subject}
+            onChange={(e) => {
+              const v = e.target.value;
+              setForm((prev) => ({ ...prev, subject: v }));
+              if (v !== '__other__') setCustomTopic('');
+            }}
+            required
+          >
+            <option value="">Выберите тему</option>
+            {REQUEST_TOPICS.map((t) => (
+              <option key={t} value={t}>{t}</option>
+            ))}
+            <option value="__other__">Другое (указать свою)</option>
+          </select>
+          {form.subject === '__other__' && (
+            <input
+              type="text"
+              className="request-form-section__input"
+              placeholder="Введите свою тему"
+              value={customTopic}
+              onChange={(e) => setCustomTopic(e.target.value)}
+              required={form.subject === '__other__'}
+            />
+          )}
+        </label>
         <label className="request-form-section__label">
           Сообщение
           <textarea

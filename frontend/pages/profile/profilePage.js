@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { getMyRequests } from '../../lib/api';
+import ReviewForm from '../../components/profile/ReviewForm';
+import StarRating from '../../components/StarRating';
+import Avatar from '../../components/Avatar';
+import { getAvatarUrl } from '../../lib/api';
 
 const STATUS_LABELS = {
   new: 'Новая',
@@ -10,18 +14,13 @@ const STATUS_LABELS = {
   closed: 'Закрыта',
 };
 
-function getInitials(name) {
-  if (!name || !name.trim()) return '?';
-  const parts = name.trim().split(/\s+/);
-  if (parts.length >= 2) {
-    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-  }
-  return name[0].toUpperCase();
-}
-
-function ProfileRequestCard({ request, currentUserId }) {
+function ProfileRequestCard({ request, currentUserId, onReviewSent }) {
   const isClient = request.client_id === currentUserId;
   const other = isClient ? request.lawyer : request.client;
+  const review = request.review;
+  const canLeaveReview = isClient && request.status === 'closed' && !review;
+  const ratingDisplay = review && review.rating != null ? review.rating / 2 : 0;
+
   const createdAt = request.created_at
     ? new Date(request.created_at).toLocaleString('ru-RU', { dateStyle: 'short', timeStyle: 'short' })
     : '—';
@@ -34,12 +33,29 @@ function ProfileRequestCard({ request, currentUserId }) {
           {STATUS_LABELS[request.status] ?? request.status}
         </span>
       </div>
+      {request.subject && (
+        <p className="profile-request-card__subject">Тема: {request.subject}</p>
+      )}
       <p className="profile-request-card__message">{request.message || '—'}</p>
       {other && (
-        <div className="profile-request-card__other">
-          {isClient ? 'Юрист: ' : 'Клиент: '}
-          <span className="profile-request-card__other-name">{other.full_name}</span>
-          {other.email && <span className="profile-request-card__other-email"> ({other.email})</span>}
+        <div className="profile-request-card__person">
+           <Avatar name={other.full_name} size={36} className="profile-request-card__person-avatar" src={getAvatarUrl(other)} />
+          <div className="profile-request-card__person-info">
+            <span className="profile-request-card__person-label">{isClient ? 'Юрист: ' : 'Клиент: '}</span>
+            <span className="profile-request-card__person-name">{other.full_name}</span>
+            {other.email && <span className="profile-request-card__person-email">{other.email}</span>}
+          </div>
+        </div>
+      )}
+      {canLeaveReview && (
+        <div className="profile-request-card__review-section">
+          <ReviewForm requestId={request.id} onSuccess={onReviewSent} />
+        </div>
+      )}
+            {review && (
+        <div className="profile-request-card__review">
+          <StarRating value={ratingDisplay} />
+          <p className="profile-request-card__review-message">{review.message}</p>
         </div>
       )}
     </div>
@@ -51,17 +67,22 @@ export default function ProfilePage() {
   const [requests, setRequests] = useState([]);
   const [requestsLoading, setRequestsLoading] = useState(true);
 
+  const load = () => {
+    if (!user) return;
+    setRequestsLoading(true);
+    getMyRequests()
+      .then(setRequests)
+      .catch(() => setRequests([]))
+      .finally(() => setRequestsLoading(false));
+  };
+
   useEffect(() => {
     if (!user) {
       setRequests([]);
       setRequestsLoading(false);
       return;
     }
-    setRequestsLoading(true);
-    getMyRequests()
-      .then(setRequests)
-      .catch(() => setRequests([]))
-      .finally(() => setRequestsLoading(false));
+    load();
   }, [user?.id]);
 
   if (loading) {
@@ -84,9 +105,7 @@ export default function ProfilePage() {
     <div className="page">
       <h1>Профиль</h1>
       <div className="profile-card">
-        <span className="profile-card__avatar" aria-hidden>
-          {getInitials(user.full_name)}
-        </span>
+        <Avatar name={user.full_name} size="lg" className="profile-card__avatar" src={getAvatarUrl(user)} />
         <div>
           <p><strong>ФИО:</strong> {user.full_name}</p>
           <p><strong>Email:</strong> {user.email}</p>
@@ -107,7 +126,11 @@ export default function ProfilePage() {
           <ul className="profile-requests__list">
             {requests.map((r) => (
               <li key={r.id}>
-                <ProfileRequestCard request={r} currentUserId={user.id} />
+                <ProfileRequestCard
+                  request={r}
+                  currentUserId={user.id}
+                  onReviewSent={load}
+                />
               </li>
             ))}
           </ul>

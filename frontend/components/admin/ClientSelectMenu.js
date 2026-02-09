@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { getAdminUsers, updateAdminRequest } from '../../lib/api';
+import Avatar from '../Avatar';
+import { getAvatarUrl } from '../../lib/api';
 
 export default function ClientSelectMenu({ requestId, onSelect, onClose, renderTrigger }) {
   const [open, setOpen] = useState(false);
@@ -64,9 +66,7 @@ export default function ClientSelectMenu({ requestId, onSelect, onClose, renderT
                   className="lawyer-select__item"
                   onClick={() => handlePick(u)}
                 >
-                  <span className="lawyer-select__item-avatar">
-                    {u.full_name?.charAt(0)?.toUpperCase() || '?'}
-                  </span>
+                  <Avatar name={u.full_name} size={32} className="lawyer-select__item-avatar" src={getAvatarUrl(u)} />
                   <span className="lawyer-select__item-name">{u.full_name}</span>
                   {u.email && (
                     <span className="client-select__item-email">{u.email}</span>

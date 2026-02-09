@@ -41,14 +41,14 @@ export default function ServicesSection() {
   const blocks = activeTab === 'individuals' ? SERVICES_INDIVIDUALS : SERVICES_BUSINESS;
 
   return (
-    <section className="services-section">
+    <section className="block-section services-section">
       <div className="services-section__inner">
       <div className="services-section__panel">
           <h2 className="services-section__title">Наши услуги</h2>
           <p className="services-section__text">
             Текст об услугах, которые предоставляет компания.
           </p>
-          <div className="services-section__buttons">
+          <div className="button-block services-section__buttons">
             <button
               type="button"
               className={`services-section__btn ${activeTab === 'individuals' ? 'services-section__btn--active' : ''}`}

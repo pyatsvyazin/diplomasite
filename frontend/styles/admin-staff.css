@@ -1,0 +1,294 @@
+.staff-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .staff-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    position: relative;
+  }
+  
+  .staff-card__photo-wrap {
+    flex-shrink: 0;
+  }
+  
+  .staff-card__info {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .staff-card__name {
+    margin: 0 0 6px;
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+  
+  .staff-card__meta {
+    margin: 0 0 4px;
+    font-size: 0.95rem;
+    color: #555;
+  }
+  
+  .staff-card__rating {
+    margin-top: 8px;
+  }
+  
+  .staff-card__menu-wrap {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+  }
+  
+  .staff-card__menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #666;
+    transition: background 0.15s, color 0.15s;
+  }
+  
+  .staff-card__menu-btn:hover {
+    background: #eee;
+    color: #333;
+  }
+  
+  .staff-card__menu-dots {
+    font-size: 1.25rem;
+    line-height: 1;
+    letter-spacing: -0.05em;
+  }
+  
+  .staff-card__dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 4px;
+    min-width: 180px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border: 1px solid #eee;
+    z-index: 10;
+  }
+  
+  .staff-card__dropdown-item {
+    display: block;
+    width: 100%;
+    padding: 10px 14px;
+    text-align: left;
+    border: none;
+    background: none;
+    font-size: 0.95rem;
+    cursor: pointer;
+    color: #333;
+    border-radius: 6px;
+    margin: 4px;
+    width: calc(100% - 8px);
+    box-sizing: border-box;
+  }
+  
+  .staff-card__dropdown-item:hover {
+    background: #f5f5f5;
+  }
+  
+  .staff-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+  }
+  
+  .staff-modal {
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px;
+    max-width: 400px;
+    width: 100%;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  }
+  
+  .staff-modal__title {
+    margin: 0 0 20px;
+    font-size: 1.25rem;
+  }
+  
+  .staff-modal__form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  
+  .staff-modal__label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.9rem;
+    color: #555;
+  }
+  
+  .staff-modal__input {
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+  }
+  
+  .staff-modal__input:focus {
+    outline: none;
+    border-color: #c9b896;
+  }
+  
+  .staff-modal__error {
+    margin: 0;
+    color: #c00;
+    font-size: 0.9rem;
+  }
+  
+  .staff-modal__actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 8px;
+  }
+  
+  .staff-modal__btn {
+    padding: 10px 18px;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    border: none;
+  }
+  
+  .staff-modal__btn--primary {
+    background: #1e1e2e;
+    color: #fff;
+  }
+  
+  .staff-modal__btn--primary:hover:not(:disabled) {
+    background: #2d2d40;
+  }
+  
+  .staff-modal__btn--primary:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+  
+  .staff-modal__btn--secondary {
+    background: #eee;
+    color: #333;
+  }
+  
+  .staff-modal__btn--secondary:hover:not(:disabled) {
+    background: #e0e0e0;
+  }
+  
+  .staff-modal__btn--secondary:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+
+  .staff-modal {
+    position: relative;
+    /* остальные стили .staff-modal без изменений */
+  }
+  
+  .staff-modal__close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: none;
+    background: #eee;
+    border-radius: 6px;
+    font-size: 1.5rem;
+    line-height: 1;
+    color: #333;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  
+  .staff-modal__close:hover:not(:disabled) {
+    background: #e0e0e0;
+    color: #000;
+  }
+  
+  .staff-modal__close:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  .staff-modal__header {
+    margin-bottom: 20px;
+  }
+  
+  .staff-modal__header .staff-modal__title {
+    margin: 0;
+    flex: 1;
+  }
+
+  .staff-modal__avatar-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+  
+  .staff-modal__avatar-label {
+    cursor: pointer;
+  }
+  
+  .staff-modal__avatar-btn {
+    display: inline-block;
+    padding: 8px 14px;
+    background: #eee;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    color: #333;
+  }
+  
+  .staff-modal__avatar-btn:hover {
+    background: #e0e0e0;
+  }
+  
+  .staff-modal__avatar-input {
+    position: absolute;
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    z-index: -1;
+  }
+
+  .staff-card__rating {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .staff-card__rating-value {
+    font-size: 0.95rem;
+    color: #555;
+  }

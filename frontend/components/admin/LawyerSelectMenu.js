@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { getAdminLawyers, updateAdminRequest } from '../../lib/api';
+import Avatar from '../Avatar';
 
 export default function LawyerSelectMenu({ requestId, onSelect, renderTrigger }) {
   const [open, setOpen] = useState(false);

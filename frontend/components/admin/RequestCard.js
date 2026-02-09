@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { updateAdminRequest, getAdminLawyers } from '../../lib/api';
 import LawyerSelectMenu from './LawyerSelectMenu';
 import ClientSelectMenu from './ClientSelectMenu';
+import StarRating from '../StarRating';
+import Avatar from '../Avatar';
+import { getAvatarUrl } from '../../lib/api';
 
 const STATUS_LABELS = {
   new: 'Новая',
@@ -28,9 +31,7 @@ function AuthorBlock({ request, onRefresh }) {
     <div className="request-card__author">
       <div className="request-card__author-main">
         {isAuthorized && (
-          <div className="request-card__avatar request-card__avatar--user" title="Авторизован">
-            {client?.full_name?.charAt(0)?.toUpperCase() || '?'}
-          </div>
+          <Avatar name={client?.full_name} size={40} className="request-card__avatar avatar--user" title="Авторизован" src={getAvatarUrl(client)} />
         )}
         <div className="request-card__author-info">
           <div className="request-card__author-name">{name}</div>
@@ -97,9 +98,7 @@ function LawyerBlock({ request, onAssign, onRefresh }) {
     return (
       <div className="request-card__lawyer">
         <div className="request-card__lawyer-main">
-          <div className="request-card__avatar request-card__avatar--lawyer">
-            {lawyer.full_name?.charAt(0)?.toUpperCase() || '?'}
-          </div>
+          <Avatar name={lawyer.full_name} size={40} className="request-card__avatar avatar--lawyer" src={getAvatarUrl(lawyer)} />
           <span className="request-card__lawyer-name">{lawyer.full_name}</span>
           <button
             type="button"
@@ -167,28 +166,40 @@ export default function RequestCard({ request, onRefresh, onLinkClient }) {
         </div>
         <div className="request-card__col request-card__col--body">
           <div className="request-card__time">{createdAt}</div>
-          <label className="request-card__status-label">
-            Статус
-            <select
-              className="request-card__status"
-              value={status}
-              onChange={handleStatusChange}
-              disabled={updating}
-            >
-              {Object.entries(STATUS_LABELS).map(([value, label]) => (
-                <option key={value} value={value}>{label}</option>
-              ))}
-            </select>
-          </label>
+          {request.subject && (
+            <div className="request-card__subject">Тема: {request.subject}</div>
+          )}
+          {!request.review && (
+            <label className="request-card__status-label">
+              Статус
+              <select
+                className="request-card__status"
+                value={status}
+                onChange={handleStatusChange}
+                disabled={updating}
+              >
+                {Object.entries(STATUS_LABELS).map(([value, label]) => (
+                  <option key={value} value={value}>{label}</option>
+                ))}
+              </select>
+            </label>
+          )}
           <div className="request-card__message">{request.message || '—'}</div>
+            {request.review && (
+              <div className="request-card__review">
+                <strong>Отзыв:</strong> <StarRating value={(request.review.rating || 0) / 2} /> — {request.review.message}
+              </div>
+            )}
         </div>
       </div>
-      <div className="request-card__row2">
-        <div className="request-card__col request-card__col--author" />
-        <div className="request-card__col request-card__col--body">
-          <LawyerBlock request={request} onAssign={() => {}} onRefresh={onRefresh} />
+      {!request.review && (
+        <div className="request-card__row2">
+          <div className="request-card__col request-card__col--author" />
+          <div className="request-card__col request-card__col--body">
+            <LawyerBlock request={request} onAssign={() => {}} onRefresh={onRefresh} />
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

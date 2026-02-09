@@ -14,7 +14,7 @@ class RequestController extends Controller
     public function index(Request $request): JsonResponse
     {
         $query = RequestModel::query()
-            ->with(['client', 'lawyer']);
+            ->with(['client', 'lawyer', 'review', 'review.lawyer']);
 
         $status = $request->query('status');
         if ($status !== null && $status !== '') {
@@ -31,6 +31,23 @@ class RequestController extends Controller
         $req = RequestModel::find($id);
         if (!$req) {
             return response()->json(['message' => 'Заявка не найдена.'], 404);
+        }
+
+        $hasReview = $req->review()->exists();
+        if ($hasReview) {
+            $data = $request->only('client_id');
+            $validator = Validator::make($data, [
+                'client_id' => 'nullable|integer|exists:users,id',
+            ], ['client_id.exists' => 'Пользователь не найден.']);
+            if ($validator->fails()) {
+                return response()->json(['message' => 'Ошибка валидации.', 'errors' => $validator->errors()], 422);
+            }
+            if (array_key_exists('client_id', $data)) {
+                $req->client_id = $data['client_id'];
+            }
+            $req->save();
+            $req->load(['client', 'lawyer', 'review']);
+            return response()->json(['data' => $req]);
         }
 
         $validator = Validator::make($request->all(), [

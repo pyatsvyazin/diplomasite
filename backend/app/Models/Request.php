@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Review;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,13 +18,17 @@ class Request extends Model
     public const STATUS_CLOSED = 'closed';
 
     protected $table = 'requests';
-
+    public function review(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Review::class);
+    }
     protected $fillable = [
         'client_id',
         'lawyer_id',
         'name',
         'email',
         'phone',
+        'subject',
         'message',
         'status',
     ];

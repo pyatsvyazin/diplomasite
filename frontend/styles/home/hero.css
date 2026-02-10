@@ -1,0 +1,144 @@
+.hero {
+  position: relative;
+  min-height: 40vh;
+  display: flex;
+  align-items: center;
+  padding: 2rem 1.5rem;
+  overflow: hidden;
+}
+
+.hero__bg {
+  position: absolute;
+  inset: 0;
+  background: url('/images/backgroundphoto.png') center / cover no-repeat;
+  filter: blur(4px);
+}
+
+.hero__bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+.hero__inner {
+  position: relative;
+  z-index: 1;
+
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  align-items: center;
+}
+
+.hero__content {
+  color: #fff;
+}
+
+.hero__title {
+  margin: 0 0 0.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #C59D6C;
+  font-size: 42px;
+}
+
+.hero__subtitle {
+  margin: 0 0 1rem;
+  font-size: clamp(1rem, 2.5vw, 1.15rem);
+  font-weight: 600;
+  opacity: 0.95;
+}
+
+.hero__text {
+  margin: 0 0 1.5rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  opacity: 0.9;
+  max-width: 520px;
+}
+
+.hero__cta {
+  padding: 16px 40px;
+  font-size: 1.3rem;
+  color: #fff;
+  background: #C59D6C;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.hero__cta:hover {
+  background: #d4c4a4;
+}
+
+.hero__cta:active {
+  transform: scale(0.98);
+}
+
+.hero__steps-wrap {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.hero__steps-glass {
+  width: 100%;
+  max-width: 490px;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.hero__steps-title {
+  margin: 0 0 1rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.hero__steps-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.hero__step {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.hero__step-icon {
+  flex-shrink: 0;
+  width: 45px;
+  height: 45px;
+  background: #C59D6C;
+  border-radius: 4px;
+}
+
+.hero__step-text {
+  font-size: 1.2rem;
+  line-height: 1.4;
+}
+
+@media (max-width: 768px) {
+  .hero__inner {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .hero__text {
+    max-width: none;
+  }
+
+  .hero__steps-wrap {
+    justify-content: center;
+  }
+}

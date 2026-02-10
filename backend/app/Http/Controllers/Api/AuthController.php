@@ -96,4 +96,38 @@ class AuthController extends Controller
 
         return response()->json(['message' => 'Вы успешно вышли из системы.']);
     }
+        /**
+     * Обновление профиля текущего пользователя.
+     */
+    public function updateProfile(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'full_name' => 'sometimes|string|max:255',
+            'email' => 'sometimes|string|email|max:255|unique:users,email,' . $request->user()->id,
+            'phone' => 'nullable|string|max:50',
+        ], [
+            'full_name.max' => 'ФИО не должно превышать 255 символов.',
+            'email.email' => 'Укажите корректный email.',
+            'email.unique' => 'Пользователь с таким email уже зарегистрирован.',
+        ]);
+
+        $user = $request->user();
+        if (array_key_exists('full_name', $validated)) {
+            $user->full_name = $validated['full_name'];
+        }
+        if (array_key_exists('email', $validated)) {
+            $user->email = $validated['email'];
+        }
+        if (array_key_exists('phone', $validated)) {
+            $user->phone = $validated['phone'];
+        }
+        $user->save();
+
+        $user->load('roles');
+        $data = $user->toArray();
+        if (!empty($user->avatar_path)) {
+            $data['avatar_path'] = url(\Illuminate\Support\Facades\Storage::disk('public')->url($user->avatar_path));
+        }
+        return response()->json($data);
+    }
 }

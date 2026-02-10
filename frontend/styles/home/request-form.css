@@ -39,7 +39,8 @@
   
   .request-form-section__textarea {
     resize: vertical;
-    min-height: 100px;
+    height: 100px;
+    resize: none;
   }
   
   .request-form-section__submit {

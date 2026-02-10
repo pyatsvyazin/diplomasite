@@ -46,7 +46,7 @@ export default function RequestFormSection() {
   };
 
   return (
-    <section className="request-form-section">
+    <section id="request-form" className="request-form-section">
       <h2 className="request-form-section__title">Заявка</h2>
       <form className="request-form-section__form" onSubmit={handleSubmit}>
         {user ? (

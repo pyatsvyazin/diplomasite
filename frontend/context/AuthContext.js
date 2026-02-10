@@ -45,8 +45,20 @@ export function AuthProvider({ children }) {
     router.push('/');
   }
 
+  async function refreshUser() {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+    if (!token) return;
+    try {
+      const res = await fetch(getApiUrl('/user'), { headers: getAuthHeaders() });
+      if (res.ok) {
+        const data = await res.json();
+        setUser(data);
+      }
+    } catch (_) {}
+  }
+
   return (
-    <AuthContext.Provider value={{ user, loading, setAuth, logout }}>
+    <AuthContext.Provider value={{ user, loading, setAuth, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

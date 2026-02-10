@@ -1,0 +1,136 @@
+  .reviews-section__inner {
+    margin: 0 auto;
+    margin-top: 50px;
+  }
+  
+  .reviews-section__title {
+    margin: 0 0 2rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    padding-bottom: 0.5rem;
+    border-bottom: 3px solid #C59D6C;
+    width: fit-content;
+  }
+  
+  .reviews-section__loading,
+  .reviews-section__empty {
+    margin: 0 0 1.5rem;
+    color: #666;
+  }
+  
+  .reviews-section__slider-wrap {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  
+  .reviews-section__arrow {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #C59D6C;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    border: none;
+    background-color: #f5f5f5;
+  }
+  
+  .reviews-section__arrow:hover {
+    color: #fff;
+  }
+  
+  .reviews-section__slider {
+    flex: 1;
+    overflow: hidden;
+  }
+  
+  .reviews-section__track {
+    display: flex;
+    gap: 20px;
+    will-change: transform;
+  }
+  
+  .reviews-section__card {
+    flex-shrink: 0;
+    width: 300px;
+    padding: 1.25rem;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    display: flex;
+    flex-direction: column;
+    min-height: 240px;
+  }
+  
+  .reviews-section__card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .reviews-section__card-author {
+    font-weight: 600;
+    color: #1a1a2e;
+  }
+  
+  .reviews-section__card-date {
+    font-size: 0.85rem;
+    color: #666;
+    white-space: nowrap;
+  }
+  
+  .reviews-section__rating {
+    margin-bottom: 0.75rem;
+  }
+  
+  .reviews-section__card-message {
+    flex: 1;
+    margin: 0 0 1rem;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: #444;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .reviews-section__card-lawyer {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid #eee;
+    font-size: 0.9rem;
+    color: #555;
+  }
+  
+  .reviews-section__card-lawyer-name {
+    font-weight: 500;
+    color: #1a1a2e;
+  }
+  
+  .reviews-section__more-wrap {
+    text-align: center;
+  }
+  
+  .reviews-section__more {
+    display: inline-block;
+    padding: 12px 28px;
+    background: #C59D6C;
+    color: #000000;
+    font-size: 1rem;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background 0.2s;
+  }
+  
+  .reviews-section__more:hover {
+    background: #b8a585;
+  }

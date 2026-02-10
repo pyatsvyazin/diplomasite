@@ -31,6 +31,7 @@ Route::middleware('auth:sanctum')->group(function () {
             $data['avatar_path'] = url(\Illuminate\Support\Facades\Storage::disk('public')->url($user->avatar_path));
         }
         return $data;
+    Route::patch('/user', [AuthController::class, 'updateProfile']);
     });
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/requests/mine', [RequestController::class, 'myRequests']);

@@ -1,15 +1,18 @@
 import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
+import HeroSection from '../components/home/HeroSection';
 import ServicesSection from '../components/home/ServicesSection';
+import ReviewsSection from '../components/home/ReviewsSection';
 import RequestFormSection from '../components/home/RequestFormSection';
 
 export default function HomePage() {
   const { user, loading, logout } = useAuth();
 
   return (
-    <div className="home"> 
-    
+    <div className="home">
+      <HeroSection />
       <ServicesSection />
+      <ReviewsSection />
       <RequestFormSection />
     </div>
   );

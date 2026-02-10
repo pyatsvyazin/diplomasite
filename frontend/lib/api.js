@@ -146,6 +146,18 @@ export async function createReview(payload) {
   return body.data;
 }
 
+export async function updateCurrentUser(payload) {
+  const url = getApiUrl('/user');
+  const res = await fetch(url, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+    body: JSON.stringify(payload),
+  });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(body.message || 'Не удалось обновить профиль');
+  return body;
+}
+
 const PLACEHOLDER_AVATAR = '/images/avatars/placeholder_avatar.png';
 
 export function getAvatarUrl(userOrPath) {

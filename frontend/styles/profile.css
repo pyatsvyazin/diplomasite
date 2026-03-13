@@ -207,6 +207,13 @@
   font-size: 0.9rem;
 }
 
+.profile-modal__error-inline {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.85rem;
+  color: #c62828;
+}
+
 .profile-modal__label {
   display: block;
   margin-bottom: 1rem;
@@ -274,6 +281,25 @@
 .profile-modal__btn--primary:disabled {
   opacity: 0.7;
   cursor: not-allowed;
+}
+
+.profile-modal__section {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e8e8e8;
+}
+
+.profile-modal__subtitle {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.profile-modal__text {
+  margin: 0 0 0.75rem;
+  font-size: 0.9rem;
+  color: #666;
 }
 
 .profile-requests {

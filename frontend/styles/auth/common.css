@@ -18,6 +18,23 @@
   margin-bottom: 12px;
 }
 
+.authPage__error--field {
+  margin-top: 4px;
+  margin-bottom: 0;
+  font-size: 0.9em;
+}
+
+.authPage__hint {
+  margin: 4px 0 0;
+  font-size: 0.85em;
+  color: #666;
+}
+
+.authPage__text {
+  margin: 0 0 16px;
+  color: #333;
+}
+
 .authPage__field {
   margin-bottom: 12px;
 }

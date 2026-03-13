@@ -46,4 +46,33 @@ class AdminController extends Controller
 
         return response()->json(['users' => $users]);
     }
+
+    /**
+     * Блокировка/разблокировка пользователя. Только для роли admin.
+     */
+    public function updateUser(Request $request, int $id): JsonResponse
+    {
+        $currentUser = $request->user();
+        $isAdmin = $currentUser->roles()->where('name', 'admin')->exists();
+        if (!$isAdmin) {
+            return response()->json([
+                'message' => 'Только администратор может блокировать пользователей.',
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'is_blocked' => 'required|boolean',
+        ]);
+
+        $user = User::find($id);
+        if (!$user) {
+            return response()->json(['message' => 'Пользователь не найден.'], 404);
+        }
+
+        $user->is_blocked = $validated['is_blocked'];
+        $user->save();
+
+        $user->load('roles');
+        return response()->json(['user' => $user, 'message' => $validated['is_blocked'] ? 'Пользователь заблокирован.' : 'Пользователь разблокирован.']);
+    }
 }

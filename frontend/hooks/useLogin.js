@@ -26,6 +26,10 @@ export function useLogin() {
         setError(data.message || data.errors?.email?.[0] || 'Ошибка входа');
         return;
       }
+      if (data.requires_2fa && data.pending_2fa_id) {
+        router.push('/auth/verify-2fa?pending_2fa_id=' + encodeURIComponent(data.pending_2fa_id));
+        return;
+      }
       setAuth(data.user, data.token);
       router.push('/');
     } catch (err) {

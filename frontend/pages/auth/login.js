@@ -46,6 +46,7 @@ export default function LoginPage() {
             {loading ? 'Вход...' : 'Войти'}
           </button>
           <Link href="/auth/register" className="authPage__link">Регистрация</Link>
+          <Link href="/auth/forgot-password" className="authPage__link">Забыли пароль?</Link>
         </div>
       </form>
     </div>

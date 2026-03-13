@@ -22,6 +22,42 @@ export function clearAuthToken() {
   }
 }
 
+export async function requestPasswordReset(email) {
+  const url = getApiUrl('/forgot-password');
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Не удалось отправить запрос');
+  return data;
+}
+
+export async function resetPasswordWithToken(payload) {
+  const url = getApiUrl('/reset-password');
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Не удалось сменить пароль');
+  return data;
+}
+
+export async function verify2fa(pending2faId, code) {
+  const url = getApiUrl('/verify-2fa');
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ pending_2fa_id: pending2faId, code }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Неверный код');
+  return data;
+}
+
 export async function submitRequest(data) {
   const url = getApiUrl('/request');
   const res = await fetch(url, {
@@ -123,6 +159,21 @@ export async function getAdminUsers(search = '', role = '') {
   return data.users || [];
 }
 
+export async function updateAdminUserBlock(userId, isBlocked) {
+  const url = getApiUrl(`/admin/users/${userId}`);
+  const res = await fetch(url, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeaders(),
+    },
+    body: JSON.stringify({ is_blocked: isBlocked }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Не удалось обновить пользователя');
+  return data.user;
+}
+
 export async function getReviews() {
   const url = getApiUrl('/reviews');
   const res = await fetch(url);
@@ -156,6 +207,29 @@ export async function updateCurrentUser(payload) {
   const body = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(body.message || 'Не удалось обновить профиль');
   return body;
+}
+
+export async function requestPasswordChangeCode() {
+  const url = getApiUrl('/user/request-password-change');
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Не удалось отправить код');
+  return data;
+}
+
+export async function confirmPasswordChange(payload) {
+  const url = getApiUrl('/user/confirm-password-change');
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Не удалось сменить пароль');
+  return data;
 }
 
 const PLACEHOLDER_AVATAR = '/images/avatars/placeholder_avatar.png';

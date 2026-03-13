@@ -15,10 +15,12 @@ import '../styles/reviews.css';
 import '../styles/avatar.css';
 import { AuthProvider } from '../context/AuthContext';
 import Navigation from '../components/Navigation';
+import YandexMetrika from '../components/YandexMetrika';
 
 export default function App({ Component, pageProps }) {
   return (
     <AuthProvider>
+      <YandexMetrika />
       <Navigation />
       <main className="app-main">
         <Component {...pageProps} />

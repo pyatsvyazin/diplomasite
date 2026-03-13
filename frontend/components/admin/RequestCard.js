@@ -5,6 +5,7 @@ import ClientSelectMenu from './ClientSelectMenu';
 import StarRating from '../StarRating';
 import Avatar from '../Avatar';
 import { getAvatarUrl } from '../../lib/api';
+import { formatPhone } from '../../lib/phone';
 
 const STATUS_LABELS = {
   new: 'Новая',
@@ -19,7 +20,9 @@ function AuthorBlock({ request, onRefresh }) {
   const client = request.client;
   const name = client?.full_name ?? request.name ?? '—';
   const email = client?.email ?? request.email ?? '—';
-  const phone = client?.phone ?? request.phone ?? '—';
+  const phoneRaw = client?.phone ?? request.phone;
+  const phone = phoneRaw ? formatPhone(phoneRaw) : '—';
+
   const [menuOpen, setMenuOpen] = useState(false);
 
   const handleUnlink = () => {

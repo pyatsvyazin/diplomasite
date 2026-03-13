@@ -61,7 +61,7 @@ export default function LawyerSelectMenu({ requestId, onSelect, renderTrigger })
                   className="lawyer-select__item"
                   onClick={() => handlePick(l)}
                 >
-                  <span className="lawyer-select__item-avatar">{l.full_name?.charAt(0)?.toUpperCase() || '?'}</span>
+                  <Avatar name={l.full_name} size={32} className="lawyer-select__item-avatar" />
                   <span className="lawyer-select__item-name">{l.full_name}</span>
                 </button>
               ))

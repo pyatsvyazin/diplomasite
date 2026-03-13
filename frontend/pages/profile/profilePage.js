@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { getMyRequests, getAvatarUrl, updateCurrentUser } from '../../lib/api';
+import { getMyRequests, getAvatarUrl, updateCurrentUser, requestPasswordChangeCode, confirmPasswordChange } from '../../lib/api';
+import { formatPhone, normalizeDigits, parsePhoneToDigits, isValidPhoneDigits } from '../../lib/phone';
 import ReviewForm from '../../components/profile/ReviewForm';
 import StarRating from '../../components/StarRating';
 import Avatar from '../../components/Avatar';
@@ -117,25 +118,109 @@ function ProfileCard({ user, onEdit }) {
   );
 }
 
+function validatePassword(pwd) {
+  if (pwd.length < 8) return 'Минимум 8 символов';
+  if (!/[0-9]/.test(pwd)) return 'Нужна хотя бы одна цифра';
+  if (!/[^\p{L}\p{N}\s]/u.test(pwd)) return 'Нужен хотя бы один спецсимвол';
+  return '';
+}
+
 function ProfileEditModal({ user, onClose, onSaved }) {
+  const initialEmail = user?.email ?? '';
+  const initialPhone = normalizeDigits(user?.phone ?? '');
   const [fullName, setFullName] = useState(user?.full_name ?? '');
-  const [email, setEmail] = useState(user?.email ?? '');
-  const [phone, setPhone] = useState(user?.phone ?? '');
+  const [email, setEmail] = useState(initialEmail);
+  const [phone, setPhone] = useState(initialPhone);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [phoneError, setPhoneError] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+
+  const [pwStep, setPwStep] = useState(null);
+  const [pwCode, setPwCode] = useState('');
+  const [pwNew, setPwNew] = useState('');
+  const [pwNewConfirm, setPwNewConfirm] = useState('');
+  const [pwError, setPwError] = useState('');
+  const [pwLoading, setPwLoading] = useState(false);
+
+  const emailOrPhoneChanged = email !== initialEmail || parsePhoneToDigits(phone) !== parsePhoneToDigits(initialPhone);
+  const needCurrentPassword = emailOrPhoneChanged;
+
+  const handlePhoneChange = (value) => {
+    setPhone(normalizeDigits(value));
+    setPhoneError('');
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setPhoneError('');
+    if (!isValidPhoneDigits(phone)) {
+      setPhoneError('Укажите номер в формате +7 (XXX) XXX-XX-XX.');
+      return;
+    }
+    if (needCurrentPassword && !currentPassword.trim()) {
+      setError('Для смены email или телефона введите текущий пароль.');
+      return;
+    }
     setSaving(true);
     try {
-      await updateCurrentUser({ full_name: fullName, email: email || undefined, phone: phone || undefined });
+      const payload = {
+        full_name: fullName,
+        email: email || undefined,
+        phone: parsePhoneToDigits(phone),
+      };
+      if (needCurrentPassword) payload.current_password = currentPassword;
+      await updateCurrentUser(payload);
       onSaved?.();
       onClose();
     } catch (err) {
       setError(err.message || 'Не удалось сохранить');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleRequestPasswordCode = async () => {
+    setPwError('');
+    setPwLoading(true);
+    try {
+      await requestPasswordChangeCode();
+      setPwStep('requested');
+    } catch (err) {
+      setPwError(err.message || 'Не удалось отправить код');
+    } finally {
+      setPwLoading(false);
+    }
+  };
+
+  const handleConfirmPasswordChange = async (e) => {
+    e.preventDefault();
+    setPwError('');
+    const err = validatePassword(pwNew);
+    if (err) {
+      setPwError(err);
+      return;
+    }
+    if (pwNew !== pwNewConfirm) {
+      setPwError('Пароли не совпадают');
+      return;
+    }
+    setPwLoading(true);
+    try {
+      await confirmPasswordChange({
+        code: pwCode.trim(),
+        password: pwNew,
+        password_confirmation: pwNewConfirm,
+      });
+      setPwStep(null);
+      setPwCode('');
+      setPwNew('');
+      setPwNewConfirm('');
+    } catch (err) {
+      setPwError(err.message || 'Не удалось сменить пароль');
+    } finally {
+      setPwLoading(false);
     }
   };
 
@@ -158,13 +243,89 @@ function ProfileEditModal({ user, onClose, onSaved }) {
           </label>
           <label className="profile-modal__label">
             Телефон
-            <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className="profile-modal__input" />
+            <input
+              type="tel"
+              value={formatPhone(phone)}
+              onChange={(e) => handlePhoneChange(e.target.value)}
+              className="profile-modal__input"
+              placeholder="+7 (9XX) XXX-XX-XX"
+              required
+            />
+            {phoneError && <span className="profile-modal__error-inline">{phoneError}</span>}
           </label>
+          {needCurrentPassword && (
+            <label className="profile-modal__label">
+              Текущий пароль (нужен для смены email или телефона)
+              <input
+                type="password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                className="profile-modal__input"
+                placeholder="Введите пароль от аккаунта"
+                required
+              />
+            </label>
+          )}
           <div className="profile-modal__actions">
             <button type="button" className="profile-modal__btn profile-modal__btn--secondary" onClick={onClose}>Отмена</button>
             <button type="submit" className="profile-modal__btn profile-modal__btn--primary" disabled={saving}>{saving ? 'Сохранение…' : 'Сохранить'}</button>
           </div>
         </form>
+
+        <div className="profile-modal__section">
+          <h4 className="profile-modal__subtitle">Сменить пароль</h4>
+          {pwStep !== 'requested' ? (
+            <>
+              <p className="profile-modal__text">Код подтверждения придёт на вашу почту.</p>
+              <button
+                type="button"
+                className="profile-modal__btn profile-modal__btn--secondary"
+                onClick={handleRequestPasswordCode}
+                disabled={pwLoading}
+              >
+                {pwLoading ? 'Отправка…' : 'Отправить код на почту'}
+              </button>
+            </>
+          ) : (
+            <form onSubmit={handleConfirmPasswordChange} className="profile-modal__form">
+              {pwError && <p className="profile-modal__error">{pwError}</p>}
+              <label className="profile-modal__label">
+                Код из письма
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={6}
+                  value={pwCode}
+                  onChange={(e) => setPwCode(e.target.value.replace(/\D/g, ''))}
+                  className="profile-modal__input"
+                  placeholder="000000"
+                />
+              </label>
+              <label className="profile-modal__label">
+                Новый пароль
+                <input
+                  type="password"
+                  value={pwNew}
+                  onChange={(e) => setPwNew(e.target.value)}
+                  className="profile-modal__input"
+                  placeholder="Минимум 8 символов, цифра и спецсимвол"
+                />
+              </label>
+              <label className="profile-modal__label">
+                Подтверждение пароля
+                <input
+                  type="password"
+                  value={pwNewConfirm}
+                  onChange={(e) => setPwNewConfirm(e.target.value)}
+                  className="profile-modal__input"
+                />
+              </label>
+              <button type="submit" className="profile-modal__btn profile-modal__btn--primary" disabled={pwLoading}>
+                {pwLoading ? 'Сохранение…' : 'Сохранить новый пароль'}
+              </button>
+            </form>
+          )}
+        </div>
       </div>
     </div>
   );

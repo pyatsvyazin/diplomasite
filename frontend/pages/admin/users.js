@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import AdminLayout from '../../components/AdminLayout';
-import { getApiUrl, getAuthHeaders } from '../../lib/api';
+import { getApiUrl, getAuthHeaders, updateAdminUserBlock } from '../../lib/api';
+import { formatPhone } from '../../lib/phone';
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState([]);
@@ -10,6 +11,8 @@ export default function AdminUsersPage() {
   const [sortBy, setSortBy] = useState('created_at');
   const [sortOrder, setSortOrder] = useState('desc');
   const [searchDebounce, setSearchDebounce] = useState('');
+  const [blockingId, setBlockingId] = useState(null);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const t = setTimeout(() => setSearchDebounce(search), 300);
@@ -38,10 +41,26 @@ export default function AdminUsersPage() {
       .finally(() => setLoading(false));
   }, [searchDebounce, roleFilter, sortBy, sortOrder]);
 
+  const handleBlockToggle = async (user) => {
+    setError('');
+    setBlockingId(user.id);
+    try {
+      await updateAdminUserBlock(user.id, !user.is_blocked);
+      setUsers((prev) =>
+        prev.map((u) => (u.id === user.id ? { ...u, is_blocked: !u.is_blocked } : u))
+      );
+    } catch (e) {
+      setError(e.message || 'Ошибка при изменении блокировки');
+    } finally {
+      setBlockingId(null);
+    }
+  };
+
   return (
     <AdminLayout>
       <div className="page">
         <h1 className="admin-page-title">Все пользователи</h1>
+        {error && <p className="admin-error" style={{ color: 'var(--color-error, #c00)', marginBottom: '0.5rem' }}>{error}</p>}
         <div className="admin-toolbar">
           <input
             type="search"
@@ -93,6 +112,7 @@ export default function AdminUsersPage() {
                   <th>Email</th>
                   <th>Телефон</th>
                   <th>Роли</th>
+                  <th>Блокировка</th>
                   <th>Дата регистрации</th>
                 </tr>
               </thead>
@@ -102,9 +122,25 @@ export default function AdminUsersPage() {
                     <td>{u.id}</td>
                     <td>{u.full_name}</td>
                     <td>{u.email}</td>
-                    <td>{u.phone || '—'}</td>
+                    <td>{u.phone ? formatPhone(u.phone) : '—'}</td>
                     <td className="roles-cell">
                       {u.roles?.length ? u.roles.map((r) => r.name).join(', ') : '—'}
+                    </td>
+                    <td>
+                      {u.is_blocked ? (
+                        <span className="admin-badge admin-badge--blocked">Заблокирован</span>
+                      ) : (
+                        <span className="admin-badge admin-badge--ok">Активен</span>
+                      )}
+                      <button
+                        type="button"
+                        className="admin-btn admin-btn--small"
+                        disabled={blockingId === u.id}
+                        onClick={() => handleBlockToggle(u)}
+                        title={u.is_blocked ? 'Разблокировать' : 'Заблокировать'}
+                      >
+                        {blockingId === u.id ? '…' : u.is_blocked ? 'Разблокировать' : 'Заблокировать'}
+                      </button>
                     </td>
                     <td>{u.created_at ? new Date(u.created_at).toLocaleDateString('ru-RU') : '—'}</td>
                   </tr>

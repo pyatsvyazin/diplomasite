@@ -1,11 +1,14 @@
 import Link from 'next/link';
 import { useRegister } from '../../hooks/useRegister';
+import { formatPhone } from '../../lib/phone';
 
 export default function RegisterPage() {
   const {
     form,
     updateField,
     error,
+    passwordError,
+    phoneError,
     loading,
     handleSubmit,
   } = useRegister();
@@ -40,15 +43,18 @@ export default function RegisterPage() {
           />
         </div>
         <div className="authPage__field">
-          <label htmlFor="phone" className="authPage__label">Телефон (необязательно)</label>
+          <label htmlFor="phone" className="authPage__label">Телефон</label>
           <input
             id="phone"
-            type="text"
+            type="tel"
             className="authPage__input"
-            value={form.phone}
+            value={formatPhone(form.phone)}
             onChange={(e) => updateField('phone', e.target.value)}
+            placeholder="+7 (9XX) XXX-XX-XX"
             autoComplete="tel"
+            required
           />
+          {phoneError && <p className="authPage__error authPage__error--field">{phoneError}</p>}
         </div>
         <div className="authPage__field">
           <label htmlFor="password" className="authPage__label">Пароль</label>
@@ -62,6 +68,8 @@ export default function RegisterPage() {
             minLength={8}
             autoComplete="new-password"
           />
+          <p className="authPage__hint">Не менее 8 символов, минимум одна цифра и один спецсимвол (!@#$%^&* и т.д.)</p>
+          {passwordError && <p className="authPage__error authPage__error--field">{passwordError}</p>}
         </div>
         <div className="authPage__field">
           <label htmlFor="password_confirmation" className="authPage__label">Подтверждение пароля</label>

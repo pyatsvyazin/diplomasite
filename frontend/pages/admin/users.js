@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import AdminLayout from '../../components/AdminLayout';
-import { getApiUrl, getAuthHeaders, updateAdminUserBlock } from '../../lib/api';
+import { getApiUrl, getAuthHeaders, updateAdminUserBlock, updateAdminUserRole } from '../../lib/api';
 import { formatPhone } from '../../lib/phone';
+import { roleLabel } from '../../constants/userRoles';
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState([]);
@@ -12,6 +13,7 @@ export default function AdminUsersPage() {
   const [sortOrder, setSortOrder] = useState('desc');
   const [searchDebounce, setSearchDebounce] = useState('');
   const [blockingId, setBlockingId] = useState(null);
+  const [roleChangingId, setRoleChangingId] = useState(null);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -53,6 +55,19 @@ export default function AdminUsersPage() {
       setError(e.message || 'Ошибка при изменении блокировки');
     } finally {
       setBlockingId(null);
+    }
+  };
+
+  const handleRoleChange = async (userId, nextRole) => {
+    setError('');
+    setRoleChangingId(userId);
+    try {
+      const updated = await updateAdminUserRole(userId, nextRole);
+      setUsers((prev) => prev.map((u) => (u.id === userId ? updated : u)));
+    } catch (e) {
+      setError(e.message || 'Ошибка при смене роли');
+    } finally {
+      setRoleChangingId(null);
     }
   };
 
@@ -124,25 +139,38 @@ export default function AdminUsersPage() {
                     <td>{u.email}</td>
                     <td>{u.phone ? formatPhone(u.phone) : '—'}</td>
                     <td className="roles-cell">
-                      {u.roles?.length ? u.roles.map((r) => r.name).join(', ') : '—'}
+                      <div className="admin-users__role-wrap">
+                        <select
+                          className="admin-filter admin-users__role-select"
+                          value={u.roles?.[0]?.name || ''}
+                          disabled={roleChangingId === u.id}
+                          onChange={(e) => handleRoleChange(u.id, e.target.value)}
+                        >
+                          <option value="client">{roleLabel('client')}</option>
+                          <option value="lawyer">{roleLabel('lawyer')}</option>
+                          <option value="admin">{roleLabel('admin')}</option>
+                        </select>
+                      </div>
                     </td>
                     <td>
-                      {u.is_blocked ? (
-                        <span className="admin-badge admin-badge--blocked">Заблокирован</span>
-                      ) : (
-                        <span className="admin-badge admin-badge--ok">Активен</span>
-                      )}
-                      <button
-                        type="button"
-                        className="admin-btn admin-btn--small"
-                        disabled={blockingId === u.id}
-                        onClick={() => handleBlockToggle(u)}
-                        title={u.is_blocked ? 'Разблокировать' : 'Заблокировать'}
-                      >
-                        {blockingId === u.id ? '…' : u.is_blocked ? 'Разблокировать' : 'Заблокировать'}
-                      </button>
+                      <div className="admin-users__block-cell">
+                        {u.is_blocked ? (
+                          <span className="admin-badge admin-badge--blocked">Заблокирован</span>
+                        ) : (
+                          <span className="admin-badge admin-badge--ok">Активен</span>
+                        )}
+                        <button
+                          type="button"
+                          className={`admin-btn admin-btn--small ${u.is_blocked ? 'admin-btn--ghost' : 'admin-btn--danger'}`}
+                          disabled={blockingId === u.id}
+                          onClick={() => handleBlockToggle(u)}
+                          title={u.is_blocked ? 'Разблокировать' : 'Заблокировать'}
+                        >
+                          {blockingId === u.id ? '…' : u.is_blocked ? 'Разблокировать' : 'Заблокировать'}
+                        </button>
+                      </div>
                     </td>
-                    <td>{u.created_at ? new Date(u.created_at).toLocaleDateString('ru-RU') : '—'}</td>
+                    <td className="admin-users__created-at">{u.created_at ? new Date(u.created_at).toLocaleDateString('ru-RU') : '—'}</td>
                   </tr>
                 ))}
               </tbody>

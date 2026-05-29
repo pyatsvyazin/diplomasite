@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -61,7 +62,8 @@ class AdminController extends Controller
         }
 
         $validated = $request->validate([
-            'is_blocked' => 'required|boolean',
+            'is_blocked' => 'sometimes|boolean',
+            'role' => 'sometimes|string|in:client,lawyer,admin',
         ]);
 
         $user = User::find($id);
@@ -69,10 +71,27 @@ class AdminController extends Controller
             return response()->json(['message' => 'Пользователь не найден.'], 404);
         }
 
-        $user->is_blocked = $validated['is_blocked'];
-        $user->save();
+        if (array_key_exists('is_blocked', $validated)) {
+            $user->is_blocked = $validated['is_blocked'];
+            $user->save();
+        }
+
+        if (array_key_exists('role', $validated)) {
+            $roleId = Role::query()->where('name', $validated['role'])->value('id');
+            if (! $roleId) {
+                return response()->json(['message' => 'Роль не найдена.'], 422);
+            }
+            $user->roles()->sync([$roleId]);
+        }
 
         $user->load('roles');
-        return response()->json(['user' => $user, 'message' => $validated['is_blocked'] ? 'Пользователь заблокирован.' : 'Пользователь разблокирован.']);
+        $message = 'Пользователь обновлён.';
+        if (array_key_exists('is_blocked', $validated)) {
+            $message = $validated['is_blocked'] ? 'Пользователь заблокирован.' : 'Пользователь разблокирован.';
+        }
+        if (array_key_exists('role', $validated)) {
+            $message = 'Роль пользователя обновлена.';
+        }
+        return response()->json(['user' => $user, 'message' => $message]);
     }
 }

@@ -1,19 +1,21 @@
-import Link from 'next/link';
-import { useAuth } from '../context/AuthContext';
 import HeroSection from '../components/home/HeroSection';
 import ServicesSection from '../components/home/ServicesSection';
+import StaffSection from '../components/home/StaffSection';
 import ReviewsSection from '../components/home/ReviewsSection';
+import HomeNewsSection from '../components/home/HomeNewsSection';
 import RequestFormSection from '../components/home/RequestFormSection';
+import HomeFooter from '../components/home/HomeFooter';
 
 export default function HomePage() {
-  const { user, loading, logout } = useAuth();
-
   return (
     <div className="home">
       <HeroSection />
       <ServicesSection />
+      <StaffSection />
+      <HomeNewsSection />
       <ReviewsSection />
       <RequestFormSection />
+      <HomeFooter />
     </div>
   );
 }

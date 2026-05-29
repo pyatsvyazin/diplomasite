@@ -62,7 +62,7 @@
 }
 
 .authPage__link {
-  color: #0066cc;
+  color: var(--color-brand);
 }
 
 .authPage__link:hover {

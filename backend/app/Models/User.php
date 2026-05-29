@@ -2,14 +2,15 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens, HasFactory, Notifiable;
 
@@ -21,10 +22,12 @@ class User extends Authenticatable
     protected $fillable = [
         'full_name',
         'email',
+        'email_verified_at',
         'phone',
         'avatar_path',
         'password',
         'is_blocked',
+        'two_factor_enabled',
     ];
 
     /**
@@ -45,6 +48,8 @@ class User extends Authenticatable
     protected $casts = [
         'password' => 'hashed',
         'is_blocked' => 'boolean',
+        'two_factor_enabled' => 'boolean',
+        'email_verified_at' => 'datetime',
     ];
 
     /**
@@ -68,5 +73,26 @@ class User extends Authenticatable
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class, 'role_user');
+    }
+
+    /** Специализации юриста (только для пользователей с ролью lawyer). */
+    public function specialties(): BelongsToMany
+    {
+        return $this->belongsToMany(Specialty::class, 'lawyer_specialty', 'user_id', 'specialty_id');
+    }
+
+    public function posts(): HasMany
+    {
+        return $this->hasMany(Post::class, 'author_id');
+    }
+
+    public function conversationParticipations(): HasMany
+    {
+        return $this->hasMany(ConversationParticipant::class);
+    }
+
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(Notification::class);
     }
 }

@@ -1,0 +1,266 @@
+.news-page__title {
+  margin: 0 0 8px;
+  font-size: 2rem;
+  line-height: 1.2;
+}
+
+.news-page__subtitle {
+  margin: 0 0 20px;
+  color: #666;
+}
+
+.posts-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem 1rem;
+  margin-top: 2rem;
+  padding-top: 1rem;
+}
+
+.posts-pagination__btn {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #fff;
+  font-family: inherit;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.posts-pagination__btn:hover:not(:disabled) {
+  border-color: var(--color-brand, #c59d6c);
+  color: var(--color-brand, #c59d6c);
+}
+
+.posts-pagination__btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.posts-pagination__pages {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.posts-pagination__page {
+  min-width: 2.25rem;
+  height: 2.25rem;
+  padding: 0 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: #fff;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.posts-pagination__page--active {
+  background: var(--color-brand, #c59d6c);
+  border-color: var(--color-brand, #c59d6c);
+  color: #000;
+  font-weight: 600;
+}
+
+.posts-pagination__ellipsis {
+  padding: 0 0.25rem;
+  color: #888;
+}
+
+.news-page__error {
+  color: #a93226;
+}
+
+.news-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.news-grid__item {
+  min-width: 0;
+}
+
+.news-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 360px;
+  background: #fff;
+  border: 1px solid #e7e7e7;
+  border-radius: 14px;
+  overflow: hidden;
+  text-decoration: none;
+  color: #1c1c1c;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+
+.news-card:hover {
+  transform: translateY(-2px);
+  border-color: #d9ccb7;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.news-card__cover-wrap {
+  position: relative;
+}
+
+.news-card__cover {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  display: block;
+  background: #d9d9d9;
+}
+
+.news-card__cover--placeholder {
+  background: linear-gradient(135deg, #ddd, #f1f1f1);
+}
+
+.news-card__body {
+  padding: 12px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  height: 100%;
+  min-height: 170px;
+}
+
+.news-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #7a7a7a;
+  font-size: 0.82rem;
+}
+
+.news-card__dot {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.news-card__title {
+  margin: 0;
+  font-size: 1.08rem;
+  line-height: 1.35;
+}
+
+.news-card__title-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.news-card__title-link:hover {
+  text-decoration: underline;
+}
+
+.news-card__excerpt {
+  margin: 0;
+  color: #5e5e5e;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.news-card__author {
+  margin: auto 0 0;
+  color: #3d3d3d;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.news-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.news-card__tag {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #f3f4f6;
+  border: 1px solid #e4e4e7;
+  color: #374151;
+  text-decoration: none;
+  font-size: 0.78rem;
+  line-height: 1;
+}
+
+.news-card__tag:hover {
+  background: #e5e7eb;
+}
+
+.news-card--skeleton {
+  pointer-events: none;
+}
+
+.news-card--skeleton .news-card__body {
+  min-height: 170px;
+}
+
+.news-skeleton__line {
+  height: 10px;
+  border-radius: 999px;
+  background: #e5e5e5;
+}
+
+.news-skeleton__line--sm {
+  width: 34%;
+}
+
+.news-skeleton__line--md {
+  width: 62%;
+}
+
+.news-skeleton__line--title {
+  width: 92%;
+  height: 13px;
+}
+
+.news-skeleton__line--title2 {
+  width: 74%;
+  height: 13px;
+}
+
+.news-skeleton__line--full {
+  width: 100%;
+}
+
+.news-skeleton__line--lg {
+  width: 80%;
+}
+
+.news-skeleton__line--author {
+  width: 42%;
+  margin-top: auto;
+}
+
+.news-skeleton__pill {
+  display: inline-block;
+  width: 110px;
+  height: 10px;
+  border-radius: 999px;
+}
+
+.news-skeleton__pill--short {
+  width: 56px;
+}
+
+.shimmer {
+  background: linear-gradient(90deg, #efefef 25%, #f8f8f8 50%, #efefef 75%);
+  background-size: 200% 100%;
+  animation: news-shimmer 1.4s infinite;
+}
+
+@keyframes news-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

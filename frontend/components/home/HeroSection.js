@@ -5,11 +5,11 @@ export default function HeroSection() {
     };
   
     const steps = [
-      'Вы оставляете заявку на нашем сайте',
-      'Мы рассматриваем заявку и связываемся с вами для уточнения деталей',
-      'Вы получаете консультацию и необходимое юридическое сопровождение',
-      'Юридический вопрос решается или доводится до результата',
-      'При необходимости оставляете отзыв о работе',
+      { text: 'Вы оставляете заявку на нашем сайте', icon: '/icons/hero/apply.svg' },
+      { text: 'Мы рассматриваем заявку и связываемся с вами для уточнения деталей', icon: '/icons/hero/phone-call.svg' },
+      { text: 'Вы получаете консультацию и необходимое юридическое сопровождение', icon: '/icons/hero/person-support.svg' },
+      { text: 'Юридический вопрос решается или доводится до результата', icon: '/icons/hero/law.svg' },
+      { text: 'При необходимости оставляете отзыв о работе', icon: '/icons/hero/feedback-gesture-hand.svg' },
     ];
   
     return (
@@ -31,10 +31,14 @@ export default function HeroSection() {
           <div className="hero__steps-wrap">
             <div className="hero__steps-glass">
               <ul className="hero__steps-list">
-                {steps.map((text, i) => (
+                {steps.map((step, i) => (
                   <li key={i} className="hero__step">
-                    <span className="hero__step-icon" aria-hidden />
-                    <span className="hero__step-text">{text}</span>
+                    <span
+                      className="hero__step-icon"
+                      style={{ '--hero-step-icon': `url("${step.icon}")` }}
+                      aria-hidden
+                    />
+                    <span className="hero__step-text">{step.text}</span>
                   </li>
                 ))}
               </ul>

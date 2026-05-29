@@ -35,15 +35,22 @@ class RequestController extends Controller
 
         $hasReview = $req->review()->exists();
         if ($hasReview) {
-            $data = $request->only('client_id');
+            $data = $request->only(['client_id', 'lawyer_id']);
             $validator = Validator::make($data, [
                 'client_id' => 'nullable|integer|exists:users,id',
-            ], ['client_id.exists' => 'Пользователь не найден.']);
+                'lawyer_id' => 'nullable|integer|exists:users,id',
+            ], [
+                'client_id.exists' => 'Пользователь не найден.',
+                'lawyer_id.exists' => 'Пользователь не найден.',
+            ]);
             if ($validator->fails()) {
                 return response()->json(['message' => 'Ошибка валидации.', 'errors' => $validator->errors()], 422);
             }
             if (array_key_exists('client_id', $data)) {
                 $req->client_id = $data['client_id'];
+            }
+            if (array_key_exists('lawyer_id', $data)) {
+                $req->lawyer_id = $data['lawyer_id'];
             }
             $req->save();
             $req->load(['client', 'lawyer', 'review']);

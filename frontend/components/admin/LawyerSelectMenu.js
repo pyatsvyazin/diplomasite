@@ -30,8 +30,11 @@ export default function LawyerSelectMenu({ requestId, onSelect, renderTrigger })
   const handlePick = (lawyer) => {
     updateAdminRequest(requestId, { lawyer_id: lawyer.id, status: 'in_progress' })
       .then(() => {
-        onSelect();
+        onSelect?.();
         setOpen(false);
+      })
+      .catch((err) => {
+        window.alert(err?.message || 'Не удалось назначить юриста');
       });
   };
 

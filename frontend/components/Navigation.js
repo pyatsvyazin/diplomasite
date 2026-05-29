@@ -34,12 +34,11 @@ export default function Navigation() {
     <header className="nav">
       <div className="nav__inner">
         <Link href="/" className="nav__logo">
-          Логотип
+          <img src="/icons/logo.svg" alt="Щит Справедливости" className="nav__logo-img" />
         </Link>
 
         <nav className="nav__menu">
           <Link href="/about" className="nav__link">О нас</Link>
-          <Link href="/cases" className="nav__link">Все кейсы</Link>
 
           <div className={`nav__dropdown-wrap ${servicesOpen ? 'nav__dropdown-wrap--open' : ''}`}>
             <button

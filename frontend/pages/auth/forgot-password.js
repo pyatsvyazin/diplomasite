@@ -27,8 +27,7 @@ export default function ForgotPasswordPage() {
       <div className="authPage">
         <h1 className="authPage__title">Проверьте почту</h1>
         <p className="authPage__text">
-          Если аккаунт с указанным email существует, на него отправлена ссылка для сброса пароля.
-          Ссылка действительна 60 минут.
+          На вашу почту отправлена ссылка для сброса пароля. Ссылка действительна 60 минут.
         </p>
         <Link href="/auth/login" className="authPage__link">Вернуться к входу</Link>
       </div>

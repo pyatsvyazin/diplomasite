@@ -1,0 +1,104 @@
+.admin-analytics__cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.admin-analytics__card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.admin-analytics__card-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1e3a5f;
+}
+
+.admin-analytics__card-label {
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.admin-analytics__charts {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.admin-analytics__chart-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.admin-analytics__chart-card--wide {
+  grid-column: 1 / -1;
+}
+
+.admin-analytics__chart-card h3 {
+  margin: 0 0 12px;
+  font-size: 1rem;
+}
+
+.admin-analytics__bottom {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.admin-analytics__section {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.admin-analytics__section h2 {
+  margin: 0 0 12px;
+  font-size: 1.05rem;
+}
+
+.admin-analytics__meetings-list,
+.admin-analytics__activity {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.admin-analytics__meetings-list li,
+.admin-analytics__activity li {
+  padding: 10px 0;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.9rem;
+}
+
+.admin-analytics__activity-type {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: #64748b;
+  letter-spacing: 0.04em;
+}
+
+.admin-analytics__activity-sub {
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 900px) {
+  .admin-analytics__charts,
+  .admin-analytics__bottom {
+    grid-template-columns: 1fr;
+  }
+}

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Request as RequestModel;
 use App\Models\Review;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -13,15 +14,63 @@ use Illuminate\Support\Facades\Storage;
 class ReviewController extends Controller
 {
     /**
-     * Список опубликованных отзывов для страницы отзывов (публичный).
+     * Юристы, по которым есть опубликованные отзывы (для фильтра на странице отзывов).
      */
-    public function index(): JsonResponse
+    public function lawyersWithPublishedReviews(): JsonResponse
     {
-        $items = Review::query()
+        $lawyerIds = Review::query()
             ->where('status', Review::STATUS_PUBLISHED)
-            ->with(['lawyer', 'client'])
-            ->orderByDesc('created_at')
-            ->get();
+            ->whereNotNull('lawyer_id')
+            ->distinct()
+            ->pluck('lawyer_id');
+
+        $lawyers = User::query()
+            ->whereIn('id', $lawyerIds)
+            ->orderBy('full_name')
+            ->get(['id', 'full_name', 'avatar_path']);
+
+        $data = $lawyers->map(static fn (User $u) => [
+            'id'          => $u->id,
+            'full_name'   => $u->full_name,
+            'avatar_path' => $u->avatar_path,
+        ])->values();
+
+        return response()->json(['data' => $data]);
+    }
+
+    /**
+     * Список опубликованных отзывов для страницы отзывов (публичный).
+     *
+     * Query: lawyer_id — фильтр по юристу; sort — newest | rating_asc | rating_desc
+     */
+    public function index(Request $request): JsonResponse
+    {
+        $sort = $request->query('sort', 'newest');
+        if (! in_array($sort, ['newest', 'rating_asc', 'rating_desc'], true)) {
+            $sort = 'newest';
+        }
+
+        $q = Review::query()
+            ->where('status', Review::STATUS_PUBLISHED)
+            ->with(['lawyer', 'client']);
+
+        $lawyerId = $request->query('lawyer_id');
+        if ($lawyerId !== null && $lawyerId !== '') {
+            $id = (int) $lawyerId;
+            if ($id > 0) {
+                $q->where('lawyer_id', $id);
+            }
+        }
+
+        if ($sort === 'rating_asc') {
+            $q->orderBy('rating')->orderByDesc('created_at');
+        } elseif ($sort === 'rating_desc') {
+            $q->orderByDesc('rating')->orderByDesc('created_at');
+        } else {
+            $q->orderByDesc('created_at');
+        }
+
+        $items = $q->get();
 
         $data = $items->map(function (Review $r) {
             return [

@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { useState } from 'react';
 import { updateAdminRequest, getAdminLawyers } from '../../lib/api';
 import LawyerSelectMenu from './LawyerSelectMenu';
@@ -6,6 +7,7 @@ import StarRating from '../StarRating';
 import Avatar from '../Avatar';
 import { getAvatarUrl } from '../../lib/api';
 import { formatPhone } from '../../lib/phone';
+import RequestMeetingsPanel from '../meetings/RequestMeetingsPanel';
 
 const STATUS_LABELS = {
   new: 'Новая',
@@ -173,24 +175,36 @@ export default function RequestCard({ request, onRefresh, onLinkClient }) {
             <div className="request-card__subject">Тема: {request.subject}</div>
           )}
           {!request.review && (
-            <label className="request-card__status-label">
-              Статус
-              <select
-                className="request-card__status"
-                value={status}
-                onChange={handleStatusChange}
-                disabled={updating}
-              >
-                {Object.entries(STATUS_LABELS).map(([value, label]) => (
-                  <option key={value} value={value}>{label}</option>
-                ))}
-              </select>
-            </label>
+            <div className="request-card__status-row">
+              <label className="request-card__status-label">
+                Статус
+                <select
+                  className={`request-card__status request-card__status--${status}`}
+                  value={status}
+                  onChange={handleStatusChange}
+                  disabled={updating}
+                >
+                  {Object.entries(STATUS_LABELS).map(([value, label]) => (
+                    <option key={value} value={value}>{label}</option>
+                  ))}
+                </select>
+              </label>
+            </div>
           )}
           <div className="request-card__message">{request.message || '—'}</div>
+          <div className="request-card__chat-row">
+            <Link href={`/requests/${request.id}/chat`} className="request-card__chat-link">
+              Чат по заявке
+            </Link>
+          </div>
+          <RequestMeetingsPanel requestId={request.id} request={request} showCreateButton />
             {request.review && (
               <div className="request-card__review">
-                <strong>Отзыв:</strong> <StarRating value={(request.review.rating || 0) / 2} /> — {request.review.message}
+                <div className="request-card__review-title">Отзыв клиента</div>
+                <div className="request-card__review-rating">
+                  <StarRating value={(request.review.rating || 0) / 2} />
+                </div>
+                <div className="request-card__review-text">{request.review.message}</div>
               </div>
             )}
         </div>

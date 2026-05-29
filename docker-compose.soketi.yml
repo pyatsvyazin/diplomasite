@@ -1,0 +1,14 @@
+# Soketi (Pusher-совместимый WebSocket). На Windows + Node 22 npx-пакет падает — используйте этот compose.
+# Запуск из папки frontend: npm run dev:soketi
+# Ключи по умолчанию совпадают с backend/.env.example: app-id / app-key / app-secret
+services:
+  soketi:
+    image: quay.io/soketi/soketi:1.4-16-debian
+    ports:
+      - "6001:6001"
+      - "9601:9601"
+    environment:
+      SOKETI_DEBUG: "1"
+      SOKETI_DEFAULT_APP_ID: app-id
+      SOKETI_DEFAULT_APP_KEY: app-key
+      SOKETI_DEFAULT_APP_SECRET: app-secret

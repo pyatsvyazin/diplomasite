@@ -1,18 +1,18 @@
-import { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import { useAuth } from '../../context/AuthContext';
 import { getMyRequests, getAvatarUrl, updateCurrentUser, requestPasswordChangeCode, confirmPasswordChange } from '../../lib/api';
 import { formatPhone, normalizeDigits, parsePhoneToDigits, isValidPhoneDigits } from '../../lib/phone';
+import { roleLabel } from '../../constants/userRoles';
 import ReviewForm from '../../components/profile/ReviewForm';
 import StarRating from '../../components/StarRating';
 import Avatar from '../../components/Avatar';
-
-const STATUS_LABELS = {
-  new: 'Новая',
-  reviewing: 'Рассматривается',
-  in_progress: 'В работе',
-  rejected: 'Отклонена',
-  closed: 'Закрыта',
-};
+import { REQUEST_STATUS_LABELS as STATUS_LABELS } from '../../constants/requestStatus';
+import ProfileDashboardLayout from '../../components/profile/ProfileDashboardLayout';
+import ConsultationsTab from '../../components/profile/ConsultationsTab';
+import NotificationsTab from '../../components/profile/NotificationsTab';
+import SettingsTabContent from '../../components/profile/SettingsTabContent';
 
 function ProfileRequestCard({ request, currentUserId, onReviewSent }) {
   const isClient = request.client_id === currentUserId;
@@ -52,66 +52,79 @@ function ProfileRequestCard({ request, currentUserId, onReviewSent }) {
           <ReviewForm requestId={request.id} onSuccess={onReviewSent} />
         </div>
       )}
-            {review && (
+      {review && (
         <div className="profile-request-card__review">
           <StarRating value={ratingDisplay} />
           <p className="profile-request-card__review-message">{review.message}</p>
         </div>
       )}
+      <div className="profile-request-card__actions">
+        <Link href={`/requests/${request.id}/chat`} className="profile-request-card__chat-link">
+          Открыть чат
+        </Link>
+      </div>
     </div>
   );
 }
 
-function ProfileCard({ user, onEdit }) {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const menuRef = useRef(null);
-
-  useEffect(() => {
-    if (!menuOpen) return;
-    const close = (e) => {
-      if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false);
-    };
-    document.addEventListener('click', close);
-    return () => document.removeEventListener('click', close);
-  }, [menuOpen]);
-
+function ProfileCard({ user, onEditField, onChangePassword }) {
   const createdAt = user.created_at
     ? new Date(user.created_at).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' })
     : '—';
-  const roleLabel = user.roles?.length ? user.roles.map((r) => r.name).join(', ') : '—';
+  const rolesText = user.roles?.length
+    ? user.roles.map((r) => roleLabel(r.name)).join(', ')
+    : '—';
 
   return (
     <div className="profile-card">
       <div className="profile-card__banner" aria-hidden />
+      <button type="button" className="profile-card__menu-decor" aria-hidden title="">⋯</button>
       <div className="profile-card__body">
-      <Avatar name={user.full_name} size={112} className="profile-card__avatar" src={getAvatarUrl(user)} />
+        <Avatar name={user.full_name} size={112} className="profile-card__avatar" src={getAvatarUrl(user)} />
         <div className="profile-card__main">
-          <h2 className="profile-card__name">{user.full_name || 'Фамилия Имя Отчество'}</h2>
+          <h2 className="profile-card__name">{user.full_name || 'ФИО'}</h2>
           <ul className="profile-card__details">
-            <li>Регистрация: {createdAt}</li>
-            <li>Id: {user.id}</li>
-            <li>Роль: {roleLabel}</li>
-            <li>Телефон: {user.phone || '—'}</li>
-            <li>Почта: {user.email || '—'}</li>
+            <li className="profile-card__detail--static">Регистрация: {createdAt}</li>
+            <li className="profile-card__detail--static">Id: {user.id}</li>
+            <li className="profile-card__detail--static">Роль: {rolesText}</li>
+            <li
+              className="profile-card__detail--editable"
+              onClick={() => onEditField('full_name')}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === 'Enter' && onEditField('full_name')}
+            >
+              <span className="profile-card__detail-value">ФИО: {user.full_name || '—'}</span>
+              <span className="profile-card__detail-hint">Нажмите, чтобы изменить</span>
+            </li>
+            <li
+              className="profile-card__detail--editable"
+              onClick={() => onEditField('phone')}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === 'Enter' && onEditField('phone')}
+            >
+              <span className="profile-card__detail-value">Телефон: {user.phone ? formatPhone(user.phone) : '—'}</span>
+              <span className="profile-card__detail-hint">Нажмите, чтобы изменить номер</span>
+            </li>
+            <li
+              className="profile-card__detail--editable"
+              onClick={() => onEditField('email')}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === 'Enter' && onEditField('email')}
+            >
+              <span className="profile-card__detail-value">Почта: {user.email || '—'}</span>
+              <span className="profile-card__detail-hint">Нажмите, чтобы изменить</span>
+            </li>
           </ul>
-        </div>
-        <div className="profile-card__menu-wrap" ref={menuRef}>
           <button
             type="button"
-            className="profile-card__menu-btn"
-            onClick={() => setMenuOpen((v) => !v)}
-            aria-label="Меню"
-            aria-expanded={menuOpen}
+            className="profile-card__change-pwd-btn"
+            onClick={onChangePassword}
           >
-            <span className="profile-card__menu-dots" aria-hidden>⋮</span>
+            Сменить пароль
           </button>
-          {menuOpen && (
-            <div className="profile-card__menu">
-              <button type="button" className="profile-card__menu-item" onClick={() => { setMenuOpen(false); onEdit(); }}>
-                Редактировать
-              </button>
-            </div>
-          )}
         </div>
       </div>
     </div>
@@ -125,52 +138,41 @@ function validatePassword(pwd) {
   return '';
 }
 
-function ProfileEditModal({ user, onClose, onSaved }) {
-  const initialEmail = user?.email ?? '';
-  const initialPhone = normalizeDigits(user?.phone ?? '');
-  const [fullName, setFullName] = useState(user?.full_name ?? '');
-  const [email, setEmail] = useState(initialEmail);
-  const [phone, setPhone] = useState(initialPhone);
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [phoneError, setPhoneError] = useState('');
-  const [saving, setSaving] = useState(false);
+const FIELD_LABELS = { full_name: 'ФИО', email: 'Почта', phone: 'Телефон' };
+
+function InlineEditModal({ field, user, onClose, onSaved }) {
+  const isPhone = field === 'phone';
+  const initial = field === 'phone' ? (user?.phone ? formatPhone(user.phone) : '') : (user?.[field] ?? '');
+  const [value, setValue] = useState(initial);
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
 
-  const [pwStep, setPwStep] = useState(null);
-  const [pwCode, setPwCode] = useState('');
-  const [pwNew, setPwNew] = useState('');
-  const [pwNewConfirm, setPwNewConfirm] = useState('');
-  const [pwError, setPwError] = useState('');
-  const [pwLoading, setPwLoading] = useState(false);
+  const handlePhoneChange = (v) => setValue(formatPhone(normalizeDigits(v)));
 
-  const emailOrPhoneChanged = email !== initialEmail || parsePhoneToDigits(phone) !== parsePhoneToDigits(initialPhone);
-  const needCurrentPassword = emailOrPhoneChanged;
-
-  const handlePhoneChange = (value) => {
-    setPhone(normalizeDigits(value));
-    setPhoneError('');
-  };
+  const needPassword = field === 'email' || field === 'phone';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    setPhoneError('');
-    if (!isValidPhoneDigits(phone)) {
-      setPhoneError('Укажите номер в формате +7 (XXX) XXX-XX-XX.');
+    if (isPhone && !isValidPhoneDigits(value)) {
+      setError('Укажите номер в формате +7 (XXX) XXX-XX-XX.');
       return;
     }
-    if (needCurrentPassword && !currentPassword.trim()) {
-      setError('Для смены email или телефона введите текущий пароль.');
+    if (needPassword && !password.trim()) {
+      setError('Введите пароль для подтверждения.');
       return;
     }
     setSaving(true);
     try {
       const payload = {
-        full_name: fullName,
-        email: email || undefined,
-        phone: parsePhoneToDigits(phone),
+        full_name: user.full_name,
+        email: user.email,
+        phone: user.phone || parsePhoneToDigits(''),
       };
-      if (needCurrentPassword) payload.current_password = currentPassword;
+      if (needPassword) payload.current_password = password;
+      if (field === 'phone') payload.phone = parsePhoneToDigits(value);
+      else payload[field] = value;
       await updateCurrentUser(payload);
       onSaved?.();
       onClose();
@@ -181,85 +183,42 @@ function ProfileEditModal({ user, onClose, onSaved }) {
     }
   };
 
-  const handleRequestPasswordCode = async () => {
-    setPwError('');
-    setPwLoading(true);
-    try {
-      await requestPasswordChangeCode();
-      setPwStep('requested');
-    } catch (err) {
-      setPwError(err.message || 'Не удалось отправить код');
-    } finally {
-      setPwLoading(false);
-    }
-  };
-
-  const handleConfirmPasswordChange = async (e) => {
-    e.preventDefault();
-    setPwError('');
-    const err = validatePassword(pwNew);
-    if (err) {
-      setPwError(err);
-      return;
-    }
-    if (pwNew !== pwNewConfirm) {
-      setPwError('Пароли не совпадают');
-      return;
-    }
-    setPwLoading(true);
-    try {
-      await confirmPasswordChange({
-        code: pwCode.trim(),
-        password: pwNew,
-        password_confirmation: pwNewConfirm,
-      });
-      setPwStep(null);
-      setPwCode('');
-      setPwNew('');
-      setPwNewConfirm('');
-    } catch (err) {
-      setPwError(err.message || 'Не удалось сменить пароль');
-    } finally {
-      setPwLoading(false);
-    }
-  };
-
   return (
     <div className="profile-modal-backdrop" onClick={onClose} role="presentation">
-      <div className="profile-modal" onClick={(e) => e.stopPropagation()}>
+      <div className="profile-modal profile-modal--small" onClick={(e) => e.stopPropagation()}>
         <div className="profile-modal__head">
-          <h3 className="profile-modal__title">Редактирование профиля</h3>
+          <h3 className="profile-modal__title">Изменить {FIELD_LABELS[field]}</h3>
           <button type="button" className="profile-modal__close" onClick={onClose} aria-label="Закрыть">×</button>
         </div>
         <form className="profile-modal__form" onSubmit={handleSubmit}>
           {error && <p className="profile-modal__error">{error}</p>}
           <label className="profile-modal__label">
-            ФИО
-            <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} className="profile-modal__input" required />
+            Новое значение
+            {isPhone ? (
+              <input
+                type="tel"
+                value={value}
+                onChange={(e) => handlePhoneChange(e.target.value)}
+                className="profile-modal__input"
+                placeholder="+7 (9XX) XXX-XX-XX"
+              />
+            ) : (
+              <input
+                type={field === 'email' ? 'email' : 'text'}
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                className="profile-modal__input"
+                required
+              />
+            )}
           </label>
-          <label className="profile-modal__label">
-            Почта
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="profile-modal__input" required />
-          </label>
-          <label className="profile-modal__label">
-            Телефон
-            <input
-              type="tel"
-              value={formatPhone(phone)}
-              onChange={(e) => handlePhoneChange(e.target.value)}
-              className="profile-modal__input"
-              placeholder="+7 (9XX) XXX-XX-XX"
-              required
-            />
-            {phoneError && <span className="profile-modal__error-inline">{phoneError}</span>}
-          </label>
-          {needCurrentPassword && (
+          {needPassword && (
             <label className="profile-modal__label">
-              Текущий пароль (нужен для смены email или телефона)
+              Пароль (для подтверждения смены)
               <input
                 type="password"
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 className="profile-modal__input"
                 placeholder="Введите пароль от аккаунта"
                 required
@@ -271,71 +230,106 @@ function ProfileEditModal({ user, onClose, onSaved }) {
             <button type="submit" className="profile-modal__btn profile-modal__btn--primary" disabled={saving}>{saving ? 'Сохранение…' : 'Сохранить'}</button>
           </div>
         </form>
-
-        <div className="profile-modal__section">
-          <h4 className="profile-modal__subtitle">Сменить пароль</h4>
-          {pwStep !== 'requested' ? (
-            <>
-              <p className="profile-modal__text">Код подтверждения придёт на вашу почту.</p>
-              <button
-                type="button"
-                className="profile-modal__btn profile-modal__btn--secondary"
-                onClick={handleRequestPasswordCode}
-                disabled={pwLoading}
-              >
-                {pwLoading ? 'Отправка…' : 'Отправить код на почту'}
-              </button>
-            </>
-          ) : (
-            <form onSubmit={handleConfirmPasswordChange} className="profile-modal__form">
-              {pwError && <p className="profile-modal__error">{pwError}</p>}
-              <label className="profile-modal__label">
-                Код из письма
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  maxLength={6}
-                  value={pwCode}
-                  onChange={(e) => setPwCode(e.target.value.replace(/\D/g, ''))}
-                  className="profile-modal__input"
-                  placeholder="000000"
-                />
-              </label>
-              <label className="profile-modal__label">
-                Новый пароль
-                <input
-                  type="password"
-                  value={pwNew}
-                  onChange={(e) => setPwNew(e.target.value)}
-                  className="profile-modal__input"
-                  placeholder="Минимум 8 символов, цифра и спецсимвол"
-                />
-              </label>
-              <label className="profile-modal__label">
-                Подтверждение пароля
-                <input
-                  type="password"
-                  value={pwNewConfirm}
-                  onChange={(e) => setPwNewConfirm(e.target.value)}
-                  className="profile-modal__input"
-                />
-              </label>
-              <button type="submit" className="profile-modal__btn profile-modal__btn--primary" disabled={pwLoading}>
-                {pwLoading ? 'Сохранение…' : 'Сохранить новый пароль'}
-              </button>
-            </form>
-          )}
-        </div>
       </div>
     </div>
   );
 }
 
-export default function ProfilePage() {
-  const { user, loading, refreshUser } = useAuth();
+function PasswordChangeModal({ onClose }) {
+  const [step, setStep] = useState('request');
+  const [code, setCode] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [newPasswordConfirm, setNewPasswordConfirm] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleRequestCode = async () => {
+    setError('');
+    setLoading(true);
+    try {
+      await requestPasswordChangeCode();
+      setStep('confirm');
+    } catch (err) {
+      setError(err.message || 'Не удалось отправить код');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleConfirm = async (e) => {
+    e.preventDefault();
+    setError('');
+    const err = validatePassword(newPassword);
+    if (err) {
+      setError(err);
+      return;
+    }
+    if (newPassword !== newPasswordConfirm) {
+      setError('Пароли не совпадают');
+      return;
+    }
+    setLoading(true);
+    try {
+      await confirmPasswordChange({
+        code: code.trim(),
+        password: newPassword,
+        password_confirmation: newPasswordConfirm,
+      });
+      onClose();
+    } catch (err) {
+      setError(err.message || 'Не удалось сменить пароль');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="profile-modal-backdrop" onClick={onClose} role="presentation">
+      <div className="profile-modal profile-modal--small" onClick={(e) => e.stopPropagation()}>
+        <div className="profile-modal__head">
+          <h3 className="profile-modal__title">Сменить пароль</h3>
+          <button type="button" className="profile-modal__close" onClick={onClose} aria-label="Закрыть">×</button>
+        </div>
+        {step === 'request' ? (
+          <>
+            <p className="profile-modal__text">Код подтверждения придёт на вашу почту.</p>
+            {error && <p className="profile-modal__error">{error}</p>}
+            <div className="profile-modal__actions">
+              <button type="button" className="profile-modal__btn profile-modal__btn--secondary" onClick={onClose}>Отмена</button>
+              <button type="button" className="profile-modal__btn profile-modal__btn--primary" onClick={handleRequestCode} disabled={loading}>
+                {loading ? 'Отправка…' : 'Отправить код на почту'}
+              </button>
+            </div>
+          </>
+        ) : (
+          <form className="profile-modal__form" onSubmit={handleConfirm}>
+            {error && <p className="profile-modal__error">{error}</p>}
+            <label className="profile-modal__label">
+              Код из письма
+              <input type="text" inputMode="numeric" maxLength={6} value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))} className="profile-modal__input" placeholder="000000" />
+            </label>
+            <label className="profile-modal__label">
+              Новый пароль
+              <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="profile-modal__input" />
+            </label>
+            <label className="profile-modal__label">
+              Подтверждение пароля
+              <input type="password" value={newPasswordConfirm} onChange={(e) => setNewPasswordConfirm(e.target.value)} className="profile-modal__input" />
+            </label>
+            <div className="profile-modal__actions">
+              <button type="button" className="profile-modal__btn profile-modal__btn--secondary" onClick={onClose}>Отмена</button>
+              <button type="submit" className="profile-modal__btn profile-modal__btn--primary" disabled={loading}>{loading ? 'Сохранение…' : 'Сохранить'}</button>
+            </div>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ProfileRequestsTab({ user }) {
   const [requests, setRequests] = useState([]);
   const [requestsLoading, setRequestsLoading] = useState(true);
-  const [editOpen, setEditOpen] = useState(false);
 
   const load = () => {
     if (!user) return;
@@ -347,13 +341,47 @@ export default function ProfilePage() {
   };
 
   useEffect(() => {
-    if (!user) {
-      setRequests([]);
-      setRequestsLoading(false);
-      return;
-    }
     load();
   }, [user?.id]);
+
+  return (
+    <>
+      <h2 className="profile-dashboard__section-title">Мои заявки</h2>
+      {requestsLoading ? (
+        <p className="profile-requests__loading">Загрузка заявок...</p>
+      ) : requests.length === 0 ? (
+        <p className="profile-requests__empty">Нет заявок</p>
+      ) : (
+        <ul className="profile-requests__list">
+          {requests.map((r) => (
+            <li key={r.id}>
+              <ProfileRequestCard
+                request={r}
+                currentUserId={user.id}
+                onReviewSent={load}
+              />
+            </li>
+          ))}
+        </ul>
+      )}
+    </>
+  );
+}
+
+export default function ProfilePage() {
+  const router = useRouter();
+  const { user, loading, refreshUser } = useAuth();
+  const [editField, setEditField] = useState(null);
+  const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+
+  const tab = typeof router.query.tab === 'string' ? router.query.tab : 'requests';
+
+  useEffect(() => {
+    if (!router.isReady) return;
+    if (!router.query.tab) {
+      router.replace({ pathname: '/profile/profilePage', query: { tab: 'requests' } }, undefined, { shallow: true });
+    }
+  }, [router.isReady, router.query.tab]);
 
   if (loading) {
     return (
@@ -372,34 +400,32 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="page">
+    <div className="page profile-page">
       <section className="profile-card-section">
-        <ProfileCard user={user} onEdit={() => setEditOpen(true)} />
-        {editOpen && (
-          <ProfileEditModal user={user} onClose={() => setEditOpen(false)} onSaved={() => refreshUser?.()} />
+        <ProfileCard
+          user={user}
+          onEditField={setEditField}
+          onChangePassword={() => setPasswordModalOpen(true)}
+        />
+        {editField && (
+          <InlineEditModal
+            field={editField}
+            user={user}
+            onClose={() => setEditField(null)}
+            onSaved={() => { refreshUser?.(); setEditField(null); }}
+          />
+        )}
+        {passwordModalOpen && (
+          <PasswordChangeModal onClose={() => setPasswordModalOpen(false)} />
         )}
       </section>
 
-      <section className="profile-requests">
-        <h2 className="profile-requests__title">Мои заявки</h2>
-        {requestsLoading ? (
-          <p className="profile-requests__loading">Загрузка заявок...</p>
-        ) : requests.length === 0 ? (
-          <p className="profile-requests__empty">Нет заявок</p>
-        ) : (
-          <ul className="profile-requests__list">
-            {requests.map((r) => (
-              <li key={r.id}>
-                <ProfileRequestCard
-                  request={r}
-                  currentUserId={user.id}
-                  onReviewSent={load}
-                />
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      <ProfileDashboardLayout activeTab={tab}>
+        {tab === 'requests' && <ProfileRequestsTab user={user} />}
+        {tab === 'consultations' && <ConsultationsTab />}
+        {tab === 'notifications' && <NotificationsTab />}
+        {tab === 'settings' && <SettingsTabContent />}
+      </ProfileDashboardLayout>
     </div>
   );
 }

@@ -9,9 +9,10 @@
 
 .hero__bg {
   position: absolute;
-  inset: 0;
+  inset: -14px;
   background: url('/images/backgroundphoto.png') center / cover no-repeat;
   filter: blur(4px);
+  transform: scale(1.04);
 }
 
 .hero__bg::after {
@@ -39,7 +40,7 @@
   margin: 0 0 0.75rem;
   font-weight: 700;
   line-height: 1.2;
-  color: #C59D6C;
+  color: var(--color-brand);
   font-size: 42px;
 }
 
@@ -60,17 +61,19 @@
 
 .hero__cta {
   padding: 16px 40px;
+  font-family: var(--home-btn-font);
+  font-weight: var(--home-btn-weight);
   font-size: 1.3rem;
-  color: #fff;
-  background: #C59D6C;
+  color: var(--home-btn-text);
+  background: var(--home-btn-bg);
   border: none;
-  border-radius: 8px;
+  border-radius: var(--home-btn-radius);
   cursor: pointer;
   transition: background 0.2s, transform 0.15s;
 }
 
 .hero__cta:hover {
-  background: #d4c4a4;
+  background: var(--color-brand-hover);
 }
 
 .hero__cta:active {
@@ -119,8 +122,18 @@
   flex-shrink: 0;
   width: 45px;
   height: 45px;
-  background: #C59D6C;
-  border-radius: 4px;
+  border-radius: var(--home-btn-radius);
+  background-color: var(--color-brand);
+  position: relative;
+}
+
+.hero__step-icon::before {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  background-color: #000;
+  -webkit-mask: var(--hero-step-icon) center / contain no-repeat;
+  mask: var(--hero-step-icon) center / contain no-repeat;
 }
 
 .hero__step-text {

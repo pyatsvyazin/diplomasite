@@ -2,7 +2,14 @@
 
 namespace App\Providers;
 
-// use Illuminate\Support\Facades\Gate;
+use App\Models\Attachment;
+use App\Models\Conversation;
+use App\Models\Meeting;
+use App\Models\Message;
+use App\Policies\AttachmentPolicy;
+use App\Policies\ConversationPolicy;
+use App\Policies\MeetingPolicy;
+use App\Policies\MessagePolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
@@ -13,7 +20,10 @@ class AuthServiceProvider extends ServiceProvider
      * @var array<class-string, class-string>
      */
     protected $policies = [
-        //
+        Conversation::class => ConversationPolicy::class,
+        Attachment::class => AttachmentPolicy::class,
+        Message::class => MessagePolicy::class,
+        Meeting::class => MeetingPolicy::class,
     ];
 
     /**

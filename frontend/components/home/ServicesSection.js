@@ -1,52 +1,46 @@
-import { useState } from 'react';
-
-const SERVICES_INDIVIDUALS = [
-  {
-    title: 'Семейные дела',
-    items: [
-      'Взыскание алиментов',
-      'Изменение размера алиментов',
-      'Расторжение брака',
-      'Лишение и ограничение родительских прав',
-    ],
-  },
-  {
-    title: 'Вопросы недвижимости',
-    items: [
-      'Полное сопровождение сделок недвижимым имуществом',
-      'Приватизация квартир',
-      'Получение разрешений на строительство',
-    ],
-  },
-  {
-    title: 'Трудовые споры',
-    items: [
-      'Взыскание заработной платы',
-      'Подготовка работодателя к проверкам',
-      'Взыскание зарплаты и компенсаций',
-      'Восстановление на работе',
-    ],
-  },
-];
-
-const SERVICES_BUSINESS = [
-  { title: 'Заголовок', items: ['Ссылка', 'Ссылка', 'Ссылка'] },
-  { title: 'Заголовок', items: ['Ссылка', 'Ссылка'] },
-  { title: 'Заголовок', items: ['Ссылка', 'Ссылка', 'Ссылка'] },
-];
+import Link from 'next/link';
+import { useEffect, useMemo, useState } from 'react';
+import { SERVICE_CATEGORY_BUSINESS, SERVICE_CATEGORY_INDIVIDUALS } from '../../constants/serviceCategories';
+import { getServices } from '../../lib/api';
 
 export default function ServicesSection() {
   const [activeTab, setActiveTab] = useState('individuals');
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const blocks = activeTab === 'individuals' ? SERVICES_INDIVIDUALS : SERVICES_BUSINESS;
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setError('');
+    getServices()
+      .then((data) => {
+        if (!cancelled) setServices(data);
+      })
+      .catch((e) => {
+        if (!cancelled) setError(e.message || 'Не удалось загрузить услуги');
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const filtered = useMemo(() => {
+    const cat = activeTab === 'individuals' ? SERVICE_CATEGORY_INDIVIDUALS : SERVICE_CATEGORY_BUSINESS;
+    return services.filter((s) => s.category === cat);
+  }, [services, activeTab]);
 
   return (
     <section className="block-section services-section">
       <div className="services-section__inner">
-      <div className="services-section__panel">
+        <div className="services-section__panel">
           <h2 className="services-section__title">Наши услуги</h2>
           <p className="services-section__text">
-            Текст об услугах, которые предоставляет компания.
+            Юридическая помощь с прозрачными условиями: фиксированная цена, диапазон или стоимость по договорённости —
+            как удобнее в вашей ситуации.
           </p>
           <div className="button-block services-section__buttons">
             <button
@@ -65,24 +59,29 @@ export default function ServicesSection() {
             </button>
           </div>
         </div>
-        <div className="services-section__content">
-          {blocks.map((block, idx) => (
-            <div key={idx} className="services-section__block">
-              <h3 className="services-section__block-title">{block.title}</h3>
-              <ul className="services-section__list">
-                {block.items.map((item, i) => (
-                  <li key={i} className="services-section__item">
-                    <a href="#" className="services-section__link" onClick={(e) => e.preventDefault()}>
-                      {item}
-                      <span className="services-section__arrow">›</span>
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+        <div className="services-section__content services-section__content--cards">
+          {loading && <p className="services-section__hint">Загрузка услуг…</p>}
+          {error && !loading && <p className="services-section__hint services-section__hint--error">{error}</p>}
+          {!loading && !error && filtered.length === 0 && (
+            <p className="services-section__hint">В этом разделе пока нет услуг.</p>
+          )}
+          {!loading &&
+            !error &&
+            filtered.map((s) => (
+              <article key={s.id} className="services-section__card">
+                <Link href={`/services/${s.id}`} className="services-section__card-link">
+                  <h3 className="services-section__card-title">{s.name}</h3>
+                  {s.short_description ? (
+                    <p className="services-section__card-desc">{s.short_description}</p>
+                  ) : null}
+                  <span className="services-section__price">{s.formatted_price}</span>
+                  <span className="services-section__arrow" aria-hidden>
+                    ›
+                  </span>
+                </Link>
+              </article>
+            ))}
         </div>
-        
       </div>
     </section>
   );

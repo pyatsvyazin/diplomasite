@@ -1,0 +1,128 @@
+/** Блокировка «лишней» прокрутки под модалкой услуг */
+html.admin-services-modal-open,
+html.admin-services-modal-open body {
+  overflow: hidden;
+}
+
+html.admin-services-modal-open .sidebar-layout__content,
+html.admin-services-modal-open .sidebar-layout__sidebar {
+  overflow: hidden !important;
+}
+
+.admin-services-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 12000;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 48px 16px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.admin-services-modal {
+  width: 100%;
+  max-width: 560px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+  padding: 20px 22px 22px;
+}
+
+.admin-services-modal__title {
+  margin: 0 0 16px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+.admin-services-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.admin-services-form label > span {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #444;
+}
+
+.admin-services-form input[type='text'],
+.admin-services-form input[type='number'],
+.admin-services-form select,
+.admin-services-form textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-family: inherit;
+}
+
+.admin-services-modal .admin-btn {
+  font-family: geometriaLight, geometriaMedium, sans-serif;
+  font-weight: 300;
+}
+
+.admin-services-form textarea {
+  min-height: 72px;
+  resize: vertical;
+}
+
+.admin-services-form__textarea--tall {
+  min-height: 140px;
+}
+
+.admin-services-form__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 520px) {
+  .admin-services-form__row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.admin-services-form__hint {
+  margin: 4px 0 0;
+  font-size: 0.82rem;
+  color: #666;
+}
+
+.admin-services-form__check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.admin-services-form__check input {
+  width: auto;
+}
+
+.admin-services-modal__actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid #eee;
+}
+
+.admin-services-table__popular {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.admin-services-table__popular--yes {
+  color: #2e7d32;
+  font-weight: 600;
+}

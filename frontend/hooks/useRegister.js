@@ -76,6 +76,10 @@ export function useRegister() {
         setError(msg);
         return;
       }
+      if (data.require_verification) {
+        router.push('/auth/check-email');
+        return;
+      }
       setAuth(data.user, data.token);
       router.push('/');
     } catch (err) {

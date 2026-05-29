@@ -27,8 +27,8 @@
 }
 
 .admin__nav-link--active {
-  background: rgba(201, 184, 150, 0.15);
-  color: #c9b896;
+  background: rgba(197, 157, 108, 0.15);
+  color: #c59d6c;
 }
 
 .admin__nav-link--trigger {
@@ -89,6 +89,17 @@
   flex-wrap: wrap;
 }
 
+.admin-toolbar,
+.admin-table,
+.admin-table th,
+.admin-table td,
+.admin-search,
+.admin-filter,
+.admin-btn {
+  font-family: geometriaLight, geometriaMedium, sans-serif;
+  font-weight: 300;
+}
+
 .admin-search {
   padding: 8px 12px;
   min-width: 220px;
@@ -115,6 +126,7 @@
 .admin-table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: auto;
 }
 
 .admin-table th,
@@ -159,8 +171,8 @@
 }
 
 .admin-badge--ok {
-  background: #e8f5e9;
-  color: #2e7d32;
+  background: #dcfce7;
+  color: #24613e;
 }
 
 .admin-badge--blocked {
@@ -170,17 +182,18 @@
 
 .admin-btn {
   padding: 8px 14px;
-  border: 1px solid #ccc;
+  border: 1px solid #c59d6c;
   border-radius: 6px;
-  background: #fff;
+  background: #c59d6c;
+  color: #000;
   font-size: 0.9rem;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
 
 .admin-btn:hover:not(:disabled) {
-  background: #f5f5f5;
-  border-color: #999;
+  background: #b08858;
+  border-color: #b08858;
 }
 
 .admin-btn:disabled {
@@ -191,4 +204,73 @@
 .admin-btn--small {
   padding: 4px 10px;
   font-size: 0.85rem;
+}
+
+.admin-btn--ghost {
+  background: #fff;
+  color: #3f2f1f;
+}
+
+.admin-btn--ghost:hover:not(:disabled) {
+  background: #f7efe3;
+}
+
+.admin-btn--danger {
+  background: #d9534f;
+  border-color: #d9534f;
+  color: #fff;
+}
+
+.admin-btn--danger:hover:not(:disabled) {
+  background: #bb3f3b;
+  border-color: #bb3f3b;
+}
+
+.admin-users__block-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.admin-users__role-wrap {
+  display: flex;
+  justify-content: center;
+}
+
+.admin-users__role-select {
+  min-width: 120px;
+}
+
+.admin-users__created-at {
+  white-space: nowrap;
+}
+
+.admin-status-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  border: 1px solid transparent;
+  font-weight: 600;
+}
+
+.admin-status-chip--draft {
+  background: #f3f4f6;
+  color: #4b5563;
+  border-color: #e5e7eb;
+}
+
+.admin-status-chip--published {
+  background: #dcfce7;
+  color: #24613e;
+  border-color: #9de3b5;
+}
+
+.admin-status-chip--archived {
+  background: #fee2e2;
+  color: #9f2d2d;
+  border-color: #f8b4b4;
 }

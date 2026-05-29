@@ -17,7 +17,7 @@ class StaffController extends Controller
     public function index(): JsonResponse
     {
         $users = User::query()
-            ->with('roles')
+            ->with(['roles', 'specialties'])
             ->whereHas('roles', fn ($q) => $q->whereIn('name', ['lawyer', 'admin']))
             ->orderBy('full_name')
             ->get();
@@ -39,6 +39,10 @@ class StaffController extends Controller
             ];
 
             if ($isLawyer) {
+                $item['specialties'] = $user->specialties->map(fn ($sp) => [
+                    'id'   => $sp->id,
+                    'name' => $sp->name,
+                ])->values()->all();
                 $item['closed_cases_count'] = RequestModel::query()
                     ->where('lawyer_id', $user->id)
                     ->where('status', RequestModel::STATUS_CLOSED)
@@ -48,6 +52,7 @@ class StaffController extends Controller
                     ->avg('rating');
                 $item['rating'] = $avgRating !== null ? round($avgRating / 2, 1) : null;
             } else {
+                $item['specialties'] = [];
                 $item['closed_cases_count'] = 0;
                 $item['rating'] = null;
             }
@@ -90,7 +95,7 @@ class StaffController extends Controller
 
         $user->fill($data);
         $user->save();
-        $user->load('roles');
+        $user->load(['roles', 'specialties']);
 
         $closedCount = RequestModel::query()
             ->where('lawyer_id', $user->id)
@@ -98,6 +103,59 @@ class StaffController extends Controller
             ->count();
         $avgRating = Review::query()->where('lawyer_id', $user->id)->avg('rating');
 
+        $avatarPath = $user->avatar_path
+            ? url(Storage::disk('public')->url($user->avatar_path))
+            : self::PLACEHOLDER_AVATAR;
+
+        $specialties = $user->specialties->map(fn ($sp) => [
+            'id'   => $sp->id,
+            'name' => $sp->name,
+        ])->values()->all();
+
+        return response()->json([
+            'data' => [
+                'id'                 => $user->id,
+                'full_name'          => $user->full_name,
+                'email'              => $user->email,
+                'phone'              => $user->phone,
+                'roles'              => $user->roles->pluck('name')->toArray(),
+                'avatar_path'        => $avatarPath,
+                'can_edit'           => true,
+                'specialties'        => $specialties,
+                'closed_cases_count' => $closedCount,
+                'rating'             => $avgRating !== null ? round($avgRating / 2, 1) : null,
+            ],
+        ]);
+    }
+
+    /**
+     * Синхронизация специальностей юриста (только для пользователей с ролью lawyer).
+     */
+    public function updateSpecialties(Request $request, int $id): JsonResponse
+    {
+        $user = User::query()->with('roles')->find($id);
+        if (!$user) {
+            return response()->json(['message' => 'Пользователь не найден.'], 404);
+        }
+        if (!$user->roles->contains('name', 'lawyer')) {
+            return response()->json(['message' => 'Специальности задаются только для юристов.'], 403);
+        }
+
+        $validated = $request->validate([
+            'specialty_ids'   => 'required|array',
+            'specialty_ids.*' => 'integer|exists:specialties,id',
+        ], [
+            'specialty_ids.required' => 'Передайте список специальностей.',
+        ]);
+
+        $user->specialties()->sync($validated['specialty_ids']);
+        $user->load('specialties');
+
+        $closedCount = RequestModel::query()
+            ->where('lawyer_id', $user->id)
+            ->where('status', RequestModel::STATUS_CLOSED)
+            ->count();
+        $avgRating = Review::query()->where('lawyer_id', $user->id)->avg('rating');
         $avatarPath = $user->avatar_path
             ? url(Storage::disk('public')->url($user->avatar_path))
             : self::PLACEHOLDER_AVATAR;
@@ -111,6 +169,7 @@ class StaffController extends Controller
                 'roles'              => $user->roles->pluck('name')->toArray(),
                 'avatar_path'        => $avatarPath,
                 'can_edit'           => true,
+                'specialties'        => $user->specialties->map(fn ($sp) => ['id' => $sp->id, 'name' => $sp->name])->values()->all(),
                 'closed_cases_count' => $closedCount,
                 'rating'             => $avgRating !== null ? round($avgRating / 2, 1) : null,
             ],

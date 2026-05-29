@@ -1,0 +1,290 @@
+.profile-page .profile-card-section {
+  margin-bottom: 1.5rem;
+}
+
+.profile-card {
+  position: relative;
+}
+
+.profile-card__menu-decor {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  z-index: 2;
+  border: none;
+  background: transparent;
+  font-size: 1.25rem;
+  color: #fff;
+  cursor: default;
+  opacity: 0.85;
+}
+
+.profile-dashboard {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.profile-dashboard__sidebar {
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 12px;
+  padding: 0.75rem;
+}
+
+.profile-dashboard__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.profile-dashboard__nav-btn {
+  text-align: left;
+  padding: 0.55rem 0.75rem;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  font-family: inherit;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.profile-dashboard__nav-btn--active {
+  background: var(--color-brand, #c59d6c);
+  color: #000;
+  font-weight: 600;
+}
+
+.profile-dashboard__chats-link {
+  display: block;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: var(--color-brand, #c59d6c);
+}
+
+.profile-dashboard__content {
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 12px;
+  padding: 1.25rem;
+  min-height: 320px;
+}
+
+.profile-dashboard__section-title {
+  margin: 0 0 1rem;
+  font-size: 1.25rem;
+}
+
+.consultations-tab__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(260px, 1fr);
+  gap: 1rem;
+}
+
+.consultations-tab__filters {
+  margin-bottom: 1rem;
+}
+
+.consultations-tab__select {
+  margin-left: 0.5rem;
+  padding: 0.35rem 0.5rem;
+}
+
+.consult-cal__nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.consult-cal__nav button {
+  border: 1px solid #ddd;
+  background: #fff;
+  border-radius: 6px;
+  padding: 0.25rem 0.6rem;
+  cursor: pointer;
+}
+
+.consult-cal__weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  text-align: center;
+  font-size: 0.8rem;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.consult-cal__cells {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.consult-cal__cell {
+  min-height: 52px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  background: #fafafa;
+  padding: 4px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.consult-cal__cell--empty {
+  border: none;
+  background: transparent;
+  cursor: default;
+}
+
+.consult-cal__cell--selected {
+  border-color: var(--color-brand, #c59d6c);
+  background: #fff8ef;
+}
+
+.consult-cal__day-num {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.consult-cal__dots {
+  display: flex;
+  gap: 3px;
+  margin-top: 4px;
+}
+
+.consult-cal__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ccc;
+}
+
+.consult-cal__dot--pending {
+  background: #e6a817;
+}
+
+.consult-cal__dot--confirmed {
+  background: #3b82f6;
+}
+
+.consult-cal__dot--cancelled {
+  background: #9ca3af;
+}
+
+.consult-cal__dot--completed {
+  background: #22a06b;
+}
+
+.consult-cal__day-list {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+}
+
+.consult-cal__day-list-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.consult-cal__day-list-head h3 {
+  margin: 0;
+}
+
+.consult-cal__create-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  background: var(--color-brand, #c59d6c);
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.consultations-tab__aside-title {
+  margin: 0 0 0.75rem;
+}
+
+.consultations-tab__completed {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+}
+
+.consultations-tab__completed-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 0.75rem;
+}
+
+.notifications-tab__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.notifications-tab__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.notifications-tab__item {
+  padding: 0.85rem 0;
+  border-bottom: 1px solid #eee;
+}
+
+.notifications-tab__item--unread {
+  background: #fff9f0;
+  margin: 0 -0.5rem;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  border-radius: 8px;
+}
+
+.notifications-tab__item-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.notifications-tab__date {
+  font-size: 0.85rem;
+  color: #888;
+  white-space: nowrap;
+}
+
+.notifications-tab__actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.notifications-tab__read-all {
+  padding: 0.4rem 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+@media (max-width: 900px) {
+  .profile-dashboard {
+    grid-template-columns: 1fr;
+  }
+
+  .consultations-tab__grid {
+    grid-template-columns: 1fr;
+  }
+}

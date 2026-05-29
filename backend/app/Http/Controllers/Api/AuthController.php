@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Mail\EmailVerificationLink;
 use App\Mail\PasswordChangeCode;
 use App\Mail\PasswordResetLink;
 use App\Mail\TwoFactorCode;
@@ -82,14 +83,50 @@ class AuthController extends Controller
             $user->roles()->attach($clientRole->id);
         }
 
-        $token = $user->createToken('auth-token')->plainTextToken;
+        $verifyToken = Str::random(64);
+        Cache::put('verify_email:' . $verifyToken, ['user_id' => $user->id], now()->addMinutes(60));
+        $frontendUrl = rtrim(config('app.frontend_url', 'http://localhost:3000'), '/');
+        $verifyUrl = $frontendUrl . '/auth/verify-email?token=' . urlencode($verifyToken) . '&email=' . urlencode($user->email);
+        Mail::to($user->email)->send(new EmailVerificationLink($verifyUrl, $user->full_name ?? ''));
 
         return response()->json([
-            'message' => 'Вы успешно зарегистрированы!',
-            'user' => $user->load('roles'),
-            'token' => $token,
-            'token_type' => 'Bearer',
+            'message' => 'На вашу почту отправлена ссылка для подтверждения. Перейдите по ней, затем войдите в аккаунт.',
+            'require_verification' => true,
         ], 201);
+    }
+
+    /**
+     * Подтверждение почты по токену из письма.
+     */
+    public function verifyEmail(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'token' => 'required|string',
+            'email' => 'required|email',
+        ], [
+            'token.required' => 'Токен отсутствует.',
+            'email.required' => 'Укажите email.',
+            'email.email' => 'Укажите корректный email.',
+        ]);
+
+        $user = User::where('email', $validated['email'])->first();
+        if (!$user) {
+            return response()->json(['message' => 'Пользователь с таким email не найден.'], 400);
+        }
+
+        $key = 'verify_email:' . $validated['token'];
+        $data = Cache::get($key);
+        if (!$data || ($data['user_id'] ?? null) != $user->id) {
+            return response()->json(['message' => 'Неверная или устаревшая ссылка. Запросите новую при регистрации или повторной отправке.'], 400);
+        }
+
+        Cache::forget($key);
+        $user->email_verified_at = now();
+        $user->save();
+
+        return response()->json([
+            'message' => 'Почта успешно подтверждена. Теперь вы можете войти в аккаунт.',
+        ]);
     }
 
     /**
@@ -117,11 +154,30 @@ class AuthController extends Controller
         if ($user->is_blocked) {
             Auth::logout();
             return response()->json([
-                'message' => 'Аккаунт заблокирован. Обратитесь к администратору.',
+                'message' => 'Аккаунт заблокирован.',
+            ], 403);
+        }
+
+        if (!$user->hasVerifiedEmail()) {
+            Auth::logout();
+            return response()->json([
+                'message' => 'Подтвердите адрес почты. Перейдите по ссылке из письма, отправленного при регистрации.',
             ], 403);
         }
 
         Auth::logout();
+
+        if (!$user->two_factor_enabled) {
+            $user->tokens()->delete();
+            $token = $user->createToken('auth-token')->plainTextToken;
+            return response()->json([
+                'message' => 'Вы успешно вошли!',
+                'user' => $user->load('roles'),
+                'token' => $token,
+                'token_type' => 'Bearer',
+            ]);
+        }
+
         $code = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
         $pendingId = Str::random(64);
         Cache::put('2fa:' . $pendingId, [
@@ -241,6 +297,40 @@ class AuthController extends Controller
     }
 
     /**
+     * Включение/выключение двухфакторной аутентификации при входе. Требуется текущий пароль.
+     */
+    public function update2fa(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'two_factor_enabled' => 'required|boolean',
+            'current_password' => 'required|string',
+        ], [
+            'two_factor_enabled.required' => 'Укажите значение настройки.',
+            'current_password.required' => 'Введите текущий пароль для подтверждения.',
+        ]);
+
+        $user = $request->user();
+        if (!Hash::check($validated['current_password'], $user->password)) {
+            return response()->json([
+                'message' => 'Неверный пароль.',
+            ], 422);
+        }
+
+        $user->two_factor_enabled = $validated['two_factor_enabled'];
+        $user->save();
+
+        $user->load('roles');
+        $data = $user->toArray();
+        if (!empty($user->avatar_path)) {
+            $data['avatar_path'] = url(\Illuminate\Support\Facades\Storage::disk('public')->url($user->avatar_path));
+        }
+        return response()->json([
+            'message' => $validated['two_factor_enabled'] ? 'Двухфакторная аутентификация включена.' : 'Двухфакторная аутентификация выключена.',
+            'user' => $data,
+        ]);
+    }
+
+    /**
      * Запрос на смену пароля: отправка кода на email.
      */
     public function requestPasswordChange(Request $request): JsonResponse
@@ -303,13 +393,17 @@ class AuthController extends Controller
         $user = User::where('email', $request->email)->first();
         if (!$user) {
             return response()->json([
-                'message' => 'Если пользователь с таким email существует, на него будет отправлена ссылка для сброса пароля.',
-            ]);
+                'message' => 'Пользователь с таким email не зарегистрирован.',
+            ], 422);
+        }
+
+        if ($user->is_blocked) {
+            return response()->json([
+                'message' => 'Аккаунт заблокирован.',
+            ], 403);
         }
 
         $plainToken = Str::random(64);
-        $expireMinutes = config('auth.passwords.users.expire', 60);
-
         DB::table('password_reset_tokens')->updateOrInsert(
             ['email' => $user->email],
             [
@@ -328,10 +422,13 @@ class AuthController extends Controller
                 'email' => $user->email,
                 'error' => $e->getMessage(),
             ]);
+            return response()->json([
+                'message' => 'Не удалось отправить письмо. Попробуйте позже.',
+            ], 500);
         }
 
         return response()->json([
-            'message' => 'Если пользователь с таким email существует, на него будет отправлена ссылка для сброса пароля.',
+            'message' => 'На вашу почту отправлена ссылка для сброса пароля.',
         ]);
     }
 

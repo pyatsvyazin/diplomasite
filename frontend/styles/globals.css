@@ -5,6 +5,33 @@
   font-style: normal;
 }
 
+@font-face {
+  font-family: 'geometriaLight';
+  src: url('/fonts/Geometria/geometria_light.otf');
+  font-weight: 300;
+  font-style: normal;
+}
+
+/** Основной бежевый бренд — как фон шапки (.nav) */
+:root {
+  --color-brand: #c59d6c;
+  --color-brand-hover: #b08858;
+  --color-brand-active: #9d7548;
+  --color-brand-strong: #6b5340;
+  --color-brand-ink: #5c442a;
+  --color-text-muted-warm: #8a7f72;
+  --color-text-soft-warm: #9a9086;
+  --color-ui-gray-warm: #8a8075;
+  /** Главная: блоковые заголовки и основные кнопки */
+  --home-heading-font: geometriaLight, geometriaMedium, sans-serif;
+  --home-heading-weight: 300;
+  --home-heading-underline: 3px solid var(--color-brand);
+  --home-btn-font: geometriaLight, geometriaMedium, sans-serif;
+  --home-btn-weight: 300;
+  --home-btn-text: #000000;
+  --home-btn-bg: var(--color-brand);
+  --home-btn-radius: 5px;
+}
 
 html,
 body {
@@ -27,12 +54,19 @@ textarea {
   resize: none;
 }
 
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
 
 .app-main {
   max-width: 1350px;
   margin: 0 auto;
   padding: 24px 20px;
-  min-height: calc(100vh - 56px);
+  min-height: calc(100vh - var(--nav-bar-height, 62px));
 }
 
 .page {

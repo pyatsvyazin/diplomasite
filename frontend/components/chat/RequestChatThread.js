@@ -18,7 +18,6 @@ import { getEcho } from '../../lib/echo';
 import { notifyChatsListRefresh } from '../../lib/chatsEvents';
 import ChatHeadMenu from './ChatHeadMenu';
 import MeetingCreateModal from '../meetings/MeetingCreateModal';
-import RequestMeetingsPanel from '../meetings/RequestMeetingsPanel';
 
 /** Время внутри пузыря (как в мессенджерах) — только часы:минуты */
 function formatBubbleTime(iso) {
@@ -145,6 +144,18 @@ function getReplyPresentation(m) {
   return parseReplyQuoteFromContent(m.content || '');
 }
 
+function isConsultationSystemMessage(message) {
+  if (message?.type !== 'system') return false;
+  const content = message.content || '';
+  return [
+    'Назначена консультация',
+    'Консультация перенесена',
+    'Клиент подтвердил консультацию',
+    'Консультация отменена',
+    'Консультация завершена',
+  ].some((text) => content.startsWith(text));
+}
+
 const MESSAGE_MENU_W = 200;
 const MESSAGE_MENU_H = 220;
 
@@ -176,7 +187,6 @@ export default function RequestChatThread({ requestId: id, embedded = false }) {
   const [replyTo, setReplyTo] = useState(null);
   const [sending, setSending] = useState(false);
   const [meetingModalOpen, setMeetingModalOpen] = useState(false);
-  const [meetingsRefreshKey, setMeetingsRefreshKey] = useState(0);
   const threadRef = useRef(null);
   const pollRef = useRef(null);
   const composerFileRef = useRef(null);
@@ -493,6 +503,7 @@ export default function RequestChatThread({ requestId: id, embedded = false }) {
   };
 
   const shellClass = embedded ? 'request-chat request-chat--embedded' : 'page request-chat';
+  const visibleMessages = messages.filter((m) => !isConsultationSystemMessage(m));
 
   if (authLoading) {
     return (
@@ -550,8 +561,8 @@ export default function RequestChatThread({ requestId: id, embedded = false }) {
           )}
 
           <div className="request-chat__thread" ref={threadRef}>
-            {messages.map((m, idx) => {
-              const prev = idx > 0 ? messages[idx - 1] : null;
+            {visibleMessages.map((m, idx) => {
+              const prev = idx > 0 ? visibleMessages[idx - 1] : null;
               const showDaySep = !prev || dayKeyFromIso(m.created_at) !== dayKeyFromIso(prev.created_at);
 
               if (m.type === 'system') {
@@ -770,13 +781,6 @@ export default function RequestChatThread({ requestId: id, embedded = false }) {
               );
             })()}
 
-          <RequestMeetingsPanel
-            key={meetingsRefreshKey}
-            requestId={conversation.request?.id || id}
-            request={conversation.request}
-            showCreateButton={false}
-          />
-
           <MeetingCreateModal
             open={meetingModalOpen}
             onClose={() => setMeetingModalOpen(false)}
@@ -784,7 +788,6 @@ export default function RequestChatThread({ requestId: id, embedded = false }) {
             request={conversation.request}
             onCreated={() => {
               setMeetingModalOpen(false);
-              setMeetingsRefreshKey((k) => k + 1);
             }}
           />
 

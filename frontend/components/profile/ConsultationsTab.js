@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { getMeetings } from '../../lib/api';
+import { cancelMeeting, confirmMeeting, getMeetings } from '../../lib/api';
 import MeetingCard from '../meetings/MeetingCard';
 import MeetingCreateModal from '../meetings/MeetingCreateModal';
 
@@ -58,15 +58,39 @@ export default function ConsultationsTab() {
     });
     return map;
   }, [meetings]);
-  const active = meetings.filter((m) => ['pending', 'confirmed'].includes(m.status));
-  const upcoming = [...active]
-    .filter((m) => new Date(m.start_at) >= new Date())
-    .sort((a, b) => new Date(a.start_at) - new Date(b.start_at))
-    .slice(0, 5);
+  const pending = meetings.filter((m) => m.status === 'pending');
   const completed = meetings.filter((m) => m.status === 'completed');
   const selectedMeetings = selectedDay
-    ? byDay[`${year}-${String(month).padStart(2, '0')}-${String(selectedDay).padStart(2, '0')}`] || []
+    ? (byDay[`${year}-${String(month).padStart(2, '0')}-${String(selectedDay).padStart(2, '0')}`] || []).filter(
+        (m) => !['pending', 'completed'].includes(m.status),
+      )
     : [];
+  const handleConfirm = async (meetingId) => {
+    await confirmMeeting(meetingId);
+    setRefreshKey((k) => k + 1);
+  };
+  const handleCancel = async (meetingId) => {
+    await cancelMeeting(meetingId, '');
+    setRefreshKey((k) => k + 1);
+  };
+  const renderMeetingActions = (meeting) => {
+    const isClient = meeting.request?.client_id === user?.id;
+    if (!isClient) return null;
+    return (
+      <>
+        {meeting.status === 'pending' && (
+          <button type="button" className="meeting-form__btn meeting-form__btn--primary" onClick={() => handleConfirm(meeting.id)}>
+            Подтвердить
+          </button>
+        )}
+        {['pending', 'confirmed'].includes(meeting.status) && (
+          <button type="button" className="meeting-form__btn meeting-form__btn--ghost" onClick={() => handleCancel(meeting.id)}>
+            Отменить
+          </button>
+        )}
+      </>
+    );
+  };
   const cells = buildCalendarDays(year, month);
   const monthLabel = view.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' });
   return (
@@ -123,7 +147,7 @@ export default function ConsultationsTab() {
           {selectedDay && (
             <div className="consult-cal__day-list">
               <div className="consult-cal__day-list-head">
-                <h3>Консультации {selectedDay}.{month}</h3>
+                <h3>Консультации на {selectedDay}.{month}</h3>
                 {canCreateMeeting && (
                   <button
                     type="button"
@@ -140,22 +164,22 @@ export default function ConsultationsTab() {
               {selectedMeetings.length === 0 ? (
                 <p>Нет консультаций в этот день.</p>
               ) : (
-                selectedMeetings.map((m) => <MeetingCard key={m.id} meeting={m} />)
+                selectedMeetings.map((m) => <MeetingCard key={m.id} meeting={m} actions={renderMeetingActions(m)} />)
               )}
             </div>
           )}
         </div>
         <div className="consultations-tab__aside">
-          <h3 className="consultations-tab__aside-title">Ближайшие</h3>
+          <h3 className="consultations-tab__aside-title">Ожидающие подтверждения</h3>
           {loading && <p>Загрузка…</p>}
-          {!loading && upcoming.length === 0 && <p>Нет предстоящих консультаций.</p>}
-          {upcoming.map((m) => (
-            <MeetingCard key={m.id} meeting={m} />
+          {!loading && pending.length === 0 && <p>Нет консультаций, ожидающих подтверждения.</p>}
+          {pending.map((m) => (
+            <MeetingCard key={m.id} meeting={m} actions={renderMeetingActions(m)} />
           ))}
         </div>
       </div>
       <section className="consultations-tab__completed">
-        <h3>Завершённые</h3>
+        <h3>Завершенные консультации</h3>
         {completed.length === 0 ? (
           <p>Нет завершённых консультаций за выбранный период.</p>
         ) : (

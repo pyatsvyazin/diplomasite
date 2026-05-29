@@ -56,7 +56,7 @@ class NotificationService
             return;
         }
 
-        $link = '/requests/'.$request->id.'/chat';
+        $link = '/profile/profilePage?tab=consultations';
         $meta = ['meeting_id' => $meeting->id, 'request_id' => $request->id];
 
         $recipients = collect([

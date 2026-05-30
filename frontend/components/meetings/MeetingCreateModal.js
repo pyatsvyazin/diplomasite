@@ -44,8 +44,8 @@ export default function MeetingCreateModal({
   useEffect(() => {
     if (!open || fixedRequestId) return;
     setLoadingRequests(true);
-    getAdminRequests()
-      .then((list) => {
+    getAdminRequests('', 1, 1000)
+      .then(({ data: list }) => {
         const eligible = (list || []).filter(
           (r) => r.lawyer_id && !['closed', 'rejected'].includes(r.status),
         );

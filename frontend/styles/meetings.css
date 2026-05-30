@@ -76,7 +76,14 @@
 }
 
 .meeting-card--overdue {
-  border-left: 4px solid #d97706;
+  border-left: 4px solid #dc2626;
+}
+
+/* Limit height for long lists of request meetings (admin panel) */
+.request-meetings__list {
+  max-height: 420px;
+  overflow-y: auto;
+  padding-right: 8px;
 }
 
 .meeting-card__head {

@@ -3,6 +3,7 @@ import AdminLayout from '../../components/AdminLayout';
 import { getApiUrl, getAuthHeaders, updateAdminUserBlock, updateAdminUserRole } from '../../lib/api';
 import { formatPhone } from '../../lib/phone';
 import { roleLabel } from '../../constants/userRoles';
+import AdminCreateUserModal from '../../components/admin/AdminCreateUserModal';
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState([]);
@@ -15,6 +16,8 @@ export default function AdminUsersPage() {
   const [blockingId, setBlockingId] = useState(null);
   const [roleChangingId, setRoleChangingId] = useState(null);
   const [error, setError] = useState('');
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     const t = setTimeout(() => setSearchDebounce(search), 300);
@@ -41,7 +44,7 @@ export default function AdminUsersPage() {
       })
       .catch(() => setUsers([]))
       .finally(() => setLoading(false));
-  }, [searchDebounce, roleFilter, sortBy, sortOrder]);
+  }, [searchDebounce, roleFilter, sortBy, sortOrder, refreshKey]);
 
   const handleBlockToggle = async (user) => {
     setError('');
@@ -77,6 +80,7 @@ export default function AdminUsersPage() {
         <h1 className="admin-page-title">Все пользователи</h1>
         {error && <p className="admin-error" style={{ color: 'var(--color-error, #c00)', marginBottom: '0.5rem' }}>{error}</p>}
         <div className="admin-toolbar">
+          <button type="button" className="admin-btn admin-btn--primary" onClick={() => setCreateModalOpen(true)}>Добавить пользователя</button>
           <input
             type="search"
             className="admin-search"
@@ -178,6 +182,11 @@ export default function AdminUsersPage() {
           )}
         </div>
       </div>
+      <AdminCreateUserModal
+        open={createModalOpen}
+        onClose={() => setCreateModalOpen(false)}
+        onCreated={() => setRefreshKey((k) => k + 1)}
+      />
     </AdminLayout>
   );
 }

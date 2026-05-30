@@ -21,9 +21,20 @@ class RequestController extends Controller
             $query->where('status', $status);
         }
 
-        $items = $query->orderByDesc('created_at')->get();
+        $perPage = (int) $request->query('per_page', 20);
+        $page = (int) $request->query('page', 1);
 
-        return response()->json(['data' => $items]);
+        $paginator = $query->orderByDesc('created_at')->paginate($perPage, ['*'], 'page', $page);
+
+        return response()->json([
+            'data' => $paginator->items(),
+            'meta' => [
+                'current_page' => $paginator->currentPage(),
+                'last_page' => $paginator->lastPage(),
+                'per_page' => $paginator->perPage(),
+                'total' => $paginator->total(),
+            ],
+        ]);
     }
 
     public function update(Request $request, int $id): JsonResponse

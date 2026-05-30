@@ -655,6 +655,28 @@
   border-color: #b08d5c;
 }
 
+.profile-logout-btn {
+  display: inline-block;
+  padding: 8px 14px;
+  background: #c59d6c;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.15s, transform 0.06s;
+}
+.profile-logout-btn:hover {
+  background: #b08850;
+  transform: translateY(-1px);
+}
+.profile-logout-btn:active {
+  transform: translateY(0);
+}
+.profile-logout-btn:focus {
+  outline: 3px solid rgba(197,157,108,0.18);
+}
+
 .consultations-tab__main-layout {
   display: grid;
   grid-template-columns: 1fr 1fr;

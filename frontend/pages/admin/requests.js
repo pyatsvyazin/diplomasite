@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import { getAdminRequests } from '../../lib/api';
 import RequestCard from '../../components/admin/RequestCard';
+import PostsPagination from '../../components/PostsPagination';
 
 const STATUS_FILTERS = [
   { value: '', label: 'Все заявки' },
@@ -16,16 +17,29 @@ export default function AdminRequestsPage() {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('');
+  const [page, setPage] = useState(1);
+  const [meta, setMeta] = useState(null);
+  const PER_PAGE = 20;
 
   const load = () => {
     setLoading(true);
-    getAdminRequests(statusFilter)
-      .then(setRequests)
-      .catch(() => setRequests([]))
+    getAdminRequests(statusFilter, page, PER_PAGE)
+      .then(({ data, meta: m }) => {
+        setRequests(data || []);
+        setMeta(m || null);
+      })
+      .catch(() => {
+        setRequests([]);
+        setMeta(null);
+      })
       .finally(() => setLoading(false));
   };
 
-  useEffect(load, [statusFilter]);
+  useEffect(() => {
+    setPage(1);
+  }, [statusFilter]);
+
+  useEffect(load, [statusFilter, page]);
 
   return (
     <AdminLayout>
@@ -50,11 +64,22 @@ export default function AdminRequestsPage() {
         ) : requests.length === 0 ? (
           <p className="admin-requests-empty">Нет заявок</p>
         ) : (
-          <div className="request-card-list">
-            {requests.map((r) => (
-              <RequestCard key={r.id} request={r} onRefresh={load} />
-            ))}
-          </div>
+          <>
+            <div className="request-card-list">
+              {requests.map((r) => (
+                <RequestCard key={r.id} request={r} onRefresh={load} />
+              ))}
+            </div>
+            {meta && meta.last_page > 1 && (
+              <div className="admin-requests-pagination">
+                <PostsPagination
+                  page={page}
+                  lastPage={meta.last_page}
+                  onPageChange={(p) => setPage(p)}
+                />
+              </div>
+            )}
+          </>
         )}
       </div>
     </AdminLayout>

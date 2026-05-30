@@ -87,14 +87,16 @@ export async function submitRequest(data) {
   return body;
 }
 
-export async function getAdminRequests(status = '') {
+export async function getAdminRequests(status = '', page = 1, per_page = 20) {
   const params = new URLSearchParams();
   if (status) params.set('status', status);
+  if (page) params.set('page', String(page));
+  if (per_page) params.set('per_page', String(per_page));
   const url = getApiUrl('/admin/requests') + (params.toString() ? '?' + params.toString() : '');
   const res = await fetch(url, { headers: getAuthHeaders() });
   if (!res.ok) throw new Error('Не удалось загрузить заявки');
-  const data = await res.json();
-  return data.data || [];
+  const body = await res.json().catch(() => ({}));
+  return { data: body.data || [], meta: body.meta || null };
 }
 
 export async function updateAdminRequest(id, payload) {
@@ -156,6 +158,24 @@ export async function getAdminSpecialties() {
   if (!res.ok) throw new Error('Не удалось загрузить специальности');
   const data = await res.json();
   return data.data || [];
+}
+
+export async function createAdminUser(payload) {
+  const url = getApiUrl('/admin/users');
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeaders(),
+    },
+    body: JSON.stringify(payload),
+  });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const msg = body.message || (body.errors && Object.values(body.errors).flat()[0]) || 'Не удалось создать пользователя';
+    throw new Error(msg);
+  }
+  return body.user;
 }
 
 export async function createAdminSpecialty(name) {

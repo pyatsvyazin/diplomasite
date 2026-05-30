@@ -94,4 +94,42 @@ class AdminController extends Controller
         }
         return response()->json(['user' => $user, 'message' => $message]);
     }
+
+    /**
+     * Создать пользователя (админ) с присвоением роли.
+     */
+    public function createUser(Request $request): JsonResponse
+    {
+        $currentUser = $request->user();
+        $isAdmin = $currentUser->roles()->where('name', 'admin')->exists();
+        if (!$isAdmin) {
+            return response()->json([
+                'message' => 'Только администратор может создавать пользователей.',
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'full_name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'phone' => 'nullable|string|max:50',
+            'password' => 'required|string|min:6',
+            'role' => 'required|string|in:client,lawyer,admin',
+        ]);
+
+        $user = new User();
+        $user->full_name = $validated['full_name'];
+        $user->email = $validated['email'];
+        $user->phone = $validated['phone'] ?? null;
+        $user->password = \Illuminate\Support\Facades\Hash::make($validated['password']);
+        $user->save();
+
+        $roleId = Role::query()->where('name', $validated['role'])->value('id');
+        if ($roleId) {
+            $user->roles()->sync([$roleId]);
+        }
+
+        $user->load('roles');
+
+        return response()->json(['user' => $user, 'message' => 'Пользователь создан.']);
+    }
 }

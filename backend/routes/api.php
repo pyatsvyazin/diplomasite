@@ -89,6 +89,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::middleware('admin.or.lawyer')->prefix('admin')->group(function () {
         Route::get('/users', [AdminController::class, 'users']);
+        Route::post('/users', [AdminController::class, 'createUser']);
         Route::patch('/users/{id}', [AdminController::class, 'updateUser']);
         Route::get('/requests', [AdminRequestController::class, 'index']);
         Route::patch('/requests/{id}', [AdminRequestController::class, 'update']);

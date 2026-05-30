@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { cancelMeeting, confirmMeeting, getMeetings } from '../../lib/api';
 import MeetingCard from '../meetings/MeetingCard';
 import MeetingCreateModal from '../meetings/MeetingCreateModal';
+import PostsPagination from '../PostsPagination';
 
 const WEEKDAYS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
 const STATUS_DOT = {
@@ -134,6 +135,11 @@ export default function ConsultationsTab() {
         .sort(sortByStartDesc),
     [meetings, now],
   );
+  const [completedPage, setCompletedPage] = useState(1);
+  const COMPLETED_PER_PAGE = 10;
+  useEffect(() => {
+    setCompletedPage(1);
+  }, [completed.length, statusFilter, refreshKey]);
   const nearestMeetings = useMemo(() => {
     return meetings
       .filter((m) => m.status === 'confirmed' && new Date(m.start_at) >= now)
@@ -325,10 +331,21 @@ export default function ConsultationsTab() {
           <section className="consultations-tab__section">
             <h3 className="consultations-tab__section-title">Завершенные консультации</h3>
             <div className="consultations-tab__cards-grid">
-              {completed.map((m) => (
-                <MeetingCard key={m.id} meeting={m} />
-              ))}
+              {completed
+                .slice((completedPage - 1) * COMPLETED_PER_PAGE, completedPage * COMPLETED_PER_PAGE)
+                .map((m) => (
+                  <MeetingCard key={m.id} meeting={m} />
+                ))}
             </div>
+            {completed.length > COMPLETED_PER_PAGE && (
+              <div className="consultations-tab__pagination">
+                <PostsPagination
+                  page={completedPage}
+                  lastPage={Math.ceil(completed.length / COMPLETED_PER_PAGE)}
+                  onPageChange={(p) => setCompletedPage(p)}
+                />
+              </div>
+            )}
           </section>
         )}
       </div>

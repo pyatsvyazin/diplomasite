@@ -3,7 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { update2faSetting } from '../../lib/api';
 
 export default function SettingsTabContent() {
-  const { user, refreshUser } = useAuth();
+  const { user, refreshUser, logout } = useAuth();
   const [modalOpen, setModalOpen] = useState(false);
   const [pendingValue, setPendingValue] = useState(null);
   const [password, setPassword] = useState('');
@@ -61,6 +61,24 @@ export default function SettingsTabContent() {
               aria-pressed={twoFactorEnabled}
             >
               <span className="settings-toggle__thumb" />
+            </button>
+          </div>
+        </div>
+      </section>
+      <section className="settings-section">
+        <h3 className="settings-section__title">Аккаунт</h3>
+        <div className="settings-row">
+          <div className="settings-row__label">
+            <span className="settings-row__name">Выход из аккаунта</span>
+            <span className="settings-row__hint">Нажмите, чтобы выйти из текущего сеанса</span>
+          </div>
+          <div className="settings-row__control">
+            <button
+              type="button"
+              className="profile-logout-btn"
+              onClick={() => logout()}
+            >
+              Выйти
             </button>
           </div>
         </div>

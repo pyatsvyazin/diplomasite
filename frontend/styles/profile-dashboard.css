@@ -152,8 +152,11 @@
 
 .consult-cal__dots {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 3px;
   margin-top: 4px;
+  max-height: 28px;
 }
 
 .consult-cal__dot {
@@ -177,6 +180,10 @@
 
 .consult-cal__dot--completed {
   background: #22a06b;
+}
+
+.consult-cal__dot--overdue {
+  background: #d97706;
 }
 
 .consult-cal__day-list {

@@ -144,18 +144,6 @@ function getReplyPresentation(m) {
   return parseReplyQuoteFromContent(m.content || '');
 }
 
-function isConsultationSystemMessage(message) {
-  if (message?.type !== 'system') return false;
-  const content = message.content || '';
-  return [
-    'Назначена консультация',
-    'Консультация перенесена',
-    'Клиент подтвердил консультацию',
-    'Консультация отменена',
-    'Консультация завершена',
-  ].some((text) => content.startsWith(text));
-}
-
 const MESSAGE_MENU_W = 200;
 const MESSAGE_MENU_H = 220;
 
@@ -503,7 +491,7 @@ export default function RequestChatThread({ requestId: id, embedded = false }) {
   };
 
   const shellClass = embedded ? 'request-chat request-chat--embedded' : 'page request-chat';
-  const visibleMessages = messages.filter((m) => !isConsultationSystemMessage(m));
+  const visibleMessages = messages;
 
   if (authLoading) {
     return (

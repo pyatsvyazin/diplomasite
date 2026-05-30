@@ -164,7 +164,7 @@ export default function RequestMeetingsPanel({
 
                 <>
 
-                  {isClient && m.status === 'pending' && (
+                  {isClient && m.status === 'pending' && new Date(m.start_at) >= new Date() && (
 
                     <button type="button" className="meeting-form__btn meeting-form__btn--primary" onClick={() => confirmMeeting(m.id).then(load)}>
 

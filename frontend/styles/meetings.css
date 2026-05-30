@@ -55,6 +55,7 @@
   border-radius: 10px;
   padding: 0.85rem 1rem;
   margin-bottom: 0.75rem;
+  position: relative;
 }
 
 .meeting-card--pending {
@@ -72,6 +73,10 @@
 
 .meeting-card--completed {
   border-left: 4px solid #22a06b;
+}
+
+.meeting-card--overdue {
+  border-left: 4px solid #d97706;
 }
 
 .meeting-card__head {
@@ -102,6 +107,27 @@
   display: inline-block;
   margin-top: 0.5rem;
   color: var(--color-brand, #c59d6c);
+}
+
+.meeting-card__chat {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-brand, #c59d6c);
+  border-radius: 50%;
+  text-decoration: none;
+}
+
+.meeting-card__chat img {
+  width: 18px;
+  height: 18px;
+  display: block;
+  filter: brightness(0) invert(1);
 }
 
 .meeting-card__actions {

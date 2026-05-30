@@ -1,5 +1,4 @@
 import { useRouter } from 'next/router';
-import Link from 'next/link';
 
 const TABS = [
   { id: 'requests', label: 'Мои заявки' },
@@ -30,9 +29,6 @@ export default function ProfileDashboardLayout({ activeTab, children }) {
             </button>
           ))}
         </nav>
-        <Link href="/chats" className="profile-dashboard__chats-link">
-          Мои чаты
-        </Link>
       </aside>
       <div className="profile-dashboard__content">{children}</div>
     </div>

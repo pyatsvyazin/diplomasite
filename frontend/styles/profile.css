@@ -1,4 +1,4 @@
-/* Карточка профиля по макету */
+ /* Карточка профиля по макету */
 .profile-card {
   position: relative;
   background: #fff;
@@ -653,4 +653,75 @@
 }
 .settings-toggle--on:hover {
   border-color: #b08d5c;
+}
+
+.consultations-tab__main-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: stretch;
+  min-height: 0;
+}
+ 
+.consultations-tab__calendar-block {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+ 
+.consultations-tab__nearest {
+  display: flex;
+  flex-direction: column;
+  background: transparent;
+  height: 100%;
+  min-height: 0;
+}
+ 
+.consultations-tab__nearest-grid {
+  display: grid;
+  gap: 16px;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(196, 157, 108, 0.65) rgba(196, 157, 108, 0.12);
+}
+
+.consultations-tab__nearest-grid::-webkit-scrollbar {
+  width: 10px;
+}
+
+.consultations-tab__nearest-grid::-webkit-scrollbar-track {
+  background: rgba(196, 157, 108, 0.12);
+  border-radius: 999px;
+}
+
+.consultations-tab__nearest-grid::-webkit-scrollbar-thumb {
+  background: rgba(196, 157, 108, 0.65);
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+}
+
+.consultations-tab__nearest-grid::-webkit-scrollbar-thumb:hover {
+  background: rgba(196, 157, 108, 0.85);
+}
+
+.consultations-tab__cards-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.consultations-tab__cards-grid--single {
+  grid-template-columns: 1fr;
+}
+
+@media (max-width: 768px) {
+  .consultations-tab__main-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .consultations-tab__cards-grid {
+    grid-template-columns: 1fr;
+  }
 }

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useMemo, useCallback, useLayoutEffect } from 'react';
 import { createPortal } from 'react-dom';
 import AdminLayout from '../../../components/AdminLayout';
+import ModalShell from '../../../components/ModalShell';
 import Avatar from '../../../components/Avatar';
 import StarRating from '../../../components/StarRating';
 import {
@@ -577,9 +578,9 @@ export default function AdminContentStaffPage() {
         )}
       </div>
 
-      {editMember && (
-        <div className="staff-modal-overlay">
-          <div className="staff-modal">
+      <ModalShell open={!!editMember} onClose={() => !saving && setEditMember(null)}>
+        {editMember && (
+          <div className="staff-modal" role="dialog">
             <button
               type="button"
               className="staff-modal__close"
@@ -650,8 +651,8 @@ export default function AdminContentStaffPage() {
               </div>
             </form>
           </div>
-        </div>
-      )}
+        )}
+      </ModalShell>
     </AdminLayout>
   );
 }

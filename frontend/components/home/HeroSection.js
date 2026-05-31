@@ -1,7 +1,13 @@
 export default function HeroSection() {
     const scrollToRequest = () => {
       const el = document.getElementById('request-form');
-      if (el) el.scrollIntoView({ behavior: 'smooth' });
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+        return;
+      }
+      if (typeof window !== 'undefined') {
+        window.location.href = '/contacts#request-form';
+      }
     };
   
     const steps = [

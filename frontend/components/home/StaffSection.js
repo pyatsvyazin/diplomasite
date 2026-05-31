@@ -244,7 +244,15 @@ export default function StaffSection() {
       <section className="block-section staff-section">
         <div className="staff-section__inner">
           <h2 className="staff-section__title">Наши сотрудники</h2>
-          <p className="staff-section__hint">Загрузка…</p>
+          <div className="staff-section__skeleton-row">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="staff-section__skeleton-card" aria-hidden>
+                <div className="staff-section__skeleton-photo shimmer" />
+                <div className="staff-section__skeleton-line shimmer" />
+                <div className="staff-section__skeleton-line shimmer staff-section__skeleton-line--short" />
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     );

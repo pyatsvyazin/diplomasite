@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { update2faSetting } from '../../lib/api';
+import ModalShell from '../ModalShell';
 
 export default function SettingsTabContent() {
   const { user, refreshUser, logout } = useAuth();
@@ -84,8 +85,12 @@ export default function SettingsTabContent() {
         </div>
       </section>
       {modalOpen && (
-        <div className="profile-modal-backdrop" onClick={() => setModalOpen(false)} role="presentation">
-          <div className="profile-modal profile-modal--small" onClick={(e) => e.stopPropagation()}>
+        <ModalShell open onClose={() => setModalOpen(false)} overlayClassName="profile-modal-backdrop">
+          <div
+            className="profile-modal profile-modal--small"
+            onMouseDown={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="profile-modal__head">
               <h3 className="profile-modal__title">Подтверждение</h3>
               <button type="button" className="profile-modal__close" onClick={() => setModalOpen(false)}>×</button>
@@ -115,7 +120,7 @@ export default function SettingsTabContent() {
               </div>
             </form>
           </div>
-        </div>
+        </ModalShell>
       )}
     </>
   );

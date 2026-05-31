@@ -1,11 +1,11 @@
-/** Блокировка «лишней» прокрутки под модалкой услуг */
-html.admin-services-modal-open,
-html.admin-services-modal-open body {
+/** Блокировка прокрутки под любой модалкой (в т.ч. админ-сайдбар) */
+html.app-modal-open,
+html.app-modal-open body {
   overflow: hidden;
 }
 
-html.admin-services-modal-open .sidebar-layout__content,
-html.admin-services-modal-open .sidebar-layout__sidebar {
+html.app-modal-open .sidebar-layout__content,
+html.app-modal-open .sidebar-layout__sidebar {
   overflow: hidden !important;
 }
 

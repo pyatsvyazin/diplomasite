@@ -31,6 +31,30 @@
     color: #a93226;
   }
 
+  .services-section__card--skeleton {
+    padding: 16px 14px;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .services-section__skel-title {
+    height: 18px;
+    width: 70%;
+    border-radius: 4px;
+  }
+
+  .services-section__skel-line {
+    height: 12px;
+    width: 100%;
+    border-radius: 4px;
+  }
+
+  .services-section__skel-line--short {
+    width: 45%;
+  }
+
   .services-section__card {
     margin: 0;
     background: #f5f5f5;
@@ -301,18 +325,20 @@
 
   @media (max-width: 900px) {
     .services-section__inner {
-      flex-direction: column-reverse;
+      flex-direction: column;
     }
-  
+
     .services-section__panel {
       width: 100%;
+      order: 1;
     }
-  
+
     .services-section__content {
+      order: 2;
       grid-template-columns: 1fr;
     }
 
     .services-section__content--cards {
-      grid-template-columns: 1fr;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }

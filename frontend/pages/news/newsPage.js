@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { getPosts } from '../../lib/api';
 import PostsPagination from '../../components/PostsPagination';
+import HomeFooter from '../../components/home/HomeFooter';
 
 const TYPE_LABELS = {
   article: 'Статья',
@@ -140,6 +141,7 @@ export default function NewsPage() {
           />
         </>
       )}
+      <HomeFooter />
     </div>
   );
 }

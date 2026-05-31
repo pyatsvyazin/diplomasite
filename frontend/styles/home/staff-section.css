@@ -23,6 +23,46 @@
   color: #a93226;
 }
 
+.staff-section__skeleton-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.staff-section__skeleton-card {
+  background: #f5f5f5;
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.staff-section__skeleton-photo {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  border-radius: 10px;
+}
+
+.staff-section__skeleton-line {
+  height: 12px;
+  border-radius: 4px;
+}
+
+.staff-section__skeleton-line--short {
+  width: 60%;
+}
+
+@media (max-width: 768px) {
+  .staff-section__skeleton-row {
+    grid-template-columns: 1fr;
+    max-width: 280px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
 .staff-section__slider-wrap {
   display: grid;
   grid-template-columns: minmax(1.5rem, auto) minmax(0, 1fr) minmax(1.5rem, auto);

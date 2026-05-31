@@ -91,7 +91,25 @@
 }
 
 @media (max-width: 640px) {
+  .home-news__layout {
+    text-align: center;
+  }
+
+  .home-news__panel {
+    align-items: center;
+  }
+
   .home-news__grid {
     grid-template-columns: 1fr;
+    justify-items: center;
+  }
+
+  .home-news__grid .news-grid__item {
+    width: 100%;
+    max-width: 360px;
+  }
+
+  .home-news__grid .news-grid__item:last-child:nth-child(odd) {
+    justify-self: center;
   }
 }

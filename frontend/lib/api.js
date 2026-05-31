@@ -118,8 +118,12 @@ export async function updateAdminRequest(id, payload) {
 }
 
 
-export async function getAdminAnalytics() {
-  const url = getApiUrl('/admin/analytics');
+export async function getAdminAnalytics(params = {}) {
+  const search = new URLSearchParams();
+  if (params.calendar_page) search.set('calendar_page', String(params.calendar_page));
+  if (params.activity_page) search.set('activity_page', String(params.activity_page));
+  const qs = search.toString();
+  const url = getApiUrl('/admin/analytics') + (qs ? `?${qs}` : '');
   const res = await fetch(url, { headers: getAuthHeaders() });
   const body = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(body.message || 'Не удалось загрузить аналитику');
@@ -773,6 +777,8 @@ export async function getLawyerBusySlots(lawyerId, from, to) {
 export async function getNotifications(params = {}) {
   const search = new URLSearchParams();
   if (params.unread) search.set('unread', '1');
+  if (params.limit != null) search.set('limit', String(params.limit));
+  if (params.offset != null) search.set('offset', String(params.offset));
   const qs = search.toString();
   const url = getApiUrl('/notifications') + (qs ? `?${qs}` : '');
   const res = await fetch(url, { headers: getAuthHeaders() });

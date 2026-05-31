@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { createPortal } from 'react-dom';
 import AdminLayout from '../../../components/AdminLayout';
+import ModalShell from '../../../components/ModalShell';
 import {
   SERVICE_CATEGORY_BUSINESS,
   SERVICE_CATEGORY_INDIVIDUALS,
@@ -108,20 +108,6 @@ export default function AdminContentServicesPage() {
       cancelled = true;
     };
   }, []);
-
-  /** Блокируем фон: и window, и прокручиваемый main админки (.sidebar-layout__content) */
-  useEffect(() => {
-    if (!modalOpen || typeof document === 'undefined') return undefined;
-    const html = document.documentElement;
-    const prevPaddingRight = html.style.paddingRight;
-    const gap = window.innerWidth - html.clientWidth;
-    html.classList.add('admin-services-modal-open');
-    if (gap > 0) html.style.paddingRight = `${gap}px`;
-    return () => {
-      html.classList.remove('admin-services-modal-open');
-      html.style.paddingRight = prevPaddingRight;
-    };
-  }, [modalOpen]);
 
   const openCreate = () => {
     setEditingId(null);
@@ -271,19 +257,15 @@ export default function AdminContentServicesPage() {
         </div>
       </div>
 
-      {modalOpen &&
-        typeof document !== 'undefined' &&
-        createPortal(
-          <div
-            className="admin-services-modal-overlay"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="admin-services-modal-title"
-            onMouseDown={(e) => {
-              if (e.target === e.currentTarget) closeModal();
-            }}
-          >
-            <div className="admin-services-modal">
+      <ModalShell open={modalOpen} onClose={closeModal} overlayClassName="admin-services-modal-overlay">
+        <div
+          className="admin-services-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="admin-services-modal-title"
+          onMouseDown={(e) => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
+        >
             <h2 id="admin-services-modal-title" className="admin-services-modal__title">
               {editingId == null ? 'Новая услуга' : 'Редактирование услуги'}
             </h2>
@@ -417,10 +399,8 @@ export default function AdminContentServicesPage() {
                 </button>
               </div>
             </form>
-          </div>
-        </div>,
-          document.body
-        )}
+        </div>
+      </ModalShell>
     </AdminLayout>
   );
 }

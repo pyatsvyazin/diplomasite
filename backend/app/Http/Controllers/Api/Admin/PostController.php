@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Post\StorePostRequest;
 use App\Http\Requests\Post\UpdatePostRequest;
 use App\Models\Post;
+use App\Services\Activity\ActivityLogService;
 use App\Services\Post\PostService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -13,8 +14,10 @@ use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller
 {
-    public function __construct(private readonly PostService $postService)
-    {
+    public function __construct(
+        private readonly PostService $postService,
+        private readonly ActivityLogService $activityLog,
+    ) {
     }
 
     public function index(Request $request): JsonResponse
@@ -46,7 +49,9 @@ class PostController extends Controller
     public function store(StorePostRequest $request): JsonResponse
     {
         $this->ensureAdmin($request);
-        $post = $this->postService->create($request->validated(), (int) $request->user()->id);
+        $actor = $request->user();
+        $post = $this->postService->create($request->validated(), (int) $actor->id);
+        $this->activityLog->postCreated($actor, $post);
 
         return response()->json(['data' => $post], 201);
     }
@@ -54,8 +59,11 @@ class PostController extends Controller
     public function update(UpdatePostRequest $request, int $id): JsonResponse
     {
         $this->ensureAdmin($request);
+        $actor = $request->user();
         $post = Post::query()->findOrFail($id);
+        $oldStatus = $post->status?->value ?? (string) $post->status;
         $updated = $this->postService->update($post, $request->validated());
+        $this->activityLog->postUpdated($actor, $updated, $oldStatus);
 
         return response()->json(['data' => $updated]);
     }
@@ -63,7 +71,9 @@ class PostController extends Controller
     public function destroy(Request $request, int $id): JsonResponse
     {
         $this->ensureAdmin($request);
+        $actor = $request->user();
         $post = Post::query()->findOrFail($id);
+        $this->activityLog->postDeleted($actor, $post);
         $post->delete();
 
         return response()->json(['message' => 'Пост удалён.']);

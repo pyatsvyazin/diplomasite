@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { getService } from '../../lib/api';
+import HomeFooter from '../../components/home/HomeFooter';
 
 export default function ServiceDetailPage() {
   const router = useRouter();
@@ -61,6 +62,7 @@ export default function ServiceDetailPage() {
           )}
         </>
       )}
+      <HomeFooter />
     </div>
   );
 }

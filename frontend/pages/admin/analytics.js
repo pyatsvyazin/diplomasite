@@ -1,9 +1,104 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
+import PostsPagination from '../../components/PostsPagination';
 import { useAuth } from '../../context/AuthContext';
 import { getAdminAnalytics } from '../../lib/api';
 
 const PIE_COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#64748b'];
+
+/** Единый формат даты на аналитике: «29 мая, 00:37» */
+function formatAnalyticsDateTime(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  const datePart = d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
+  const timePart = d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+  return `${datePart}, ${timePart}`;
+}
+
+function AnalyticsSummary({ summary, fallback }) {
+  const s = summary || {
+    requests: {
+      total: fallback?.requests_total,
+      active: fallback?.requests_active,
+      reviewing: fallback?.requests_reviewing,
+      closed: fallback?.requests_closed,
+    },
+    meetings: {
+      total: fallback?.meetings_total,
+      upcoming: fallback?.meetings_upcoming,
+      completed: fallback?.meetings_completed,
+      overdue: fallback?.meetings_overdue,
+    },
+    users: {
+      clients: fallback?.clients_count,
+      lawyers: fallback?.lawyers_count,
+      admins: fallback?.admins_count,
+    },
+    posts: {
+      articles: fallback?.posts_articles,
+      pages: fallback?.posts_pages,
+      news: fallback?.posts_news,
+      archived: fallback?.posts_archived,
+    },
+  };
+
+  const blocks = [
+    {
+      title: 'Заявки',
+      rows: [
+        { label: 'Всего', value: s.requests?.total },
+        { label: 'Активные (в работе)', value: s.requests?.active },
+        { label: 'На рассмотрении', value: s.requests?.reviewing },
+        { label: 'Закрытые', value: s.requests?.closed },
+      ],
+    },
+    {
+      title: 'Консультации',
+      rows: [
+        { label: 'Всего', value: s.meetings?.total },
+        { label: 'Предстоящие (подтверждённые)', value: s.meetings?.upcoming },
+        { label: 'Завершённые и отменённые', value: s.meetings?.completed },
+        { label: 'Просроченные', value: s.meetings?.overdue },
+      ],
+    },
+    {
+      title: 'Пользователи',
+      rows: [
+        { label: 'Клиенты', value: s.users?.clients },
+        { label: 'Юристы', value: s.users?.lawyers },
+        { label: 'Администраторы', value: s.users?.admins },
+      ],
+    },
+    {
+      title: 'Посты',
+      rows: [
+        { label: 'Статей', value: s.posts?.articles },
+        { label: 'Страниц', value: s.posts?.pages },
+        { label: 'Новостей', value: s.posts?.news },
+        { label: 'В архиве', value: s.posts?.archived },
+      ],
+    },
+  ];
+
+  return (
+    <div className="admin-analytics__summary">
+      {blocks.map((block) => (
+        <section key={block.title} className="admin-analytics__summary-block">
+          <h2 className="admin-analytics__summary-title">{block.title}</h2>
+          <ul className="admin-analytics__summary-list">
+            {block.rows.map((row) => (
+              <li key={row.label} className="admin-analytics__summary-row">
+                <span className="admin-analytics__summary-label">{row.label}</span>
+                <span className="admin-analytics__summary-value">{row.value ?? 0}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+    </div>
+  );
+}
 
 function AnalyticsCharts({ data }) {
   const [charts, setCharts] = useState(null);
@@ -56,7 +151,16 @@ function AnalyticsCharts({ data }) {
         <h3>Статусы заявок</h3>
         <ResponsiveContainer width="100%" height={260}>
           <PieChart>
-            <Pie data={pieData} dataKey="count" nameKey="label" cx="50%" cy="50%" outerRadius={90} label>
+            <Pie
+              data={pieData}
+              dataKey="count"
+              nameKey="label"
+              cx="50%"
+              cy="50%"
+              outerRadius={90}
+              label
+              isAnimationActive={false}
+            >
               {pieData.map((entry, index) => (
                 <Cell key={entry.status} fill={PIE_COLORS[index % PIE_COLORS.length]} />
               ))}
@@ -87,16 +191,37 @@ export default function AdminAnalyticsPage() {
   const isAdmin = user?.roles?.some((r) => r.name === 'admin');
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [listLoading, setListLoading] = useState(false);
   const [error, setError] = useState('');
+  const [calendarPage, setCalendarPage] = useState(1);
+  const [activityPage, setActivityPage] = useState(1);
+  const readyRef = useRef(false);
+
+  const load = useCallback(
+    (calendarPg, activityPg, initial = false) => {
+      if (initial) setLoading(true);
+      else setListLoading(true);
+      setError('');
+      getAdminAnalytics({ calendar_page: calendarPg, activity_page: activityPg })
+        .then(setData)
+        .catch((e) => setError(e.message || 'Ошибка загрузки'))
+        .finally(() => {
+          setLoading(false);
+          setListLoading(false);
+        });
+    },
+    [],
+  );
 
   useEffect(() => {
     if (authLoading || !isAdmin) return;
-    setLoading(true);
-    getAdminAnalytics()
-      .then(setData)
-      .catch((e) => setError(e.message || 'Ошибка загрузки'))
-      .finally(() => setLoading(false));
-  }, [authLoading, isAdmin]);
+    const initial = !readyRef.current;
+    readyRef.current = true;
+    load(calendarPage, activityPage, initial);
+  }, [authLoading, isAdmin, calendarPage, activityPage, load]);
+
+  const handleCalendarPage = (page) => setCalendarPage(page);
+  const handleActivityPage = (page) => setActivityPage(page);
 
   return (
     <AdminLayout>
@@ -109,83 +234,60 @@ export default function AdminAnalyticsPage() {
         {isAdmin && loading && <p>Загрузка…</p>}
         {isAdmin && data && (
           <>
-            <div className="admin-analytics__cards">
-              <div className="admin-analytics__card">
-                <span className="admin-analytics__card-value">{data.requests_total}</span>
-                <span className="admin-analytics__card-label">Всего заявок</span>
-              </div>
-              <div className="admin-analytics__card">
-                <span className="admin-analytics__card-value">{data.requests_active}</span>
-                <span className="admin-analytics__card-label">В работе / активные</span>
-              </div>
-              <div className="admin-analytics__card">
-                <span className="admin-analytics__card-value">{data.requests_closed}</span>
-                <span className="admin-analytics__card-label">Закрыто</span>
-              </div>
-              <div className="admin-analytics__card">
-                <span className="admin-analytics__card-value">{data.meetings_total}</span>
-                <span className="admin-analytics__card-label">Консультаций</span>
-              </div>
-              <div className="admin-analytics__card">
-                <span className="admin-analytics__card-value">{data.meetings_upcoming}</span>
-                <span className="admin-analytics__card-label">Предстоящих</span>
-              </div>
-              <div className="admin-analytics__card">
-                <span className="admin-analytics__card-value">{data.clients_count}</span>
-                <span className="admin-analytics__card-label">Клиентов</span>
-              </div>
-              <div className="admin-analytics__card">
-                <span className="admin-analytics__card-value">{data.lawyers_count}</span>
-                <span className="admin-analytics__card-label">Юристов</span>
-              </div>
-            </div>
+            <AnalyticsSummary summary={data.summary} fallback={data} />
 
             <AnalyticsCharts data={data} />
 
-            <div className="admin-analytics__bottom">
+            <div className={`admin-analytics__bottom${listLoading ? ' admin-analytics__bottom--loading' : ''}`}>
               <section className="admin-analytics__section">
                 <h2>Консультации в этом месяце</h2>
                 {(data.calendar_meetings || []).length === 0 ? (
                   <p>Нет назначенных консультаций в текущем месяце.</p>
                 ) : (
-                  <ul className="admin-analytics__meetings-list">
-                    {data.calendar_meetings.map((m) => (
-                      <li key={m.id}>
-                        <strong>{m.title}</strong>
-                        <span>
-                          {m.start_at
-                            ? new Date(m.start_at).toLocaleString('ru-RU', {
-                                day: 'numeric',
-                                month: 'short',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })
-                            : ''}
-                          {m.lawyer_name ? ` · ${m.lawyer_name}` : ''}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
+                  <>
+                    <ul className="admin-analytics__list">
+                      {data.calendar_meetings.map((m) => (
+                        <li key={m.id}>
+                          <strong>{m.title}</strong>
+                          <span>
+                            {formatAnalyticsDateTime(m.start_at)}
+                            {m.lawyer_name ? ` · ${m.lawyer_name}` : ''}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                    <PostsPagination
+                      page={data.calendar_meta?.current_page || calendarPage}
+                      lastPage={data.calendar_meta?.last_page || 1}
+                      onPageChange={handleCalendarPage}
+                    />
+                  </>
                 )}
               </section>
               <section className="admin-analytics__section">
                 <h2>Последние действия</h2>
-                <ul className="admin-analytics__activity">
-                  {(data.recent_activity || []).map((item, idx) => (
-                    <li key={`${item.type}-${item.id}-${idx}`}>
-                      <span className="admin-analytics__activity-type">
-                        {item.type === 'meeting' ? 'Консультация' : 'Заявка'}
-                      </span>
-                      <span>{item.title}</span>
-                      {item.subtitle && <span className="admin-analytics__activity-sub">{item.subtitle}</span>}
-                      {item.at && (
-                        <time dateTime={item.at}>
-                          {new Date(item.at).toLocaleString('ru-RU', { dateStyle: 'short', timeStyle: 'short' })}
-                        </time>
-                      )}
-                    </li>
-                  ))}
-                </ul>
+                {(data.recent_activity || []).length === 0 ? (
+                  <p>Нет записей. События появятся после действий сотрудников в системе.</p>
+                ) : (
+                  <>
+                    <ul className="admin-analytics__activity">
+                      {data.recent_activity.map((item) => (
+                        <li key={item.id}>
+                          <span className="admin-analytics__activity-actor">{item.actor_name}</span>
+                          <span className="admin-analytics__activity-text">{item.summary}</span>
+                          {item.at && (
+                            <time dateTime={item.at}>{formatAnalyticsDateTime(item.at)}</time>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                    <PostsPagination
+                      page={data.activity_meta?.current_page || activityPage}
+                      lastPage={data.activity_meta?.last_page || 1}
+                      onPageChange={handleActivityPage}
+                    />
+                  </>
+                )}
               </section>
             </div>
           </>

@@ -1,15 +1,17 @@
 import Link from 'next/link';
 import { useRegister } from '../../hooks/useRegister';
 import { formatPhone } from '../../lib/phone';
+import PasswordRulesChecklist from '../../components/PasswordRulesChecklist';
+import PasswordMatchHint from '../../components/PasswordMatchHint';
 
 export default function RegisterPage() {
   const {
     form,
     updateField,
     error,
-    passwordError,
     phoneError,
     loading,
+    passwordReady,
     handleSubmit,
   } = useRegister();
 
@@ -68,8 +70,7 @@ export default function RegisterPage() {
             minLength={8}
             autoComplete="new-password"
           />
-          <p className="authPage__hint">Не менее 8 символов, минимум одна цифра и один спецсимвол (!@#$%^&* и т.д.)</p>
-          {passwordError && <p className="authPage__error authPage__error--field">{passwordError}</p>}
+          <PasswordRulesChecklist password={form.password} />
         </div>
         <div className="authPage__field">
           <label htmlFor="password_confirmation" className="authPage__label">Подтверждение пароля</label>
@@ -83,9 +84,10 @@ export default function RegisterPage() {
             minLength={8}
             autoComplete="new-password"
           />
+          <PasswordMatchHint password={form.password} confirmation={form.password_confirmation} />
         </div>
         <div className="authPage__actions">
-          <button type="submit" className="authPage__submit" disabled={loading}>
+          <button type="submit" className="authPage__submit" disabled={loading || !passwordReady}>
             {loading ? 'Регистрация...' : 'Зарегистрироваться'}
           </button>
           <Link href="/auth/login" className="authPage__link">Вход</Link>

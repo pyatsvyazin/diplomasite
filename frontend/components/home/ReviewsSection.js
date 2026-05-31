@@ -158,9 +158,18 @@ export default function ReviewsSection() {
   if (loading) {
     return (
       <section className="reviews-section">
-        <div className="reviews-section__inner">
+        <div className="block-section reviews-section__inner">
           <h2 className="reviews-section__title">Отзывы клиентов</h2>
-          <p className="reviews-section__loading">Загрузка отзывов...</p>
+          <div className="reviews-section__skeleton-row">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="reviews-section__skeleton-card" aria-hidden>
+                <div className="reviews-section__skeleton-stars shimmer" />
+                <div className="reviews-section__skeleton-line shimmer" />
+                <div className="reviews-section__skeleton-line shimmer" />
+                <div className="reviews-section__skeleton-line shimmer reviews-section__skeleton-line--short" />
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     );

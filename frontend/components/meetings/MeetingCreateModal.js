@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import { createPortal } from 'react-dom';
 import { useAuth } from '../../context/AuthContext';
 import { createRequestMeeting, getAdminRequests } from '../../lib/api';
+import ModalShell from '../ModalShell';
 import MeetingForm, { toLocalInputValue } from './MeetingForm';
 
 function defaultStartFromDate(year, month, day) {
@@ -23,16 +23,11 @@ export default function MeetingCreateModal({
 }) {
   const { user } = useAuth();
   const isAdmin = user?.roles?.some((r) => r.name === 'admin');
-  const [mounted, setMounted] = useState(false);
   const [requestId, setRequestId] = useState(fixedRequestId ? String(fixedRequestId) : '');
   const [request, setRequest] = useState(fixedRequest || null);
   const [requests, setRequests] = useState([]);
   const [loadingRequests, setLoadingRequests] = useState(false);
   const [error, setError] = useState('');
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -85,18 +80,17 @@ export default function MeetingCreateModal({
     onClose();
   };
 
-  if (!open || !mounted) return null;
-
   const activeRequest = fixedRequest || request;
   const canSubmit = fixedRequestId || requestId;
   const noLawyer = activeRequest && !activeRequest.lawyer_id;
 
-  return createPortal(
-    <div className="meeting-modal-overlay" role="presentation" onClick={onClose}>
+  return (
+    <ModalShell open={open} onClose={onClose} overlayClassName="meeting-modal-overlay">
       <div
         className="meeting-modal"
         role="dialog"
         aria-labelledby="meeting-modal-title"
+        onMouseDown={(e) => e.stopPropagation()}
         onClick={(e) => e.stopPropagation()}
       >
         <button type="button" className="meeting-modal__close" onClick={onClose} aria-label="Закрыть">
@@ -142,7 +136,6 @@ export default function MeetingCreateModal({
           />
         )}
       </div>
-    </div>,
-    document.body,
+    </ModalShell>
   );
 }

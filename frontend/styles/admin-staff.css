@@ -451,6 +451,11 @@
     max-width: 400px;
     width: 100%;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    position: relative;
+  }
+
+  .staff-modal--wide {
+    max-width: 440px;
   }
   
   .staff-modal__title {

@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { SERVICE_CATEGORY_INDIVIDUALS } from '../../constants/serviceCategories';
 import { getServices } from '../../lib/api';
+import HomeFooter from '../../components/home/HomeFooter';
 
 export default function ServicesIndividualsPage() {
   const [items, setItems] = useState([]);
@@ -45,6 +46,7 @@ export default function ServicesIndividualsPage() {
           ))}
         </ul>
       )}
+      <HomeFooter />
     </div>
   );
 }

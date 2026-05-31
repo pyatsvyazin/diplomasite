@@ -3,6 +3,7 @@ import { getReviews, getReviewLawyers, getAvatarUrl } from '../../lib/api';
 import StarRating from '../../components/StarRating';
 import Avatar from '../../components/Avatar';
 import LawyerFilterCombobox from '../../components/reviews/LawyerFilterCombobox';
+import HomeFooter from '../../components/home/HomeFooter';
 
 export default function ReviewsPage() {
   const [reviews, setReviews] = useState([]);
@@ -85,6 +86,7 @@ export default function ReviewsPage() {
           ))}
         </ul>
       )}
+      <HomeFooter />
     </div>
   );
 }

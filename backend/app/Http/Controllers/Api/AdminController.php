@@ -5,11 +5,27 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Role;
 use App\Models\User;
+use App\Services\Activity\ActivityLogService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
 {
+    public function __construct(private ActivityLogService $activityLog)
+    {
+    }
+    private static function normalizePhone(string $value): ?string
+    {
+        $digits = preg_replace('/\D/', '', $value);
+        if (strlen($digits) === 10) {
+            $digits = '7' . $digits;
+        } elseif (strlen($digits) === 11 && $digits[0] === '8') {
+            $digits = '7' . substr($digits, 1);
+        }
+
+        return (strlen($digits) === 11 && $digits[0] === '7') ? $digits : null;
+    }
+
     /**
      * Список пользователей (поиск, фильтр по роли, сортировка).
      */
@@ -111,16 +127,35 @@ class AdminController extends Controller
         $validated = $request->validate([
             'full_name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'phone' => 'nullable|string|max:50',
-            'password' => 'required|string|min:6',
+            'phone' => [
+                'required',
+                'string',
+                'max:50',
+                function (string $attr, $value, $fail) {
+                    if (self::normalizePhone($value) === null) {
+                        $fail('Укажите номер в формате +7 (XXX) XXX-XX-XX.');
+                    }
+                },
+            ],
+            'password' => [
+                'required',
+                'string',
+                'min:8',
+                'confirmed',
+                'regex:/^(?=.*[0-9])(?=.*[^\p{L}\p{N}\s]).{8,}$/u',
+            ],
             'role' => 'required|string|in:client,lawyer,admin',
+        ], [
+            'password.confirmed' => 'Подтверждение пароля не совпадает.',
+            'password.regex' => 'Пароль должен содержать минимум одну цифру и один спецсимвол.',
         ]);
 
         $user = new User();
         $user->full_name = $validated['full_name'];
         $user->email = $validated['email'];
-        $user->phone = $validated['phone'] ?? null;
+        $user->phone = self::normalizePhone($validated['phone']);
         $user->password = \Illuminate\Support\Facades\Hash::make($validated['password']);
+        $user->email_verified_at = now();
         $user->save();
 
         $roleId = Role::query()->where('name', $validated['role'])->value('id');
@@ -129,6 +164,8 @@ class AdminController extends Controller
         }
 
         $user->load('roles');
+
+        $this->activityLog->userRegisteredByAdmin($currentUser, $user, $validated['role']);
 
         return response()->json(['user' => $user, 'message' => 'Пользователь создан.']);
     }

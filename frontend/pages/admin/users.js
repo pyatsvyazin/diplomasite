@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
 import AdminLayout from '../../components/AdminLayout';
+import { useAuth } from '../../context/AuthContext';
 import { getApiUrl, getAuthHeaders, updateAdminUserBlock, updateAdminUserRole } from '../../lib/api';
 import { formatPhone } from '../../lib/phone';
 import { roleLabel } from '../../constants/userRoles';
 import AdminCreateUserModal from '../../components/admin/AdminCreateUserModal';
 
 export default function AdminUsersPage() {
+  const { user: currentUser } = useAuth();
+  const isAdmin = currentUser?.roles?.some((r) => r.name === 'admin');
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -79,8 +82,7 @@ export default function AdminUsersPage() {
       <div className="page">
         <h1 className="admin-page-title">Все пользователи</h1>
         {error && <p className="admin-error" style={{ color: 'var(--color-error, #c00)', marginBottom: '0.5rem' }}>{error}</p>}
-        <div className="admin-toolbar">
-          <button type="button" className="admin-btn admin-btn--primary" onClick={() => setCreateModalOpen(true)}>Добавить пользователя</button>
+        <div className="admin-toolbar admin-toolbar--users">
           <input
             type="search"
             className="admin-search"
@@ -116,6 +118,15 @@ export default function AdminUsersPage() {
             <option value="asc">По возрастанию (А→Я, старые сначала)</option>
             <option value="desc">По убыванию (Я→А, новые сначала)</option>
           </select>
+          {isAdmin && (
+            <button
+              type="button"
+              className="admin-btn admin-btn--primary admin-toolbar__register-btn"
+              onClick={() => setCreateModalOpen(true)}
+            >
+              Регистрация пользователя
+            </button>
+          )}
         </div>
         <div className="admin-table-wrap">
           {loading ? (

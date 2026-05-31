@@ -3,7 +3,6 @@ import { useRouter } from 'next/router';
 const TABS = [
   { id: 'requests', label: 'Мои заявки' },
   { id: 'consultations', label: 'Консультации' },
-  { id: 'notifications', label: 'Уведомления' },
   { id: 'settings', label: 'Настройки' },
 ];
 

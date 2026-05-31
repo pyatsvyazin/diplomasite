@@ -2,13 +2,9 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
 import { resetPasswordWithToken } from '../../lib/api';
-
-function validatePassword(password) {
-  if (password.length < 8) return 'Минимум 8 символов';
-  if (!/[0-9]/.test(password)) return 'Нужна хотя бы одна цифра';
-  if (!/[^\p{L}\p{N}\s]/u.test(password)) return 'Нужен хотя бы один спецсимвол (!@#$%^&* и т.д.)';
-  return '';
-}
+import PasswordRulesChecklist from '../../components/PasswordRulesChecklist';
+import PasswordMatchHint from '../../components/PasswordMatchHint';
+import { isPasswordPairReady } from '../../lib/validation';
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -16,7 +12,6 @@ export default function ResetPasswordPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirmation, setPasswordConfirmation] = useState('');
-  const [passwordError, setPasswordError] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -28,13 +23,7 @@ export default function ResetPasswordPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    const err = validatePassword(password);
-    if (err) {
-      setPasswordError(err);
-      return;
-    }
-    if (password !== passwordConfirmation) {
-      setPasswordError('Пароли не совпадают');
+    if (!isPasswordPairReady(password, passwordConfirmation)) {
       return;
     }
     if (!token) {
@@ -68,6 +57,7 @@ export default function ResetPasswordPage() {
   }
 
   const noToken = router.isReady && !token;
+  const passwordReady = isPasswordPairReady(password, passwordConfirmation);
 
   return (
     <div className="authPage">
@@ -97,15 +87,11 @@ export default function ResetPasswordPage() {
             type="password"
             className="authPage__input"
             value={password}
-            onChange={(e) => {
-              setPassword(e.target.value);
-              setPasswordError('');
-            }}
+            onChange={(e) => setPassword(e.target.value)}
             required
             autoComplete="new-password"
           />
-          <p className="authPage__hint">Минимум 8 символов, одна цифра и один спецсимвол</p>
-          {passwordError && <p className="authPage__error authPage__error--field">{passwordError}</p>}
+          <PasswordRulesChecklist password={password} />
         </div>
         <div className="authPage__field">
           <label htmlFor="password_confirmation" className="authPage__label">Подтверждение пароля</label>
@@ -118,9 +104,10 @@ export default function ResetPasswordPage() {
             required
             autoComplete="new-password"
           />
+          <PasswordMatchHint password={password} confirmation={passwordConfirmation} />
         </div>
         <div className="authPage__actions">
-          <button type="submit" className="authPage__submit" disabled={loading || noToken}>
+          <button type="submit" className="authPage__submit" disabled={loading || noToken || !passwordReady}>
             {loading ? 'Сохранение...' : 'Сохранить пароль'}
           </button>
           <Link href="/auth/login" className="authPage__link">Вход</Link>

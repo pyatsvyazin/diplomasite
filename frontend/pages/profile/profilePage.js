@@ -4,6 +4,8 @@ import { useRouter } from 'next/router';
 import { useAuth } from '../../context/AuthContext';
 import { getMyRequests, getAvatarUrl, updateCurrentUser, requestPasswordChangeCode, confirmPasswordChange } from '../../lib/api';
 import { formatPhone, normalizeDigits, parsePhoneToDigits, isValidPhoneDigits } from '../../lib/phone';
+import { isPasswordPairReady } from '../../lib/validation';
+import PasswordMatchHint from '../../components/PasswordMatchHint';
 import { roleLabel } from '../../constants/userRoles';
 import ReviewForm from '../../components/profile/ReviewForm';
 import StarRating from '../../components/StarRating';
@@ -11,8 +13,9 @@ import Avatar from '../../components/Avatar';
 import { REQUEST_STATUS_LABELS as STATUS_LABELS } from '../../constants/requestStatus';
 import ProfileDashboardLayout from '../../components/profile/ProfileDashboardLayout';
 import ConsultationsTab from '../../components/profile/ConsultationsTab';
-import NotificationsTab from '../../components/profile/NotificationsTab';
 import SettingsTabContent from '../../components/profile/SettingsTabContent';
+import ModalShell from '../../components/ModalShell';
+import PasswordRulesChecklist from '../../components/PasswordRulesChecklist';
 
 function ProfileRequestCard({ request, currentUserId, onReviewSent }) {
   const isClient = request.client_id === currentUserId;
@@ -184,8 +187,12 @@ function InlineEditModal({ field, user, onClose, onSaved }) {
   };
 
   return (
-    <div className="profile-modal-backdrop" onClick={onClose} role="presentation">
-      <div className="profile-modal profile-modal--small" onClick={(e) => e.stopPropagation()}>
+    <ModalShell open onClose={onClose} overlayClassName="profile-modal-backdrop">
+      <div
+        className="profile-modal profile-modal--small"
+        onMouseDown={(e) => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="profile-modal__head">
           <h3 className="profile-modal__title">Изменить {FIELD_LABELS[field]}</h3>
           <button type="button" className="profile-modal__close" onClick={onClose} aria-label="Закрыть">×</button>
@@ -231,7 +238,7 @@ function InlineEditModal({ field, user, onClose, onSaved }) {
           </div>
         </form>
       </div>
-    </div>
+    </ModalShell>
   );
 }
 
@@ -259,13 +266,7 @@ function PasswordChangeModal({ onClose }) {
   const handleConfirm = async (e) => {
     e.preventDefault();
     setError('');
-    const err = validatePassword(newPassword);
-    if (err) {
-      setError(err);
-      return;
-    }
-    if (newPassword !== newPasswordConfirm) {
-      setError('Пароли не совпадают');
+    if (!isPasswordPairReady(newPassword, newPasswordConfirm)) {
       return;
     }
     setLoading(true);
@@ -284,8 +285,8 @@ function PasswordChangeModal({ onClose }) {
   };
 
   return (
-    <div className="profile-modal-backdrop" onClick={onClose} role="presentation">
-      <div className="profile-modal profile-modal--small" onClick={(e) => e.stopPropagation()}>
+    <ModalShell open onClose={onClose} overlayClassName="profile-modal-backdrop">
+      <div className="profile-modal profile-modal--small">
         <div className="profile-modal__head">
           <h3 className="profile-modal__title">Сменить пароль</h3>
           <button type="button" className="profile-modal__close" onClick={onClose} aria-label="Закрыть">×</button>
@@ -311,19 +312,27 @@ function PasswordChangeModal({ onClose }) {
             <label className="profile-modal__label">
               Новый пароль
               <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="profile-modal__input" />
+              <PasswordRulesChecklist password={newPassword} />
             </label>
             <label className="profile-modal__label">
               Подтверждение пароля
               <input type="password" value={newPasswordConfirm} onChange={(e) => setNewPasswordConfirm(e.target.value)} className="profile-modal__input" />
+              <PasswordMatchHint password={newPassword} confirmation={newPasswordConfirm} />
             </label>
             <div className="profile-modal__actions">
               <button type="button" className="profile-modal__btn profile-modal__btn--secondary" onClick={onClose}>Отмена</button>
-              <button type="submit" className="profile-modal__btn profile-modal__btn--primary" disabled={loading}>{loading ? 'Сохранение…' : 'Сохранить'}</button>
+              <button
+                type="submit"
+                className="profile-modal__btn profile-modal__btn--primary"
+                disabled={loading || !isPasswordPairReady(newPassword, newPasswordConfirm)}
+              >
+                {loading ? 'Сохранение…' : 'Сохранить'}
+              </button>
             </div>
           </form>
         )}
       </div>
-    </div>
+    </ModalShell>
   );
 }
 
@@ -378,7 +387,8 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!router.isReady) return;
-    if (!router.query.tab) {
+    const q = router.query.tab;
+    if (!q || q === 'notifications') {
       router.replace({ pathname: '/profile/profilePage', query: { tab: 'requests' } }, undefined, { shallow: true });
     }
   }, [router.isReady, router.query.tab]);
@@ -423,7 +433,6 @@ export default function ProfilePage() {
       <ProfileDashboardLayout activeTab={tab}>
         {tab === 'requests' && <ProfileRequestsTab user={user} />}
         {tab === 'consultations' && <ConsultationsTab />}
-        {tab === 'notifications' && <NotificationsTab />}
         {tab === 'settings' && <SettingsTabContent />}
       </ProfileDashboardLayout>
     </div>

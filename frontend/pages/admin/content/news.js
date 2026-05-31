@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import AdminLayout from '../../../components/AdminLayout';
+import ModalShell from '../../../components/ModalShell';
 import TipTapEditor, { EMPTY_DOC } from '../../../components/admin/TipTapEditor';
 import { createAdminPost, getAdminPosts, updateAdminPost, uploadAdminPostImage } from '../../../lib/api';
 
@@ -507,17 +508,20 @@ export default function AdminContentNewsPage() {
           </section>
         </div>
 
-        {previewOpen && (
-          <div className="admin-posts__modal-overlay" onClick={() => setPreviewOpen(false)}>
-            <div className="admin-posts__modal" onClick={(e) => e.stopPropagation()}>
-              <button type="button" className="admin-posts__modal-close" onClick={() => setPreviewOpen(false)}>
-                ×
-              </button>
-              <h2>{form.title || 'Без названия'}</h2>
-              <div className="admin-posts__preview">{(form.content?.content || []).map((node, idx) => renderNode(node, `pv-${idx}`))}</div>
-            </div>
+        <ModalShell open={previewOpen} onClose={() => setPreviewOpen(false)} overlayClassName="admin-posts__modal-overlay">
+          <div
+            className="admin-posts__modal"
+            role="dialog"
+            onMouseDown={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button type="button" className="admin-posts__modal-close" onClick={() => setPreviewOpen(false)}>
+              ×
+            </button>
+            <h2>{form.title || 'Без названия'}</h2>
+            <div className="admin-posts__preview">{(form.content?.content || []).map((node, idx) => renderNode(node, `pv-${idx}`))}</div>
           </div>
-        )}
+        </ModalShell>
       </div>
     </AdminLayout>
   );

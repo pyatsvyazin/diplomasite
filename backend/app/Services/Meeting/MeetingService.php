@@ -8,6 +8,7 @@ use App\Enums\NotificationType;
 use App\Models\Meeting;
 use App\Models\Request as ClientRequest;
 use App\Models\User;
+use App\Services\Activity\ActivityLogService;
 use App\Services\Conversation\SystemMessageService;
 use App\Services\Notification\NotificationService;
 use Carbon\Carbon;
@@ -19,6 +20,7 @@ class MeetingService
     public function __construct(
         private SystemMessageService $systemMessages,
         private NotificationService $notifications,
+        private ActivityLogService $activityLog,
     ) {
     }
 
@@ -75,6 +77,8 @@ class MeetingService
                 $meeting->title.' — '.$meeting->formatted_date,
             );
 
+            $this->activityLog->meetingCreated($actor, $meeting);
+
             return $meeting;
         });
     }
@@ -99,7 +103,7 @@ class MeetingService
         $payload = $this->validatedPayload($data, $meeting->id, $lawyerId);
         $this->assertNoOverlap($lawyerId, $payload['start_at'], $payload['end_at'], $meeting->id);
 
-        return DB::transaction(function () use ($meeting, $payload, $lawyerId, $wasConfirmed) {
+        return DB::transaction(function () use ($meeting, $payload, $lawyerId, $wasConfirmed, $actor) {
             $meeting->fill([
                 'responsible_lawyer_id' => $lawyerId,
                 'title' => $payload['title'],
@@ -131,6 +135,8 @@ class MeetingService
                 'Консультация перенесена',
                 $meeting->title.' — '.$meeting->formatted_date,
             );
+
+            $this->activityLog->meetingRescheduled($actor, $meeting);
 
             return $meeting;
         });
@@ -173,7 +179,7 @@ class MeetingService
             throw ValidationException::withMessages(['status' => ['Консультация уже отменена или завершена.']]);
         }
 
-        return DB::transaction(function () use ($meeting, $reason) {
+        return DB::transaction(function () use ($meeting, $actor, $reason) {
             $meeting->update([
                 'status' => MeetingStatus::Cancelled,
                 'cancellation_reason' => $reason,
@@ -189,6 +195,10 @@ class MeetingService
                 $reason ?: $meeting->title,
             );
 
+            if ($this->activityLog->isStaff($actor)) {
+                $this->activityLog->meetingCancelled($actor, $meeting);
+            }
+
             return $meeting;
         });
     }
@@ -201,7 +211,7 @@ class MeetingService
             throw ValidationException::withMessages(['status' => ['Нельзя завершить отменённую консультацию.']]);
         }
 
-        return DB::transaction(function () use ($meeting) {
+        return DB::transaction(function () use ($meeting, $actor) {
             $meeting->update(['status' => MeetingStatus::Completed]);
             $meeting->load(['conversation', 'request']);
 
@@ -212,6 +222,8 @@ class MeetingService
                 'Консультация завершена',
                 $meeting->title,
             );
+
+            $this->activityLog->meetingCompleted($actor, $meeting);
 
             return $meeting;
         });

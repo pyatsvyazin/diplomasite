@@ -1,18 +1,21 @@
 import { useEffect, useState } from 'react';
-import { createPortal } from 'react-dom';
 import { createAdminUser } from '../../lib/api';
+import { formatPhone, normalizeDigits, parsePhoneToDigits, isValidPhoneDigits } from '../../lib/phone';
+import { isPasswordPairReady } from '../../lib/validation';
+import ModalShell from '../ModalShell';
+import PasswordRulesChecklist from '../PasswordRulesChecklist';
+import PasswordMatchHint from '../PasswordMatchHint';
 
 export default function AdminCreateUserModal({ open, onClose, onCreated }) {
-  const [mounted, setMounted] = useState(false);
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
+  const [passwordConfirmation, setPasswordConfirmation] = useState('');
   const [role, setRole] = useState('client');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-
-  useEffect(() => setMounted(true), []);
+  const [phoneError, setPhoneError] = useState('');
 
   useEffect(() => {
     if (!open) {
@@ -20,19 +23,36 @@ export default function AdminCreateUserModal({ open, onClose, onCreated }) {
       setEmail('');
       setPhone('');
       setPassword('');
+      setPasswordConfirmation('');
       setRole('client');
       setError('');
+      setPhoneError('');
     }
   }, [open]);
-
-  if (!open || !mounted) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setPhoneError('');
+
+    if (!isValidPhoneDigits(phone)) {
+      setPhoneError('Укажите номер в формате +7 (XXX) XXX-XX-XX.');
+      return;
+    }
+    if (!isPasswordPairReady(password, passwordConfirmation)) {
+      return;
+    }
+
     setLoading(true);
     try {
-      await createAdminUser({ full_name: fullName, email, phone, password, role });
+      await createAdminUser({
+        full_name: fullName.trim(),
+        email: email.trim(),
+        phone: parsePhoneToDigits(phone),
+        password,
+        password_confirmation: passwordConfirmation,
+        role,
+      });
       onCreated?.();
       onClose?.();
     } catch (err) {
@@ -42,46 +62,80 @@ export default function AdminCreateUserModal({ open, onClose, onCreated }) {
     }
   };
 
-  return createPortal(
-    <div className="modal-overlay" role="presentation" onClick={onClose}>
-      <div className="modal" role="dialog" onClick={(e) => e.stopPropagation()}>
-        <button type="button" className="modal__close" onClick={onClose}>×</button>
-        <h2 className="modal__title">Создать пользователя</h2>
-        <form onSubmit={handleSubmit} className="admin-create-user-form">
-          <label>
+  const passwordReady = isPasswordPairReady(password, passwordConfirmation);
+
+  return (
+    <ModalShell open={open} onClose={onClose}>
+      <div className="staff-modal staff-modal--wide" role="dialog">
+        <button type="button" className="staff-modal__close" onClick={onClose} aria-label="Закрыть">
+          ×
+        </button>
+        <h2 className="staff-modal__title">Регистрация пользователя</h2>
+        <form onSubmit={handleSubmit} className="staff-modal__form">
+          <label className="staff-modal__label">
             ФИО
-            <input value={fullName} onChange={(e) => setFullName(e.target.value)} required />
+            <input className="staff-modal__input" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
           </label>
-          <label>
+          <label className="staff-modal__label">
             Email
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            <input className="staff-modal__input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
           </label>
-          <label>
+          <label className="staff-modal__label">
             Телефон
-            <input value={phone} onChange={(e) => setPhone(e.target.value)} />
+            <input
+              className="staff-modal__input"
+              type="tel"
+              value={formatPhone(phone)}
+              onChange={(e) => setPhone(normalizeDigits(e.target.value))}
+              required
+            />
+            {phoneError && <span className="staff-modal__error">{phoneError}</span>}
           </label>
-          <label>
+          <label className="staff-modal__label">
             Пароль
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
+            <input
+              className="staff-modal__input"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              autoComplete="new-password"
+            />
+            <PasswordRulesChecklist password={password} />
           </label>
-          <label>
+          <label className="staff-modal__label">
+            Подтверждение пароля
+            <input
+              className="staff-modal__input"
+              type="password"
+              value={passwordConfirmation}
+              onChange={(e) => setPasswordConfirmation(e.target.value)}
+              required
+              autoComplete="new-password"
+            />
+            <PasswordMatchHint password={password} confirmation={passwordConfirmation} />
+          </label>
+          <label className="staff-modal__label">
             Роль
-            <select value={role} onChange={(e) => setRole(e.target.value)}>
+            <select className="staff-modal__input" value={role} onChange={(e) => setRole(e.target.value)}>
               <option value="client">Клиент</option>
               <option value="lawyer">Юрист</option>
               <option value="admin">Администратор</option>
             </select>
           </label>
 
-          {error && <p className="modal__error">{error}</p>}
+          {error && <p className="staff-modal__error">{error}</p>}
 
-          <div className="modal__actions">
-            <button type="button" className="btn btn--ghost" onClick={onClose} disabled={loading}>Отмена</button>
-            <button type="submit" className="btn btn--primary" disabled={loading}>{loading ? '…' : 'Создать'}</button>
+          <div className="staff-modal__actions">
+            <button type="button" className="staff-modal__btn staff-modal__btn--secondary" onClick={onClose} disabled={loading}>
+              Отмена
+            </button>
+            <button type="submit" className="staff-modal__btn staff-modal__btn--primary" disabled={loading || !passwordReady}>
+              {loading ? '…' : 'Зарегистрировать'}
+            </button>
           </div>
         </form>
       </div>
-    </div>,
-    document.body,
+    </ModalShell>
   );
 }

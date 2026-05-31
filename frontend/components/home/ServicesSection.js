@@ -60,7 +60,17 @@ export default function ServicesSection() {
           </div>
         </div>
         <div className="services-section__content services-section__content--cards">
-          {loading && <p className="services-section__hint">Загрузка услуг…</p>}
+          {loading && (
+            <>
+              {Array.from({ length: 4 }).map((_, i) => (
+                <article key={i} className="services-section__card services-section__card--skeleton" aria-hidden>
+                  <div className="services-section__skel-title shimmer" />
+                  <div className="services-section__skel-line shimmer" />
+                  <div className="services-section__skel-line shimmer services-section__skel-line--short" />
+                </article>
+              ))}
+            </>
+          )}
           {error && !loading && <p className="services-section__hint services-section__hint--error">{error}</p>}
           {!loading && !error && filtered.length === 0 && (
             <p className="services-section__hint">В этом разделе пока нет услуг.</p>

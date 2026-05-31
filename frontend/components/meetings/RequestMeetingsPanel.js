@@ -19,6 +19,7 @@ import {
 import MeetingCard from './MeetingCard';
 
 import MeetingCreateModal from './MeetingCreateModal';
+import ModalShell from '../ModalShell';
 
 import MeetingForm, { toLocalInputValue } from './MeetingForm';
 
@@ -150,6 +151,7 @@ export default function RequestMeetingsPanel({
 
       {!loading && meetings.length === 0 && <p className="request-meetings__empty">Консультаций пока нет.</p>}
 
+      <div className="request-meetings__list-wrap">
       <ul className="request-meetings__list">
 
         {meetings.map((m) => (
@@ -243,8 +245,7 @@ export default function RequestMeetingsPanel({
         ))}
 
       </ul>
-
-
+      </div>
 
       <MeetingCreateModal
 
@@ -263,10 +264,13 @@ export default function RequestMeetingsPanel({
 
 
       {editModalOpen && editMeeting && (
-
-        <div className="meeting-modal-overlay" role="presentation" onClick={() => setEditModalOpen(false)}>
-
-          <div className="meeting-modal" role="dialog" onClick={(e) => e.stopPropagation()}>
+        <ModalShell open onClose={() => setEditModalOpen(false)} overlayClassName="meeting-modal-overlay">
+          <div
+            className="meeting-modal"
+            role="dialog"
+            onMouseDown={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
+          >
 
             <button type="button" className="meeting-modal__close" onClick={() => setEditModalOpen(false)} aria-label="Закрыть">
 
@@ -309,9 +313,7 @@ export default function RequestMeetingsPanel({
             />
 
           </div>
-
-        </div>
-
+        </ModalShell>
       )}
 
     </section>

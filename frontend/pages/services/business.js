@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { SERVICE_CATEGORY_BUSINESS } from '../../constants/serviceCategories';
 import { getServices } from '../../lib/api';
+import HomeFooter from '../../components/home/HomeFooter';
 
 export default function ServicesBusinessPage() {
   const [items, setItems] = useState([]);
@@ -47,6 +48,7 @@ export default function ServicesBusinessPage() {
           ))}
         </ul>
       )}
+      <HomeFooter />
     </div>
   );
 }

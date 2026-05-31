@@ -22,7 +22,12 @@ class NotificationController extends Controller
             $q->whereNull('read_at');
         }
 
-        $items = $q->limit(100)->get();
+        $limit = min(50, max(1, (int) $request->query('limit', 15)));
+        $offset = max(0, (int) $request->query('offset', 0));
+
+        $total = (clone $q)->count();
+        $items = (clone $q)->offset($offset)->limit($limit)->get();
+        $loaded = $offset + $items->count();
 
         $unreadCount = Notification::query()
             ->where('user_id', $user->id)
@@ -31,7 +36,13 @@ class NotificationController extends Controller
 
         return response()->json([
             'data' => $items,
-            'meta' => ['unread_count' => $unreadCount],
+            'meta' => [
+                'unread_count' => $unreadCount,
+                'total' => $total,
+                'offset' => $offset,
+                'limit' => $limit,
+                'has_more' => $loaded < $total,
+            ],
         ]);
     }
 

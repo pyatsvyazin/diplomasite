@@ -95,8 +95,15 @@ function LawyerBlock({ request, onAssign, onRefresh }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const handleRemove = () => {
-    updateAdminRequest(request.id, { lawyer_id: null }).then(onRefresh);
-    setMenuOpen(false);
+    updateAdminRequest(request.id, { lawyer_id: null })
+      .then(() => {
+        onRefresh?.();
+        setMenuOpen(false);
+      })
+      .catch((err) => {
+        window.alert(err?.message || 'Не удалось снять юриста');
+        setMenuOpen(false);
+      });
   };
 
   if (lawyer) {

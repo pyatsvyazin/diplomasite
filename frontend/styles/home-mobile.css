@@ -1,0 +1,155 @@
+/* Адаптив главной и общие правки для мобильных */
+
+@media (max-width: 880px) {
+  .hero {
+    min-height: auto;
+    padding: 1.25rem 1rem 1.5rem;
+  }
+
+  .hero__inner {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .hero__content {
+    text-align: center;
+  }
+
+  .hero__title {
+    font-size: clamp(1.5rem, 6vw, 2rem);
+  }
+
+  .hero__text {
+    max-width: none;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .hero__cta {
+    margin: 0 auto;
+    display: inline-block;
+  }
+
+  .hero__steps-wrap {
+    justify-content: center;
+    order: 2;
+  }
+
+  .hero__content {
+    order: 1;
+  }
+
+  .hero__steps-glass {
+    max-width: 100%;
+  }
+
+  .hero__step-text {
+    font-size: 1rem;
+    text-align: left;
+  }
+}
+
+@media (max-width: 770px) {
+  .block-section {
+    text-align: center;
+  }
+
+  .block-section .services-section__title,
+  .block-section .staff-section__title,
+  .block-section .home-news__title,
+  .block-section .reviews-section__title {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .services-section__panel {
+    align-items: center;
+    text-align: center;
+  }
+
+  .services-section__buttons {
+    align-items: stretch;
+    width: 100%;
+    max-width: 320px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .home-news__panel {
+    align-items: center;
+    text-align: center;
+  }
+
+  .home-news__more {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .reviews-section__head {
+    text-align: center;
+  }
+
+  .reviews-section__more {
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+@media (max-width: 900px) {
+  .services-section__inner {
+    flex-direction: column;
+  }
+
+  .services-section__panel {
+    width: 100%;
+    order: 1;
+  }
+
+  .services-section__content--cards {
+    order: 2;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .services-section__content--cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .services-section__card-title {
+    font-size: 0.95rem;
+  }
+
+  .services-section__card-desc {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .home-news__grid {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+
+  .home-news__grid .news-grid__item {
+    width: 100%;
+    max-width: 360px;
+  }
+
+  .home-news__grid .news-grid__item:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+    justify-self: center;
+  }
+}
+
+@media (max-width: 560px) {
+  .staff-section__photo {
+    width: 100%;
+    height: auto;
+    max-height: 220px;
+    object-fit: cover;
+    object-position: top center;
+    aspect-ratio: 4 / 5;
+  }
+}

@@ -16,6 +16,58 @@ function formatAnalyticsDateTime(iso) {
   return `${datePart}, ${timePart}`;
 }
 
+const MEETING_STATUS_LABELS = {
+  pending: 'Ожидает подтверждения',
+  confirmed: 'Подтверждена',
+  cancelled: 'Отменена',
+  completed: 'Завершена',
+  overdue: 'Просрочена',
+};
+
+function getMeetingDisplayStatus(meeting) {
+  if (meeting.status === 'pending' && meeting.start_at && new Date(meeting.start_at) < new Date()) {
+    return 'overdue';
+  }
+  return meeting.status || 'pending';
+}
+
+const ACTIVITY_EVENT_META = {
+  user_registered: { label: 'Регистрация', tone: 'success' },
+  post_created: { label: 'Создание', tone: 'success' },
+  post_updated: { label: 'Изменение', tone: 'info' },
+  post_status_changed: { label: 'Статус поста', tone: 'info' },
+  post_deleted: { label: 'Удаление', tone: 'danger' },
+  request_lawyer_assigned: { label: 'Назначение', tone: 'info' },
+  request_lawyer_unassigned: { label: 'Снятие юриста', tone: 'warning' },
+  meeting_created: { label: 'Консультация', tone: 'info' },
+  meeting_rescheduled: { label: 'Перенос', tone: 'warning' },
+  meeting_cancelled: { label: 'Отмена', tone: 'danger' },
+  meeting_completed: { label: 'Завершение', tone: 'success' },
+  request_status_changed: { label: 'Статус заявки', tone: 'info' },
+  user_blocked: { label: 'Блокировка', tone: 'danger' },
+  user_unblocked: { label: 'Разблокировка', tone: 'success' },
+  user_role_changed: { label: 'Смена роли', tone: 'info' },
+  staff_updated: { label: 'Данные сотрудника', tone: 'info' },
+};
+
+function getActivityEventMeta(item) {
+  const base = ACTIVITY_EVENT_META[item.event_type] || { label: 'Действие', tone: 'neutral' };
+  let tone = base.tone;
+
+  if (item.event_type === 'request_status_changed' && item.summary) {
+    if (/→ «(Закрыта|Отклонена)»/.test(item.summary)) tone = 'danger';
+    else if (/→ «(В работе|На рассмотрении)»/.test(item.summary)) tone = 'info';
+    else if (/→ «Новая»/.test(item.summary)) tone = 'success';
+  }
+
+  if (item.event_type === 'post_status_changed' && item.summary) {
+    if (/→ «в архиве»/i.test(item.summary)) tone = 'warning';
+    else if (/→ «опубликовано»/i.test(item.summary)) tone = 'success';
+  }
+
+  return { label: base.label, tone };
+}
+
 function AnalyticsSummary({ summary, fallback }) {
   const s = summary || {
     requests: {
@@ -245,16 +297,27 @@ export default function AdminAnalyticsPage() {
                   <p>Нет назначенных консультаций в текущем месяце.</p>
                 ) : (
                   <>
-                    <ul className="admin-analytics__list">
-                      {data.calendar_meetings.map((m) => (
-                        <li key={m.id}>
-                          <strong>{m.title}</strong>
-                          <span>
-                            {formatAnalyticsDateTime(m.start_at)}
-                            {m.lawyer_name ? ` · ${m.lawyer_name}` : ''}
-                          </span>
-                        </li>
-                      ))}
+                    <ul className="admin-analytics__feed">
+                      {data.calendar_meetings.map((m) => {
+                        const displayStatus = getMeetingDisplayStatus(m);
+                        return (
+                          <li
+                            key={m.id}
+                            className={`admin-analytics__feed-item admin-analytics__feed-item--tone-${displayStatus}`}
+                          >
+                            <div className="admin-analytics__feed-head">
+                              <span className={`admin-analytics__badge admin-analytics__badge--${displayStatus}`}>
+                                {MEETING_STATUS_LABELS[displayStatus] || displayStatus}
+                              </span>
+                              <time dateTime={m.start_at}>{formatAnalyticsDateTime(m.start_at)}</time>
+                            </div>
+                            <p className="admin-analytics__feed-title">{m.title}</p>
+                            {m.lawyer_name && (
+                              <p className="admin-analytics__feed-meta">Юрист: {m.lawyer_name}</p>
+                            )}
+                          </li>
+                        );
+                      })}
                     </ul>
                     <PostsPagination
                       page={data.calendar_meta?.current_page || calendarPage}
@@ -270,16 +333,25 @@ export default function AdminAnalyticsPage() {
                   <p>Нет записей. События появятся после действий сотрудников в системе.</p>
                 ) : (
                   <>
-                    <ul className="admin-analytics__activity">
-                      {data.recent_activity.map((item) => (
-                        <li key={item.id}>
-                          <span className="admin-analytics__activity-actor">{item.actor_name}</span>
-                          <span className="admin-analytics__activity-text">{item.summary}</span>
-                          {item.at && (
-                            <time dateTime={item.at}>{formatAnalyticsDateTime(item.at)}</time>
-                          )}
-                        </li>
-                      ))}
+                    <ul className="admin-analytics__feed">
+                      {data.recent_activity.map((item) => {
+                        const { label, tone } = getActivityEventMeta(item);
+                        return (
+                          <li
+                            key={item.id}
+                            className={`admin-analytics__feed-item admin-analytics__feed-item--tone-${tone}`}
+                          >
+                            <div className="admin-analytics__feed-head">
+                              <span className={`admin-analytics__badge admin-analytics__badge--${tone}`}>{label}</span>
+                              {item.at && (
+                                <time dateTime={item.at}>{formatAnalyticsDateTime(item.at)}</time>
+                              )}
+                            </div>
+                            <p className="admin-analytics__feed-actor">{item.actor_name}</p>
+                            <p className="admin-analytics__feed-summary">{item.summary}</p>
+                          </li>
+                        );
+                      })}
                     </ul>
                     <PostsPagination
                       page={data.activity_meta?.current_page || activityPage}

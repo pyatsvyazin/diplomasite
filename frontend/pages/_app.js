@@ -18,6 +18,8 @@ import '../styles/home/reviews-section.css';
 import '../styles/home/staff-section.css';
 import '../styles/reviews.css';
 import '../styles/avatar.css';
+import '../styles/status-tokens.css';
+import '../styles/request-chat-link.css';
 import '../styles/news-cards.css';
 import '../styles/post-detail.css';
 import '../styles/request-chat.css';
@@ -27,16 +29,20 @@ import '../styles/admin-analytics.css';
 import '../styles/home-mobile.css';
 import '../styles/contacts-page.css';
 import '../styles/password-rules.css';
+import { useRouter } from 'next/router';
 import { AuthProvider } from '../context/AuthContext';
 import Navigation from '../components/Navigation';
 import YandexMetrika from '../components/YandexMetrika';
 
 export default function App({ Component, pageProps }) {
+  const router = useRouter();
+  const isAuthRoute = router.pathname.startsWith('/auth');
+
   return (
     <AuthProvider>
       <YandexMetrika />
       <Navigation />
-      <main className="app-main">
+      <main className={`app-main${isAuthRoute ? ' app-main--auth' : ''}`}>
         <Component {...pageProps} />
       </main>
     </AuthProvider>

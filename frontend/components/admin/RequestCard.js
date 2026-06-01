@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { useState } from 'react';
 import { updateAdminRequest, getAdminLawyers } from '../../lib/api';
 import LawyerSelectMenu from './LawyerSelectMenu';
@@ -8,6 +7,7 @@ import Avatar from '../Avatar';
 import { getAvatarUrl } from '../../lib/api';
 import { formatPhone } from '../../lib/phone';
 import RequestMeetingsPanel from '../meetings/RequestMeetingsPanel';
+import RequestChatLink from '../RequestChatLink';
 
 const STATUS_LABELS = {
   new: 'Новая',
@@ -93,8 +93,11 @@ function AuthorBlock({ request, onRefresh }) {
 function LawyerBlock({ request, onAssign, onRefresh }) {
   const lawyer = request.lawyer;
   const [menuOpen, setMenuOpen] = useState(false);
+  const [removing, setRemoving] = useState(false);
 
   const handleRemove = () => {
+    if (removing) return;
+    setRemoving(true);
     updateAdminRequest(request.id, { lawyer_id: null })
       .then(() => {
         onRefresh?.();
@@ -103,7 +106,8 @@ function LawyerBlock({ request, onAssign, onRefresh }) {
       .catch((err) => {
         window.alert(err?.message || 'Не удалось снять юриста');
         setMenuOpen(false);
-      });
+      })
+      .finally(() => setRemoving(false));
   };
 
   if (lawyer) {
@@ -125,7 +129,9 @@ function LawyerBlock({ request, onAssign, onRefresh }) {
             <>
               <div className="request-card__menu-backdrop" onClick={() => setMenuOpen(false)} />
               <div className="request-card__dropdown">
-                <button type="button" onClick={handleRemove}>Снять юриста</button>
+                <button type="button" onClick={handleRemove} disabled={removing}>
+                  {removing ? 'Снятие…' : 'Снять юриста'}
+                </button>
               </div>
             </>
           )}
@@ -171,7 +177,8 @@ export default function RequestCard({ request, onRefresh, onLinkClient }) {
     : '—';
 
   return (
-    <div className="request-card">
+    <div className="request-card request-card--with-chat">
+      <RequestChatLink requestId={request.id} />
       <div className="request-card__row">
         <div className="request-card__col request-card__col--author">
           <AuthorBlock request={request} onRefresh={onRefresh} />
@@ -199,11 +206,6 @@ export default function RequestCard({ request, onRefresh, onLinkClient }) {
             </div>
           )}
           <div className="request-card__message">{request.message || '—'}</div>
-          <div className="request-card__chat-row">
-            <Link href={`/requests/${request.id}/chat`} className="request-card__chat-link">
-              Чат по заявке
-            </Link>
-          </div>
           <RequestMeetingsPanel requestId={request.id} request={request} showCreateButton />
             {request.review && (
               <div className="request-card__review">

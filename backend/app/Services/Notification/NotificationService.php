@@ -8,6 +8,7 @@ use App\Models\Notification;
 use App\Models\Request as ClientRequest;
 use App\Models\User;
 use App\Support\RequestStatusLabel;
+use Illuminate\Mail\Mailables\Address;
 use Illuminate\Support\Facades\Mail;
 
 class NotificationService
@@ -44,7 +45,7 @@ class NotificationService
             $this->notify($user, NotificationType::RequestStatusChanged, $title, $body, $link, [
                 'request_id' => $request->id,
             ]);
-            $this->sendEmailIfConfigured($user, $title, $body);
+            $this->sendEmailIfConfigured($user, $title, $body, $link);
         }
     }
 
@@ -67,7 +68,7 @@ class NotificationService
 
         foreach ($recipients as $user) {
             $this->notify($user, $type, $title, $body, $link, $meta);
-            $this->sendEmailIfConfigured($user, $title, $body ?? '');
+            $this->sendEmailIfConfigured($user, $title, $body ?? $title, $link);
         }
     }
 
@@ -103,25 +104,44 @@ class NotificationService
             }
 
             $this->notify($user, $type, $title, $body, $link, $meta);
-            $this->sendEmailIfConfigured($user, $title, $body);
+            $this->sendEmailIfConfigured($user, $title, $body, $link);
         }
     }
 
     /**
-     * Опционально: MAIL_MAILER=smtp в .env — письма уйдут через Laravel Mail.
+     * Письмо через Laravel Mail (config/mail.php + MAIL_* в .env).
      */
-    private function sendEmailIfConfigured(User $user, string $subject, string $body): void
+    private function sendEmailIfConfigured(User $user, string $subject, string $body, ?string $link = null): void
     {
-        if (config('mail.default') === 'log' || empty($user->email)) {
+        if (!config('notifications.mail_enabled') || empty($user->email)) {
             return;
         }
 
+        $text = trim($body);
+        if ($text === '') {
+            $text = $subject;
+        }
+
+        if ($link) {
+            $url = rtrim((string) config('app.frontend_url', 'http://localhost:3000'), '/').$link;
+            $text .= "\n\nОткрыть на сайте:\n".$url;
+        }
+
+        $appName = (string) config('app.name', 'Юридический щит');
+        $text .= "\n\n— ".$appName;
+
         try {
-            Mail::raw($body, function ($message) use ($user, $subject) {
-                $message->to($user->email)->subject($subject);
+            $from = new Address(
+                (string) config('mail.from.address'),
+                (string) config('mail.from.name', $appName),
+            );
+
+            Mail::raw($text, function ($message) use ($user, $subject, $appName, $from) {
+                $message->to($user->email)->subject($subject.' — '.$appName);
+                $message->from($from->address, $from->name);
             });
-        } catch (\Throwable) {
-            // не блокируем основной сценарий
+        } catch (\Throwable $e) {
+            report($e);
         }
     }
 }

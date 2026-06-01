@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -76,6 +77,7 @@ class AuthController extends Controller
             'email' => $validated['email'],
             'phone' => self::normalizePhone($validated['phone']),
             'password' => Hash::make($validated['password']),
+            'two_factor_enabled' => false,
         ]);
 
         $clientRole = Role::where('name', 'client')->first();
@@ -293,6 +295,33 @@ class AuthController extends Controller
         if (!empty($user->avatar_path)) {
             $data['avatar_path'] = url(\Illuminate\Support\Facades\Storage::disk('public')->url($user->avatar_path));
         }
+        return response()->json($data);
+    }
+
+    public function uploadAvatar(Request $request): JsonResponse
+    {
+        $request->validate([
+            'avatar' => 'required|image|max:2048',
+        ], [
+            'avatar.required' => 'Выберите изображение.',
+            'avatar.image' => 'Файл должен быть изображением.',
+            'avatar.max' => 'Размер файла не более 2 МБ.',
+        ]);
+
+        $user = $request->user();
+        $path = $request->file('avatar')->store('avatars', 'public');
+        if ($user->avatar_path) {
+            Storage::disk('public')->delete($user->avatar_path);
+        }
+        $user->avatar_path = $path;
+        $user->save();
+        $user->load('roles');
+
+        $data = $user->toArray();
+        if (!empty($user->avatar_path)) {
+            $data['avatar_path'] = url(Storage::disk('public')->url($user->avatar_path));
+        }
+
         return response()->json($data);
     }
 

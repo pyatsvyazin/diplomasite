@@ -151,13 +151,21 @@ export default function ConsultationsTab() {
   const selectedDateLabel = selectedDay ? formatFullRussianDate(year, month, selectedDay) : '';
 
   const handleConfirm = async (meetingId) => {
-    await confirmMeeting(meetingId);
-    setRefreshKey((k) => k + 1);
+    try {
+      await confirmMeeting(meetingId);
+      setRefreshKey((k) => k + 1);
+    } catch (e) {
+      window.alert(e?.message || 'Не удалось подтвердить консультацию');
+    }
   };
 
   const handleCancel = async (meetingId) => {
-    await cancelMeeting(meetingId, '');
-    setRefreshKey((k) => k + 1);
+    try {
+      await cancelMeeting(meetingId, '');
+      setRefreshKey((k) => k + 1);
+    } catch (e) {
+      window.alert(e?.message || 'Не удалось отменить консультацию');
+    }
   };
 
   const renderMeetingActions = (meeting) => {

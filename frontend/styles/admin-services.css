@@ -117,12 +117,32 @@ html.app-modal-open .sidebar-layout__sidebar {
   border-top: 1px solid #eee;
 }
 
-.admin-services-table__popular {
-  font-size: 0.85rem;
-  color: #666;
+.admin-services-table__order {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
 }
 
-.admin-services-table__popular--yes {
-  color: #2e7d32;
-  font-weight: 600;
+.admin-services-table__order-btn {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid #e0d5c4;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  color: #5c4a32;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.admin-services-table__order-btn:hover:not(:disabled) {
+  background: #f5efe6;
+  border-color: #c59d6c;
+}
+
+.admin-services-table__order-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }

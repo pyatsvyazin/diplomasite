@@ -16,9 +16,10 @@ export default function RegisterPage() {
   } = useRegister();
 
   return (
-    <div className="authPage">
-      <h1 className="authPage__title">Регистрация</h1>
-      <form className="authPage__form" onSubmit={handleSubmit}>
+    <div className="authPage-shell">
+      <div className="authPage">
+        <h1 className="authPage__title">Регистрация</h1>
+        <form className="authPage__form" onSubmit={handleSubmit}>
         {error && <p className="authPage__error">{error}</p>}
         <div className="authPage__field">
           <label htmlFor="full_name" className="authPage__label">ФИО</label>
@@ -88,11 +89,14 @@ export default function RegisterPage() {
         </div>
         <div className="authPage__actions">
           <button type="submit" className="authPage__submit" disabled={loading || !passwordReady}>
-            {loading ? 'Регистрация...' : 'Зарегистрироваться'}
+            {loading ? 'Регистрация…' : 'Зарегистрироваться'}
           </button>
-          <Link href="/auth/login" className="authPage__link">Вход</Link>
+          <div className="authPage__links">
+            <Link href="/auth/login" className="authPage__link">Уже есть аккаунт — войти</Link>
+          </div>
         </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 }

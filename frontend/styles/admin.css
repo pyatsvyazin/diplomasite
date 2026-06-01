@@ -82,6 +82,33 @@
   font-size: 1.5rem;
 }
 
+@media (max-width: 768px) {
+  .admin-page-title {
+    font-size: 1.25rem;
+    margin-bottom: 14px;
+  }
+
+  .admin-toolbar {
+    margin-bottom: 14px;
+  }
+
+  .admin-btn {
+    font-size: 0.85rem;
+    padding: 8px 12px;
+  }
+
+  .admin-search,
+  .admin-filter {
+    font-size: 0.85rem;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .admin-table {
+    font-size: 0.85rem;
+  }
+}
+
 .admin-toolbar {
   display: flex;
   gap: 12px;

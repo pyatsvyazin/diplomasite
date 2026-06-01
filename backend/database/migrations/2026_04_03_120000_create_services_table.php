@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('price_type', 32);
             $table->unsignedInteger('price_from')->nullable();
             $table->unsignedInteger('price_to')->nullable();
-            $table->boolean('is_popular')->default(false);
+            $table->unsignedInteger('priority')->default(0);
             $table->timestamps();
         });
     }

@@ -48,6 +48,7 @@
   font-family: inherit;
   font-size: 0.95rem;
   cursor: pointer;
+  width: 100%;
 }
 
 .profile-dashboard__nav-btn--active {
@@ -290,6 +291,33 @@
 @media (max-width: 900px) {
   .profile-dashboard {
     grid-template-columns: 1fr;
+  }
+
+  .profile-dashboard__sidebar {
+    padding: 0.5rem;
+  }
+
+  .profile-dashboard__nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  .profile-dashboard__nav-btn {
+    width: auto;
+    flex: 1 1 auto;
+    font-size: 0.85rem;
+    padding: 0.45rem 0.6rem;
+    text-align: center;
+  }
+
+  .profile-dashboard__content {
+    padding: 1rem;
+    font-size: 0.92rem;
+  }
+
+  .profile-dashboard__section-title {
+    font-size: 1.1rem;
   }
 
   .consultations-tab__grid {

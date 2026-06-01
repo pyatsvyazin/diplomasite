@@ -24,10 +24,14 @@ function NavItem({ item, pathname, collapsed }) {
 
   const isActive = item.href && pathname === item.href;
   const className = `sidebar-layout__nav-link ${isActive ? 'sidebar-layout__nav-link--active' : ''} ${collapsed ? 'sidebar-layout__nav-link--collapsed' : ''}`;
+  const badge = Number(item.badge) > 0 ? (Number(item.badge) > 9 ? '9+' : String(item.badge)) : null;
 
   return (
     <Link href={item.href} className={className} title={collapsed ? item.label : undefined}>
-      <span className="sidebar-layout__nav-icon">{icon}</span>
+      <span className="sidebar-layout__nav-icon-wrap">
+        <span className="sidebar-layout__nav-icon">{icon}</span>
+        {badge && <span className="sidebar-layout__nav-badge">{badge}</span>}
+      </span>
       <span className="sidebar-layout__nav-label">{item.label}</span>
     </Link>
   );

@@ -37,10 +37,7 @@ class ServiceController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        $q = Service::query()
-            ->orderByDesc('is_popular')
-            ->orderBy('category')
-            ->orderBy('name');
+        $q = Service::query()->ordered();
 
         $search = trim((string) $request->query('search', ''));
         if ($search !== '') {
@@ -63,6 +60,10 @@ class ServiceController extends Controller
     public function store(Request $request): JsonResponse
     {
         $payload = $this->validatedPayload($request);
+        $category = $payload['category'];
+        $max = Service::query()->where('category', $category)->max('priority');
+        $payload['priority'] = ($max !== null ? (int) $max : -1) + 1;
+
         $service = Service::create($payload);
 
         return response()->json(['data' => $service->fresh()], 201);
@@ -72,6 +73,7 @@ class ServiceController extends Controller
     {
         $service = Service::query()->findOrFail($id);
         $payload = $this->validatedPayload($request);
+        unset($payload['priority']);
         $service->fill($payload);
         $service->save();
 
@@ -84,6 +86,39 @@ class ServiceController extends Controller
         $service->delete();
 
         return response()->json(['message' => 'Услуга удалена.']);
+    }
+
+    public function move(Request $request, int $id): JsonResponse
+    {
+        $validated = $request->validate([
+            'direction' => 'required|in:up,down',
+        ]);
+
+        $service = Service::query()->findOrFail($id);
+        $siblings = Service::query()
+            ->where('category', $service->category)
+            ->orderBy('priority')
+            ->orderBy('id')
+            ->get();
+
+        $index = $siblings->search(fn (Service $s) => $s->id === $service->id);
+        if ($index === false) {
+            return response()->json(['message' => 'Услуга не найдена в категории.'], 404);
+        }
+
+        $swapIndex = $validated['direction'] === 'up' ? $index - 1 : $index + 1;
+        if ($swapIndex < 0 || $swapIndex >= $siblings->count()) {
+            return response()->json(['data' => $service->fresh()]);
+        }
+
+        $other = $siblings[$swapIndex];
+        $tmp = $service->priority;
+        $service->priority = $other->priority;
+        $other->priority = $tmp;
+        $service->save();
+        $other->save();
+
+        return response()->json(['data' => Service::query()->ordered()->get()]);
     }
 
     /**
@@ -99,7 +134,6 @@ class ServiceController extends Controller
             'price_type' => ['required', 'string', Rule::enum(ServicePriceType::class)],
             'price_from' => 'nullable|integer|min:0',
             'price_to' => 'nullable|integer|min:0',
-            'is_popular' => 'sometimes|boolean',
         ], [
             'name.required' => 'Укажите название услуги.',
             'category.required' => 'Выберите категорию.',
@@ -152,7 +186,6 @@ class ServiceController extends Controller
             'price_type' => $type,
             'price_from' => $priceFrom,
             'price_to' => $priceTo,
-            'is_popular' => (bool) ($validated['is_popular'] ?? false),
         ];
     }
 }

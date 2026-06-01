@@ -14,6 +14,7 @@ import {
   deleteAdminSpecialty,
   getAvatarUrl,
 } from '../../../lib/api';
+import { formatPhone, normalizeDigits, parsePhoneToDigits } from '../../../lib/phone';
 
 const ROLE_LABELS = { lawyer: 'Юрист', admin: 'Администратор' };
 
@@ -471,7 +472,7 @@ export default function AdminContentStaffPage() {
       setForm({
         full_name: editMember.full_name || '',
         email: editMember.email || '',
-        phone: editMember.phone || '',
+        phone: editMember.phone ? formatPhone(editMember.phone) : '',
       });
       setError('');
       setAvatarFile(null);
@@ -492,11 +493,11 @@ export default function AdminContentStaffPage() {
           const fd = new FormData();
           fd.append('full_name', form.full_name);
           fd.append('email', form.email);
-          fd.append('phone', form.phone);
+          fd.append('phone', parsePhoneToDigits(form.phone) || '');
           fd.append('avatar', avatarFile);
           return fd;
         })()
-      : form;
+      : { ...form, phone: parsePhoneToDigits(form.phone) || '' };
     updateAdminStaffMember(editMember.id, payload)
       .then((updated) => {
         setStaff((prev) => prev.map((m) => (m.id === updated.id ? updated : m)));
@@ -634,10 +635,11 @@ export default function AdminContentStaffPage() {
               <label className="staff-modal__label">
                 Телефон
                 <input
-                  type="text"
+                  type="tel"
                   className="staff-modal__input"
                   value={form.phone}
-                  onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+                  onChange={(e) => setForm((f) => ({ ...f, phone: formatPhone(normalizeDigits(e.target.value)) }))}
+                  placeholder="+7 (9XX) XXX-XX-XX"
                 />
               </label>
               {error && <p className="staff-modal__error">{error}</p>}

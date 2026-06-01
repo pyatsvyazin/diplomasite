@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { submitRequest } from '../../lib/api';
+import { formatPhone, normalizeDigits, parsePhoneToDigits, isValidPhoneDigits } from '../../lib/phone';
 import { REQUEST_TOPICS } from '../../constants/requestTopics';
 import Avatar from '../Avatar';
 import { getAvatarUrl } from '../../lib/api';
@@ -17,7 +18,11 @@ export default function RequestFormSection() {
   
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    if (name === 'phone') {
+      setForm((prev) => ({ ...prev, phone: formatPhone(normalizeDigits(value)) }));
+    } else {
+      setForm((prev) => ({ ...prev, [name]: value }));
+    }
     setError('');
   };
 
@@ -28,12 +33,22 @@ export default function RequestFormSection() {
       setError('Укажите тему.');
       return;
     }
+    if (!user && !isValidPhoneDigits(form.phone)) {
+      setError('Укажите номер в формате +7 (XXX) XXX-XX-XX.');
+      return;
+    }
     setError('');
     setLoading(true);
     try {
       const payload = user
         ? { subject: subjectValue, message: form.message }
-        : { name: form.name, email: form.email, phone: form.phone, subject: subjectValue, message: form.message };
+        : {
+            name: form.name,
+            email: form.email,
+            phone: parsePhoneToDigits(form.phone),
+            subject: subjectValue,
+            message: form.message,
+          };
       await submitRequest(payload);
       setSuccess(true);
       setForm({ name: '', email: '', phone: '', subject: '', message: '' });
@@ -94,6 +109,7 @@ export default function RequestFormSection() {
                   className="request-form-section__input"
                   value={form.phone}
                   onChange={handleChange}
+                  placeholder="+7 (9XX) XXX-XX-XX"
                   required
                 />
               </label>

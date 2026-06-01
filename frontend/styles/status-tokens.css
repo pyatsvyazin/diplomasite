@@ -1,0 +1,118 @@
+/**
+ * Единая палитра статусов:
+ * danger — закрыто / отклонено / отменено
+ * success — в работе / завершено / подтверждено
+ * warning — новое / ожидает / на рассмотрении
+ * muted — просрочено / неактивно
+ * info — прочие активные
+ */
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.3;
+  border: 1px solid transparent;
+}
+
+.status-badge--danger {
+  background: #fee2e2;
+  color: #b91c1c;
+  border-color: #fecaca;
+}
+
+.status-badge--success {
+  background: #dcfce7;
+  color: #15803d;
+  border-color: #bbf7d0;
+}
+
+.status-badge--warning {
+  background: #fef3c7;
+  color: #b45309;
+  border-color: #fde68a;
+}
+
+.status-badge--muted {
+  background: #f1f5f9;
+  color: #64748b;
+  border-color: #e2e8f0;
+}
+
+.status-badge--info {
+  background: #dbeafe;
+  color: #1d4ed8;
+  border-color: #bfdbfe;
+}
+
+/* Заявки */
+.profile-request-card__status,
+.request-card__status {
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border: 1px solid transparent;
+}
+
+.profile-request-card__status--new,
+.request-card__status--new {
+  background: #fef3c7;
+  color: #b45309;
+  border-color: #fde68a;
+}
+
+.profile-request-card__status--reviewing,
+.request-card__status--reviewing {
+  background: #dbeafe;
+  color: #1d4ed8;
+  border-color: #bfdbfe;
+}
+
+.profile-request-card__status--in_progress,
+.request-card__status--in_progress {
+  background: #dcfce7;
+  color: #15803d;
+  border-color: #bbf7d0;
+}
+
+.profile-request-card__status--rejected,
+.request-card__status--rejected {
+  background: #fee2e2;
+  color: #b91c1c;
+  border-color: #fecaca;
+}
+
+.profile-request-card__status--closed,
+.request-card__status--closed {
+  background: #fee2e2;
+  color: #991b1b;
+  border-color: #fecaca;
+}
+
+/* Консультации — карточки */
+.meeting-card--pending {
+  border-left: 4px solid #f59e0b;
+}
+
+.meeting-card--confirmed {
+  border-left: 4px solid #22c55e;
+}
+
+.meeting-card--completed {
+  border-left: 4px solid #15803d;
+}
+
+.meeting-card--cancelled,
+.meeting-card--overdue {
+  border-left: 4px solid #94a3b8;
+  opacity: 0.92;
+}
+
+.consult-cal__dot--pending { background: #f59e0b; }
+.consult-cal__dot--confirmed { background: #22c55e; }
+.consult-cal__dot--completed { background: #15803d; }
+.consult-cal__dot--cancelled,
+.consult-cal__dot--overdue { background: #94a3b8; }

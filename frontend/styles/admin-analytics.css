@@ -88,42 +88,193 @@
 }
 
 .admin-analytics__section h2 {
-  margin: 0 0 12px;
+  margin: 0 0 14px;
   font-size: 1.05rem;
-}
-
-.admin-analytics__list,
-.admin-analytics__meetings-list,
-.admin-analytics__activity {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.admin-analytics__section .posts-pagination {
-  margin-top: 12px;
-}
-
-.admin-analytics__list li,
-.admin-analytics__meetings-list li,
-.admin-analytics__activity li {
-  padding: 10px 0;
-  border-bottom: 1px solid #f1f5f9;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 0.9rem;
-}
-
-.admin-analytics__activity-actor {
-  font-size: 0.8rem;
   font-weight: 600;
   color: #1e3a5f;
 }
 
-.admin-analytics__activity-text {
+.admin-analytics__section > p {
+  margin: 0;
+  color: #64748b;
   font-size: 0.9rem;
+}
+
+.admin-analytics__feed {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.admin-analytics__section .posts-pagination {
+  margin-top: 14px;
+}
+
+.admin-analytics__feed-item {
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #f8fafc;
+  border: 1px solid #e8eef4;
+  border-left-width: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.admin-analytics__feed-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.admin-analytics__feed-head time {
+  font-size: 0.8rem;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.admin-analytics__badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.3;
+}
+
+.admin-analytics__feed-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #0f172a;
+  line-height: 1.35;
+}
+
+.admin-analytics__feed-meta,
+.admin-analytics__feed-actor {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #64748b;
+}
+
+.admin-analytics__feed-actor {
+  font-weight: 600;
+  color: #475569;
+}
+
+.admin-analytics__feed-summary {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.45;
   color: #334155;
+}
+
+/* Тоны: консультации */
+.admin-analytics__feed-item--tone-pending {
+  border-left-color: #f59e0b;
+  background: #fffbeb;
+}
+
+.admin-analytics__badge--pending {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.admin-analytics__feed-item--tone-confirmed {
+  border-left-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.admin-analytics__badge--confirmed {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.admin-analytics__feed-item--tone-completed {
+  border-left-color: #22c55e;
+  background: #f0fdf4;
+}
+
+.admin-analytics__badge--completed {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.admin-analytics__feed-item--tone-cancelled,
+.admin-analytics__feed-item--tone-overdue {
+  border-left-color: #ef4444;
+  background: #fef2f2;
+}
+
+.admin-analytics__badge--cancelled,
+.admin-analytics__badge--overdue {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+/* Тоны: действия */
+.admin-analytics__feed-item--tone-danger {
+  border-left-color: #ef4444;
+  background: #fef2f2;
+}
+
+.admin-analytics__badge--danger {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.admin-analytics__feed-item--tone-danger .admin-analytics__feed-summary {
+  color: #991b1b;
+}
+
+.admin-analytics__feed-item--tone-success {
+  border-left-color: #22c55e;
+  background: #f0fdf4;
+}
+
+.admin-analytics__badge--success {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.admin-analytics__feed-item--tone-success .admin-analytics__feed-summary {
+  color: #166534;
+}
+
+.admin-analytics__feed-item--tone-warning {
+  border-left-color: #f59e0b;
+  background: #fffbeb;
+}
+
+.admin-analytics__badge--warning {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.admin-analytics__feed-item--tone-info {
+  border-left-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.admin-analytics__badge--info {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.admin-analytics__feed-item--tone-neutral {
+  border-left-color: #94a3b8;
+  background: #f8fafc;
+}
+
+.admin-analytics__badge--neutral {
+  background: #e2e8f0;
+  color: #475569;
 }
 
 .admin-analytics__bottom--loading {

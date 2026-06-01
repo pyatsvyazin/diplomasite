@@ -34,9 +34,10 @@ export default function Verify2FAPage() {
   const noPendingId = router.isReady && !pending2faId;
 
   return (
-    <div className="authPage">
-      <h1 className="authPage__title">Код из письма</h1>
-      <p className="authPage__text">Введите 6-значный код, отправленный на вашу почту.</p>
+    <div className="authPage-shell">
+      <div className="authPage">
+        <h1 className="authPage__title">Код из письма</h1>
+        <p className="authPage__subtitle">Введите 6-значный код, отправленный на вашу почту</p>
       {noPendingId && (
         <p className="authPage__error">Сессия входа не найдена. <Link href="/auth/login">Войдите снова</Link>.</p>
       )}
@@ -59,11 +60,14 @@ export default function Verify2FAPage() {
         </div>
         <div className="authPage__actions">
           <button type="submit" className="authPage__submit" disabled={loading || noPendingId || code.length !== 6}>
-            {loading ? 'Проверка...' : 'Войти'}
+            {loading ? 'Проверка…' : 'Войти'}
           </button>
-          <Link href="/auth/login" className="authPage__link">Назад к входу</Link>
+          <div className="authPage__links">
+            <Link href="/auth/login" className="authPage__link">Назад к входу</Link>
+          </div>
         </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 }

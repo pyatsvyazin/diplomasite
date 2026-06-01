@@ -25,7 +25,7 @@ class ServiceSeeder extends Seeder
             ['name' => 'Интеллектуальная собственность', 'price_type' => ServicePriceType::Custom, 'price_from' => null, 'price_to' => null],
         ];
 
-        foreach ($rows as $row) {
+        foreach ($rows as $i => $row) {
             Service::query()->updateOrCreate(
                 ['name' => $row['name'], 'category' => self::CATEGORY_INDIVIDUALS],
                 [
@@ -34,7 +34,7 @@ class ServiceSeeder extends Seeder
                     'price_type' => $row['price_type'],
                     'price_from' => $row['price_from'],
                     'price_to' => $row['price_to'],
-                    'is_popular' => false,
+                    'priority' => $i,
                 ]
             );
         }

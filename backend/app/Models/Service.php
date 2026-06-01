@@ -16,12 +16,12 @@ class Service extends Model
         'price_type',
         'price_from',
         'price_to',
-        'is_popular',
+        'priority',
     ];
 
     protected $casts = [
         'price_type' => ServicePriceType::class,
-        'is_popular' => 'boolean',
+        'priority' => 'integer',
         'price_from' => 'integer',
         'price_to' => 'integer',
     ];
@@ -56,8 +56,8 @@ class Service extends Model
         return number_format($amount, 0, ',', ' ').' ₽';
     }
 
-    public function scopePopular(Builder $query): Builder
+    public function scopeOrdered(Builder $query): Builder
     {
-        return $query->where('is_popular', true);
+        return $query->orderBy('priority')->orderBy('name');
     }
 }

@@ -45,6 +45,10 @@ class User extends Authenticatable implements MustVerifyEmail
      *
      * @var array<string, string>
      */
+    protected $attributes = [
+        'two_factor_enabled' => false,
+    ];
+
     protected $casts = [
         'password' => 'hashed',
         'is_blocked' => 'boolean',

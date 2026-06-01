@@ -10,6 +10,7 @@ import {
   deleteAdminService,
   getAdminServices,
   getAdminServicesMeta,
+  moveAdminService,
   updateAdminService,
 } from '../../../lib/api';
 
@@ -22,7 +23,6 @@ function emptyForm() {
     price_type: 'fixed',
     price_from: '',
     price_to: '',
-    is_popular: false,
   };
 }
 
@@ -35,7 +35,6 @@ function serviceToForm(s) {
     price_type: typeof s.price_type === 'string' ? s.price_type : s.price_type?.value || 'fixed',
     price_from: s.price_from != null ? String(s.price_from) : '',
     price_to: s.price_to != null ? String(s.price_to) : '',
-    is_popular: Boolean(s.is_popular),
   };
 }
 
@@ -53,7 +52,6 @@ function formToPayload(form) {
     price_type: form.price_type,
     price_from: Number.isFinite(priceFrom) ? priceFrom : null,
     price_to: Number.isFinite(priceTo) ? priceTo : null,
-    is_popular: form.is_popular,
   };
 }
 
@@ -70,6 +68,7 @@ export default function AdminContentServicesPage() {
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState('');
+  const [movingId, setMovingId] = useState(null);
 
   useEffect(() => {
     const t = setTimeout(() => setSearchDebounced(searchInput.trim()), 380);
@@ -108,6 +107,18 @@ export default function AdminContentServicesPage() {
       cancelled = true;
     };
   }, []);
+
+  const handleMove = async (row, direction) => {
+    setMovingId(row.id);
+    try {
+      await moveAdminService(row.id, direction);
+      await load();
+    } catch (e) {
+      setFormError(e.message || 'Не удалось изменить порядок');
+    } finally {
+      setMovingId(null);
+    }
+  };
 
   const openCreate = () => {
     setEditingId(null);
@@ -223,7 +234,7 @@ export default function AdminContentServicesPage() {
                   <th>Категория</th>
                   <th>Цена на сайте</th>
                   <th>Тип цены</th>
-                  <th>Популярная</th>
+                  <th>Порядок</th>
                   <th />
                 </tr>
               </thead>
@@ -235,11 +246,28 @@ export default function AdminContentServicesPage() {
                     <td>{row.formatted_price}</td>
                     <td>{priceTypeLabel(typeof row.price_type === 'string' ? row.price_type : row.price_type?.value)}</td>
                     <td>
-                      <span
-                        className={`admin-services-table__popular${row.is_popular ? ' admin-services-table__popular--yes' : ''}`}
-                      >
-                        {row.is_popular ? 'Да' : '—'}
-                      </span>
+                      <div className="admin-services-table__order">
+                        <button
+                          type="button"
+                          className="admin-services-table__order-btn"
+                          title="Выше"
+                          disabled={movingId === row.id}
+                          onClick={() => handleMove(row, 'up')}
+                          aria-label="Поднять выше"
+                        >
+                          ↑
+                        </button>
+                        <button
+                          type="button"
+                          className="admin-services-table__order-btn"
+                          title="Ниже"
+                          disabled={movingId === row.id}
+                          onClick={() => handleMove(row, 'down')}
+                          aria-label="Опустить ниже"
+                        >
+                          ↓
+                        </button>
+                      </div>
                     </td>
                     <td style={{ whiteSpace: 'nowrap' }}>
                       <button type="button" className="admin-btn admin-btn--small admin-btn--ghost" onClick={() => openEdit(row)}>
@@ -379,14 +407,11 @@ export default function AdminContentServicesPage() {
                 </label>
               )}
 
-              <label className="admin-services-form__check">
-                <input
-                  type="checkbox"
-                  checked={form.is_popular}
-                  onChange={(e) => setForm((f) => ({ ...f, is_popular: e.target.checked }))}
-                />
-                Показывать выше остальных (популярная)
-              </label>
+              {editingId == null && (
+                <p className="admin-services-form__hint">
+                  Новая услуга добавляется в конец списка своей категории. Порядок можно изменить стрелками в таблице.
+                </p>
+              )}
 
               {formError && <p className="admin-error">{formError}</p>}
 

@@ -1,0 +1,26 @@
+.request-chat-link {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-brand, #c59d6c);
+  border-radius: 50%;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  transition: transform 0.15s, background 0.15s;
+}
+
+.request-chat-link:hover {
+  transform: scale(1.05);
+  background: var(--color-brand-strong, #a8845a);
+}
+
+.request-chat-link img {
+  display: block;
+  filter: brightness(0) invert(1);
+}

@@ -11,7 +11,7 @@ class ServiceController extends Controller
     public function index(): JsonResponse
     {
         $items = Service::query()
-            ->orderByDesc('is_popular')
+            ->orderBy('priority')
             ->orderBy('category')
             ->orderBy('name')
             ->get();

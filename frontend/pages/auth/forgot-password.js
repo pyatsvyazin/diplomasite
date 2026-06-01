@@ -24,20 +24,25 @@ export default function ForgotPasswordPage() {
 
   if (success) {
     return (
-      <div className="authPage">
-        <h1 className="authPage__title">Проверьте почту</h1>
-        <p className="authPage__text">
-          На вашу почту отправлена ссылка для сброса пароля. Ссылка действительна 60 минут.
-        </p>
-        <Link href="/auth/login" className="authPage__link">Вернуться к входу</Link>
+      <div className="authPage-shell">
+        <div className="authPage">
+          <h1 className="authPage__title">Проверьте почту</h1>
+          <p className="authPage__text">
+            На вашу почту отправлена ссылка для сброса пароля. Ссылка действительна 60 минут.
+          </p>
+          <div className="authPage__links">
+            <Link href="/auth/login" className="authPage__link">Вернуться к входу</Link>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="authPage">
-      <h1 className="authPage__title">Восстановление пароля</h1>
-      <form className="authPage__form" onSubmit={handleSubmit}>
+    <div className="authPage-shell">
+      <div className="authPage">
+        <h1 className="authPage__title">Восстановление пароля</h1>
+        <form className="authPage__form" onSubmit={handleSubmit}>
         {error && <p className="authPage__error">{error}</p>}
         <div className="authPage__field">
           <label htmlFor="email" className="authPage__label">Email</label>
@@ -53,11 +58,14 @@ export default function ForgotPasswordPage() {
         </div>
         <div className="authPage__actions">
           <button type="submit" className="authPage__submit" disabled={loading}>
-            {loading ? 'Отправка...' : 'Отправить ссылку'}
+            {loading ? 'Отправка…' : 'Отправить ссылку'}
           </button>
-          <Link href="/auth/login" className="authPage__link">Вход</Link>
+          <div className="authPage__links">
+            <Link href="/auth/login" className="authPage__link">Вход</Link>
+          </div>
         </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 }

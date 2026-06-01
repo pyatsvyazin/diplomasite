@@ -6,12 +6,28 @@ use App\Http\Controllers\Controller;
 use App\Models\Request as RequestModel;
 use App\Models\Review;
 use App\Models\User;
+use App\Services\Activity\ActivityLogService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class StaffController extends Controller
 {
+    public function __construct(private ActivityLogService $activityLog)
+    {
+    }
+
+    private static function normalizePhone(string $value): ?string
+    {
+        $digits = preg_replace('/\D/', '', $value);
+        if (strlen($digits) === 10) {
+            $digits = '7'.$digits;
+        } elseif (strlen($digits) === 11 && $digits[0] === '8') {
+            $digits = '7'.substr($digits, 1);
+        }
+
+        return (strlen($digits) === 11 && $digits[0] === '7') ? $digits : null;
+    }
     private const PLACEHOLDER_AVATAR = '/images/avatars/placeholder_avatar.png';
 
     public function index(): JsonResponse
@@ -73,10 +89,25 @@ class StaffController extends Controller
             return response()->json(['message' => 'Редактирование данных этого сотрудника запрещено.'], 403);
         }
 
+        $actor = $request->user();
+        $changed = [];
+
         $data = $request->validate([
             'full_name' => 'sometimes|string|max:255',
             'email'     => 'sometimes|email|unique:users,email,' . $id,
-            'phone'     => 'nullable|string|max:50',
+            'phone'     => [
+                'nullable',
+                'string',
+                'max:50',
+                function (string $attr, $value, $fail) {
+                    if ($value === null || $value === '') {
+                        return;
+                    }
+                    if (self::normalizePhone($value) === null) {
+                        $fail('Укажите номер в формате +7 (XXX) XXX-XX-XX.');
+                    }
+                },
+            ],
         ], [
             'full_name.max' => 'ФИО слишком длинное.',
             'email.email'   => 'Некорректный email.',
@@ -91,11 +122,32 @@ class StaffController extends Controller
                 Storage::disk('public')->delete($user->avatar_path);
             }
             $user->avatar_path = $path;
+            $changed[] = 'avatar';
+        }
+
+        if (array_key_exists('full_name', $data) && $data['full_name'] !== $user->full_name) {
+            $changed[] = 'full_name';
+        }
+        if (array_key_exists('email', $data) && $data['email'] !== $user->email) {
+            $changed[] = 'email';
+        }
+        if (array_key_exists('phone', $data)) {
+            $normalized = $data['phone'] !== null && $data['phone'] !== ''
+                ? self::normalizePhone($data['phone'])
+                : null;
+            if ($normalized !== $user->phone) {
+                $changed[] = 'phone';
+            }
+            $data['phone'] = $normalized;
         }
 
         $user->fill($data);
         $user->save();
         $user->load(['roles', 'specialties']);
+
+        if ($actor && $changed !== []) {
+            $this->activityLog->staffUpdated($actor, $user, $changed);
+        }
 
         $closedCount = RequestModel::query()
             ->where('lawyer_id', $user->id)

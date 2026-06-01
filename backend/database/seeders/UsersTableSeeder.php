@@ -17,7 +17,7 @@ class UsersTableSeeder extends Seeder
             'email_verified_at' => $verified,
             'avatar_path' => null,
             'is_blocked' => false,
-            'two_factor_enabled' => true,
+            'two_factor_enabled' => false,
             'created_at' => $now,
             'updated_at' => $now,
         ], $u);

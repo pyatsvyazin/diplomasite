@@ -111,6 +111,9 @@ export async function updateAdminRequest(id, payload) {
   });
   const body = await res.json().catch(() => ({}));
   if (!res.ok) {
+    if (res.status === 429) {
+      throw new Error('Слишком много запросов. Подождите минуту и повторите.');
+    }
     const msg = body.message || body.errors?.status?.[0] || body.errors?.lawyer_id?.[0] || 'Не удалось обновить заявку';
     throw new Error(msg);
   }
@@ -508,6 +511,32 @@ export async function createReview(payload) {
   return body.data;
 }
 
+export async function uploadUserAvatar(file) {
+  const url = getApiUrl('/user/avatar');
+  const fd = new FormData();
+  fd.append('avatar', file);
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: fd,
+  });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(body.message || 'Не удалось загрузить фото');
+  return body;
+}
+
+export async function moveAdminService(id, direction) {
+  const url = getApiUrl(`/admin/services/manage/${id}/move`);
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+    body: JSON.stringify({ direction }),
+  });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(body.message || 'Не удалось изменить порядок');
+  return body.data || [];
+}
+
 export async function updateCurrentUser(payload) {
   const url = getApiUrl('/user');
   const res = await fetch(url, {
@@ -733,9 +762,22 @@ export async function updateMeeting(id, payload) {
   return data.data;
 }
 
+async function apiFetch(url, options = {}) {
+  try {
+    return await fetch(url, options);
+  } catch {
+    throw new Error(
+      `Не удалось связаться с API (${API_BASE}). Проверьте, что backend запущен (php artisan serve) и адрес в NEXT_PUBLIC_API_URL верный.`,
+    );
+  }
+}
+
 export async function confirmMeeting(id) {
   const url = getApiUrl(`/meetings/${id}/confirm`);
-  const res = await fetch(url, { method: 'POST', headers: getAuthHeaders() });
+  const res = await apiFetch(url, {
+    method: 'POST',
+    headers: { Accept: 'application/json', ...getAuthHeaders() },
+  });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || 'Не удалось подтвердить');
   return data.data;

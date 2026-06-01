@@ -190,6 +190,71 @@ class ActivityLogService
         );
     }
 
+    public function userBlocked(User $actor, User $target, bool $blocked): void
+    {
+        $this->log(
+            $actor,
+            $blocked ? 'user_blocked' : 'user_unblocked',
+            $blocked
+                ? sprintf('Заблокирован пользователь %s', $target->full_name)
+                : sprintf('Разблокирован пользователь %s', $target->full_name),
+            'user',
+            $target->id,
+        );
+    }
+
+    public function userRoleChanged(User $actor, User $target, string $oldRole, string $newRole): void
+    {
+        $this->log(
+            $actor,
+            'user_role_changed',
+            sprintf(
+                'Пользователю %s изменена роль: %s → %s',
+                $target->full_name,
+                $this->roleRu($oldRole),
+                $this->roleRu($newRole),
+            ),
+            'user',
+            $target->id,
+            ['old_role' => $oldRole, 'new_role' => $newRole],
+        );
+    }
+
+    public function staffUpdated(User $actor, User $target, array $changedFields): void
+    {
+        if ($changedFields === []) {
+            return;
+        }
+
+        $labels = [
+            'full_name' => 'ФИО',
+            'email' => 'email',
+            'phone' => 'телефон',
+            'avatar' => 'фото',
+        ];
+        $parts = [];
+        foreach ($changedFields as $key) {
+            $parts[] = $labels[$key] ?? $key;
+        }
+
+        $this->log(
+            $actor,
+            'staff_updated',
+            sprintf('Обновлены данные сотрудника %s: %s', $target->full_name, implode(', ', $parts)),
+            'user',
+            $target->id,
+        );
+    }
+
+    private function roleRu(string $role): string
+    {
+        return match ($role) {
+            'lawyer' => 'юрист',
+            'admin' => 'администратор',
+            default => 'клиент',
+        };
+    }
+
     private function postTypeRu(Post $post): string
     {
         $type = $post->type instanceof PostType ? $post->type : PostType::tryFrom((string) $post->type);

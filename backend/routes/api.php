@@ -55,6 +55,7 @@ Route::middleware('auth:sanctum')->group(function () {
         return $data;
     });
     Route::patch('/user', [AuthController::class, 'updateProfile']);
+    Route::post('/user/avatar', [AuthController::class, 'uploadAvatar']);
     Route::patch('/user/2fa', [AuthController::class, 'update2fa']);
     Route::post('/user/request-password-change', [AuthController::class, 'requestPasswordChange']);
     Route::post('/user/confirm-password-change', [AuthController::class, 'confirmPasswordChange']);
@@ -113,5 +114,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/services/manage', [AdminServiceController::class, 'store']);
         Route::put('/services/manage/{id}', [AdminServiceController::class, 'update']);
         Route::delete('/services/manage/{id}', [AdminServiceController::class, 'destroy']);
+        Route::post('/services/manage/{id}/move', [AdminServiceController::class, 'move']);
     });
 });

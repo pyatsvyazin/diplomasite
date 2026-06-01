@@ -99,7 +99,7 @@ export default function ReviewForm({ requestId, onSuccess }) {
         Опубликовать анонимно
       </label>
       {error && <p className="review-form__error">{error}</p>}
-      <button type="submit" className="review-form__submit" disabled={loading}>
+      <button type="submit" className="profile-action-btn review-form__submit" disabled={loading}>
         {loading ? 'Отправка…' : 'Отправить отзыв'}
       </button>
     </form>

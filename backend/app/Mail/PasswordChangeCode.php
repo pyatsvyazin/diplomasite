@@ -4,13 +4,14 @@ namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
+use App\Mail\Concerns\UsesAppMailSender;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
 class PasswordChangeCode extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable, SerializesModels, UsesAppMailSender;
 
     public function __construct(
         public string $code
@@ -20,7 +21,7 @@ class PasswordChangeCode extends Mailable
     {
         return new Envelope(
             subject: 'Код для смены пароля',
-            from: config('mail.from.address'),
+            from: $this->appMailFrom(),
         );
     }
 

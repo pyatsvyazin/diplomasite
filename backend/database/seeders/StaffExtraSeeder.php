@@ -62,7 +62,7 @@ class StaffExtraSeeder extends Seeder
                     'email_verified_at' => $now,
                     'avatar_path' => null,
                     'is_blocked' => false,
-                    'two_factor_enabled' => true,
+                    'two_factor_enabled' => false,
                 ]
             );
 

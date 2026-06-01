@@ -87,9 +87,16 @@ class AdminController extends Controller
             return response()->json(['message' => 'Пользователь не найден.'], 404);
         }
 
+        $user->load('roles');
+        $oldRole = $user->roles->first()?->name ?? 'client';
+        $wasBlocked = (bool) $user->is_blocked;
+
         if (array_key_exists('is_blocked', $validated)) {
             $user->is_blocked = $validated['is_blocked'];
             $user->save();
+            if ((bool) $validated['is_blocked'] !== $wasBlocked) {
+                $this->activityLog->userBlocked($currentUser, $user, (bool) $validated['is_blocked']);
+            }
         }
 
         if (array_key_exists('role', $validated)) {
@@ -98,6 +105,9 @@ class AdminController extends Controller
                 return response()->json(['message' => 'Роль не найдена.'], 422);
             }
             $user->roles()->sync([$roleId]);
+            if ($validated['role'] !== $oldRole) {
+                $this->activityLog->userRoleChanged($currentUser, $user, $oldRole, $validated['role']);
+            }
         }
 
         $user->load('roles');

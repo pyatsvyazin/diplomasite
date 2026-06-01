@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('avatar_path')->nullable();
             $table->string('password');
             $table->boolean('is_blocked')->default(false);
-            $table->boolean('two_factor_enabled')->default(true);
+            $table->boolean('two_factor_enabled')->default(false);
             $table->timestamps();
         });
     }

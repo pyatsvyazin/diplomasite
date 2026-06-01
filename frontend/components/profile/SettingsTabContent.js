@@ -2,16 +2,18 @@ import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { update2faSetting } from '../../lib/api';
 import ModalShell from '../ModalShell';
+import PasswordChangeModal from './PasswordChangeModal';
 
 export default function SettingsTabContent() {
   const { user, refreshUser, logout } = useAuth();
   const [modalOpen, setModalOpen] = useState(false);
+  const [passwordModalOpen, setPasswordModalOpen] = useState(false);
   const [pendingValue, setPendingValue] = useState(null);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const twoFactorEnabled = user?.two_factor_enabled !== false;
+  const twoFactorEnabled = user?.two_factor_enabled === true;
 
   const handleToggleClick = (newValue) => {
     setPendingValue(newValue);
@@ -65,32 +67,35 @@ export default function SettingsTabContent() {
             </button>
           </div>
         </div>
+        <div className="settings-row">
+          <div className="settings-row__label">
+            <span className="settings-row__name">Пароль</span>
+            <span className="settings-row__hint">Смена пароля с подтверждением по email</span>
+          </div>
+          <div className="settings-row__control">
+            <button type="button" className="profile-action-btn" onClick={() => setPasswordModalOpen(true)}>
+              Сменить пароль
+            </button>
+          </div>
+        </div>
       </section>
       <section className="settings-section">
         <h3 className="settings-section__title">Аккаунт</h3>
-        <div className="settings-row">
+        <div className="settings-row settings-row--logout">
           <div className="settings-row__label">
             <span className="settings-row__name">Выход из аккаунта</span>
-            <span className="settings-row__hint">Нажмите, чтобы выйти из текущего сеанса</span>
+            <span className="settings-row__hint">Завершить текущий сеанс на этом устройстве</span>
           </div>
           <div className="settings-row__control">
-            <button
-              type="button"
-              className="profile-logout-btn"
-              onClick={() => logout()}
-            >
-              Выйти
+            <button type="button" className="profile-logout-btn profile-logout-btn--styled" onClick={() => logout()}>
+              Выйти из аккаунта
             </button>
           </div>
         </div>
       </section>
       {modalOpen && (
         <ModalShell open onClose={() => setModalOpen(false)} overlayClassName="profile-modal-backdrop">
-          <div
-            className="profile-modal profile-modal--small"
-            onMouseDown={(e) => e.stopPropagation()}
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="profile-modal profile-modal--small">
             <div className="profile-modal__head">
               <h3 className="profile-modal__title">Подтверждение</h3>
               <button type="button" className="profile-modal__close" onClick={() => setModalOpen(false)}>×</button>
@@ -108,6 +113,7 @@ export default function SettingsTabContent() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  autoComplete="current-password"
                 />
               </label>
               <div className="profile-modal__actions">
@@ -115,13 +121,14 @@ export default function SettingsTabContent() {
                   Отмена
                 </button>
                 <button type="submit" className="profile-modal__btn profile-modal__btn--primary" disabled={loading}>
-                  {loading ? '…' : 'Подтвердить'}
+                  {loading ? 'Подтверждение…' : 'Подтвердить'}
                 </button>
               </div>
             </form>
           </div>
         </ModalShell>
       )}
+      <PasswordChangeModal open={passwordModalOpen} onClose={() => setPasswordModalOpen(false)} />
     </>
   );
 }

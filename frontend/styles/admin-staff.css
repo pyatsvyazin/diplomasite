@@ -622,3 +622,47 @@
     font-size: 0.95rem;
     color: #555;
   }
+
+@media (max-width: 768px) {
+  .staff-card {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 14px 44px 14px 14px;
+  }
+
+  .staff-card__photo-wrap {
+    align-self: flex-start;
+  }
+
+  .staff-card__photo-wrap .avatar {
+    width: 56px !important;
+    height: 56px !important;
+  }
+
+  .staff-card__name {
+    font-size: 1rem;
+  }
+
+  .staff-card__meta {
+    font-size: 0.85rem;
+    word-break: break-word;
+  }
+
+  .staff-tabs__btn,
+  .staff-filters__input,
+  .staff-filters__select {
+    font-size: 0.85rem;
+  }
+
+  .staff-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .staff-filters__input,
+  .staff-filters__select {
+    width: 100%;
+    min-width: 0;
+  }
+}

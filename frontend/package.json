@@ -8,7 +8,9 @@
     "dev:next": "next dev",
     "dev:laravel": "cd ../backend && php artisan serve",
     "dev:soketi": "docker compose -f ../docker-compose.soketi.yml up",
-    "dev:soketi:npx": "npx --yes @soketi/soketi start"
+    "dev:soketi:npx": "npx --yes @soketi/soketi start",
+    "build": "next build",
+    "start": "next start"
   },
   "keywords": [],
   "author": "",

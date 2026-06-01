@@ -37,7 +37,7 @@ class ConversationSeeder extends Seeder
             ->whereDoesntHave('messages', function ($q) {
                 $q->where('type', '!=', MessageType::System->value);
             })
-            ->limit(5)
+            ->limit(15)
             ->get();
 
         foreach ($conversations as $conversation) {

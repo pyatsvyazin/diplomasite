@@ -30,6 +30,12 @@ class UsersTableSeeder extends Seeder
                 'password' => Hash::make('password'),
             ]),
             $row([
+                'full_name' => 'Администратор2',
+                'email' => 'admin2@test.ru',
+                'phone' => '79990000034',
+                'password' => Hash::make('password'),
+            ]),
+            $row([
                 'full_name' => 'Иванов Иван Иванович',
                 'email' => 'client1@test.ru',
                 'phone' => '79990000001',
@@ -57,6 +63,24 @@ class UsersTableSeeder extends Seeder
                 'full_name' => 'Новикова Елена Александровна',
                 'email' => 'client5@test.ru',
                 'phone' => '79990000005',
+                'password' => Hash::make('password'),
+            ]),
+            $row([
+                'full_name' => 'Морозов Сергей Петрович',
+                'email' => 'client6@test.ru',
+                'phone' => '79990000006',
+                'password' => Hash::make('password'),
+            ]),
+            $row([
+                'full_name' => 'Волкова Татьяна Игоревна',
+                'email' => 'client7@test.ru',
+                'phone' => '79990000007',
+                'password' => Hash::make('password'),
+            ]),
+            $row([
+                'full_name' => 'Лебедев Артём Владимирович',
+                'email' => 'client8@test.ru',
+                'phone' => '79990000008',
                 'password' => Hash::make('password'),
             ]),
             $row([

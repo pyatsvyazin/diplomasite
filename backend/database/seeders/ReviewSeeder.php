@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Request;
 use App\Models\Review;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class ReviewSeeder extends Seeder
@@ -56,6 +57,70 @@ class ReviewSeeder extends Seeder
 
             $at = $request->updated_at ?: now()->subDays(5);
             $review->forceFill(['created_at' => $at, 'updated_at' => $at])->saveQuietly();
+        }
+
+        $this->seedExtraReviewsForLawyerRatings($messages, $ratings, $anonymousFlags);
+
+        $count = Review::query()->where('status', Review::STATUS_PUBLISHED)->count();
+        $this->command?->info("ReviewSeeder: опубликованных отзывов — {$count}.");
+    }
+
+    /**
+     * Дополнительные отзывы на уже закрытые заявки (разные юристы) — для рейтинга на главной.
+     */
+    private function seedExtraReviewsForLawyerRatings(array $messages, array $ratings, array $anonymousFlags): void
+    {
+        $lawyers = User::query()
+            ->whereHas('roles', fn ($q) => $q->where('name', 'lawyer'))
+            ->orderBy('id')
+            ->get();
+
+        if ($lawyers->count() < 2) {
+            return;
+        }
+
+        $extraSubjects = [
+            'Демо: корпоративный спор (отзыв)',
+            'Демо: трудовой спор (отзыв)',
+            'Демо: наследственное дело (отзыв)',
+        ];
+
+        $clients = User::query()
+            ->whereHas('roles', fn ($q) => $q->where('name', 'client'))
+            ->orderBy('id')
+            ->get();
+
+        foreach ($extraSubjects as $idx => $subject) {
+            $lawyer = $lawyers[$idx % $lawyers->count()];
+            $client = $clients[$idx % max(1, $clients->count())];
+
+            $request = Request::query()->updateOrCreate(
+                ['subject' => $subject],
+                [
+                    'message' => 'Закрытая заявка для демонстрации отзывов и рейтинга юристов.',
+                    'client_id' => $client->id,
+                    'lawyer_id' => $lawyer->id,
+                    'name' => $client->full_name,
+                    'email' => $client->email,
+                    'phone' => $client->phone,
+                    'status' => Request::STATUS_CLOSED,
+                ]
+            );
+
+            $at = now()->subDays(14 + $idx);
+            $request->forceFill(['created_at' => $at, 'updated_at' => $at])->saveQuietly();
+
+            Review::query()->updateOrCreate(
+                ['request_id' => $request->id],
+                [
+                    'client_id' => $client->id,
+                    'lawyer_id' => $lawyer->id,
+                    'rating' => [9, 10, 8][$idx % 3],
+                    'message' => $messages[($idx + 3) % count($messages)],
+                    'is_anonymous' => $anonymousFlags[$idx % count($anonymousFlags)],
+                    'status' => Review::STATUS_PUBLISHED,
+                ]
+            );
         }
     }
 }

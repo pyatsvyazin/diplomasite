@@ -19,9 +19,11 @@ class DatabaseSeeder extends Seeder
         $this->call(LawyerSpecialtySeeder::class);
         $this->call(RequestSeeder::class);
         $this->call(ServiceSeeder::class);
-        $this->call(ReviewSeeder::class);
         $this->call(ConversationSeeder::class);
+        $this->call(MeetingSeeder::class);
+        $this->call(ReviewSeeder::class);
         $this->call(PostSeeder::class);
         $this->call(StaffExtraSeeder::class);
+        $this->call(ActivityEventSeeder::class);
     }
 }

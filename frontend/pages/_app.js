@@ -28,6 +28,7 @@ import '../styles/profile-dashboard.css';
 import '../styles/admin-analytics.css';
 import '../styles/home-mobile.css';
 import '../styles/contacts-page.css';
+import '../styles/about-page.css';
 import '../styles/password-rules.css';
 import { useRouter } from 'next/router';
 import { AuthProvider } from '../context/AuthContext';

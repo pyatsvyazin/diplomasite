@@ -229,6 +229,17 @@
   width: 64%;
 }
 
+@media (max-width: 768px) {
+  .post-detail {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .post-detail__sheet {
+    padding: 16px 14px 20px;
+  }
+}
+
 @media (max-width: 960px) {
   .post-detail__grid {
     grid-template-columns: 1fr;

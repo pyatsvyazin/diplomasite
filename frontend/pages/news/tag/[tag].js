@@ -66,8 +66,8 @@ export default function NewsByTagPage() {
 
   return (
     <div className="page news-page">
-      <p><Link href="/news">← Все новости</Link></p>
-      <h1 className="news-page__title">Публикации по тегу: #{tag}</h1>
+      <section className="page-section block-section">
+      <h1 className="page-heading news-page__title">Публикации по тегу: #{tag}</h1>
       {loading && <p>Загрузка...</p>}
       {error && <p className="news-page__error">{error}</p>}
       {!loading && !error && items.length === 0 && <p>По этому тегу пока нет публикаций.</p>}
@@ -124,6 +124,7 @@ export default function NewsByTagPage() {
           />
         </>
       )}
+      </section>
     </div>
   );
 }

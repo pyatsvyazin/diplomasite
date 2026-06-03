@@ -32,7 +32,8 @@ export default function ReviewsPage() {
 
   return (
     <div className="page reviews-page">
-      <h1>Отзывы</h1>
+      <section className="page-section block-section">
+      <h1 className="page-heading">Отзывы</h1>
       <div className="reviews-page__toolbar">
         <label className="reviews-page__field">
           <span className="reviews-page__label">Юрист</span>
@@ -86,6 +87,7 @@ export default function ReviewsPage() {
           ))}
         </ul>
       )}
+      </section>
       <HomeFooter />
     </div>
   );

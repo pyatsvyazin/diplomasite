@@ -59,8 +59,9 @@ export default function NewsPage() {
 
   return (
     <div className="page news-page">
-      <h1 className="news-page__title">Новости и публикации</h1>
-      <p className="news-page__subtitle">Актуальные материалы, комментарии и юридические разборы.</p>
+      <section className="page-section block-section">
+      <h1 className="page-heading news-page__title">Новости и публикации</h1>
+      <p className="page-lead news-page__subtitle">Актуальные материалы, комментарии и юридические разборы.</p>
 
       {loading && (
         <div className="news-grid" aria-hidden>
@@ -141,6 +142,7 @@ export default function NewsPage() {
           />
         </>
       )}
+      </section>
       <HomeFooter />
     </div>
   );

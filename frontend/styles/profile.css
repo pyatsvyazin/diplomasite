@@ -88,6 +88,65 @@
   padding-top: 0.25rem;
 }
 
+@media (max-width: 768px) {
+  .profile-card__body {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding-bottom: 1rem;
+    gap: 0;
+  }
+
+  .profile-card__avatar-wrap {
+    margin-top: -56px;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .profile-card__main {
+    width: 100%;
+    padding-top: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .profile-card__name {
+    text-align: center;
+  }
+
+  .profile-card__details {
+    width: 100%;
+    max-width: none;
+    padding: 0 1rem;
+    box-sizing: border-box;
+    align-self: stretch;
+  }
+
+  .profile-card__details li {
+    justify-content: flex-start;
+    text-align: left;
+    width: 100%;
+  }
+
+  .profile-card__detail--editable,
+  .profile-card__detail--static {
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .profile-card__detail--editable {
+    padding-left: 0;
+  }
+
+  .profile-card__menu-wrap {
+    top: 8px;
+    right: 8px;
+  }
+}
+
 .profile-card__name {
   margin: 0 0 0.75rem;
   font-size: 1.25rem;
@@ -122,6 +181,8 @@
 
 .profile-card__detail--static {
   cursor: default;
+  width: fit-content;
+  max-width: 100%;
 }
 
 .profile-card__detail--editable {
@@ -841,7 +902,9 @@
   gap: 16px;
   flex: 1 1 auto;
   min-height: 0;
+  overflow-x: hidden;
   overflow-y: auto;
+  padding-right: 6px;
   scrollbar-width: thin;
   scrollbar-color: rgba(196, 157, 108, 0.65) rgba(196, 157, 108, 0.12);
 }
@@ -878,9 +941,118 @@
 @media (max-width: 768px) {
   .consultations-tab__main-layout {
     grid-template-columns: 1fr;
+    gap: 14px;
   }
 
   .consultations-tab__cards-grid {
     grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .consultations-tab .consultations-tab__section-title {
+    font-size: 0.92rem;
+    font-weight: 600;
+    margin: 0 0 0.55rem;
+  }
+
+  .consultations-tab .consultations-tab__section {
+    margin-bottom: 1rem;
+  }
+
+  .consultations-tab .consult-cal__nav {
+    margin-bottom: 0.5rem;
+  }
+
+  .consultations-tab .consult-cal__nav span {
+    font-size: 0.88rem;
+    font-weight: 600;
+  }
+
+  .consultations-tab .consult-cal__nav button {
+    font-size: 0.85rem;
+    padding: 0.2rem 0.45rem;
+  }
+
+  .consultations-tab .consult-cal__weekdays {
+    font-size: 0.68rem;
+    gap: 2px;
+  }
+
+  .consultations-tab .consult-cal__cells {
+    gap: 2px;
+  }
+
+  .consultations-tab .consult-cal__cell {
+    min-height: 38px;
+    padding: 2px;
+    border-radius: 6px;
+  }
+
+  .consultations-tab .consult-cal__day-num {
+    font-size: 0.72rem;
+  }
+
+  .consultations-tab .consult-cal__dot {
+    width: 5px;
+    height: 5px;
+  }
+
+  .consultations-tab .consult-cal__create-btn {
+    font-size: 0.72rem;
+    padding: 4px 8px;
+  }
+
+  .consultations-tab .consultations-tab__filters label {
+    font-size: 0.82rem;
+  }
+
+  .consultations-tab .consultations-tab__select {
+    font-size: 0.82rem;
+    padding: 0.25rem 0.4rem;
+  }
+
+  .consultations-tab .consultations-tab__empty {
+    font-size: 0.82rem;
+    margin: 0;
+  }
+
+  .consultations-tab .meeting-card {
+    padding: 0.6rem 0.7rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .consultations-tab .meeting-card__title {
+    font-size: 0.88rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .consultations-tab .meeting-card__head {
+    font-size: 0.72rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .consultations-tab .meeting-card__meta,
+  .consultations-tab .meeting-card__lawyer {
+    font-size: 0.75rem;
+    margin: 0.15rem 0;
+  }
+
+  .consultations-tab .meeting-card__link {
+    font-size: 0.78rem;
+    margin-top: 0.35rem;
+  }
+
+  .consultations-tab .meeting-card__actions {
+    margin-top: 0.45rem;
+    gap: 0.25rem;
+  }
+
+  .consultations-tab .meeting-card__actions .meeting-form__btn {
+    font-size: 0.7rem;
+    padding: 0.28rem 0.42rem;
+  }
+
+  .consultations-tab__nearest-grid {
+    gap: 10px;
   }
 }

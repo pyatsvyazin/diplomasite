@@ -131,9 +131,11 @@ export default function RequestMeetingsPanel({
 
         {showCreateButton && canCreate && (
 
-          <button type="button" className="request-meetings__add" onClick={openCreate}>
+          <button type="button" className="request-meetings__add" onClick={openCreate} title="Назначить консультацию">
 
-            Назначить консультацию
+            <span className="request-meetings__add-text">Назначить консультацию</span>
+
+            <span className="request-meetings__add-icon" aria-hidden>+</span>
 
           </button>
 

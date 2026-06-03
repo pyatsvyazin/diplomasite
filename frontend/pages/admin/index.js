@@ -5,7 +5,7 @@ export default function AdminIndexPage() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace('/admin/users');
+    router.replace('/admin/requests');
   }, [router]);
 
   return null;

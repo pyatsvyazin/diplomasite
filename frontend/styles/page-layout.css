@@ -1,0 +1,41 @@
+/* Единый отступ от навигации и оформление внутренних страниц */
+
+.app-main > .home > .block-section:first-child,
+.app-main > .page > .hero.block-section:first-child,
+.app-main > .page > .block-section:first-child,
+.app-main > .contacts-page > :first-child {
+  margin-top: 0;
+}
+
+.page-section {
+  background: #fff;
+  border-radius: 20px;
+  padding: 20px 22px 24px;
+}
+
+.page > .page-section.block-section:first-child {
+  margin-top: 0;
+}
+
+.page-heading {
+  margin: 0 0 8px;
+  font-family: var(--home-heading-font);
+  font-size: 1.5rem;
+  font-weight: var(--home-heading-weight);
+  color: #1a1a2e;
+  border-bottom: var(--home-heading-underline);
+  display: inline-block;
+  padding-bottom: 0.5rem;
+}
+
+.page-lead {
+  margin: 0 0 20px;
+  color: #666;
+  line-height: 1.5;
+  max-width: 42rem;
+}
+
+.news-page__title,
+.reviews-page .page-heading {
+  margin-bottom: 8px;
+}

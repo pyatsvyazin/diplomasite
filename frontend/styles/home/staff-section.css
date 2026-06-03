@@ -65,9 +65,9 @@
 
 .staff-section__slider-wrap {
   display: grid;
-  grid-template-columns: minmax(1.5rem, auto) minmax(0, 1fr) minmax(1.5rem, auto);
+  grid-template-columns: minmax(1.25rem, auto) minmax(0, 1fr) minmax(1.25rem, auto);
   align-items: center;
-  gap: 0.5rem 0.75rem;
+  gap: 0.35rem 0.5rem;
   overflow-x: clip;
   max-width: 100%;
 }
@@ -197,6 +197,28 @@
   font-size: 0.88rem;
   color: #888;
   font-style: italic;
+}
+
+@media (max-width: 560px) {
+  .staff-section__photo-wrap {
+    height: auto;
+    aspect-ratio: 4 / 5;
+    max-height: 220px;
+  }
+
+  .staff-section__photo {
+    object-fit: cover;
+    object-position: center top;
+  }
+
+  .staff-section__badges {
+    justify-content: flex-start;
+  }
+
+  .staff-section__name,
+  .staff-section__rating-row {
+    text-align: left;
+  }
 }
 
 .staff-section__badges {

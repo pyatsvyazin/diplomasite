@@ -46,10 +46,6 @@
     background: #fff;
   }
 
-  .request-card--with-chat {
-    padding-right: 52px;
-  }
-  
   .request-card__row {
     display: flex;
     gap: 16px;
@@ -378,7 +374,13 @@
   @media (max-width: 768px) {
     .request-card {
       padding: 12px;
-      padding-right: 48px;
+    }
+
+    .request-card--with-chat .request-chat-link {
+      top: 8px;
+      right: 8px;
+      width: 34px;
+      height: 34px;
     }
 
     .request-card__row,

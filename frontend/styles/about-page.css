@@ -410,6 +410,24 @@
   min-height: 56px;
 }
 
+@media (max-width: 640px) {
+  .about-service-card__action {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .about-service-cards {
+    justify-items: center;
+  }
+
+  .about-service-card {
+    width: 100%;
+    max-width: 360px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
 @media (max-width: 479px) {
   .about-cta__actions {
     flex-direction: column;
@@ -418,5 +436,16 @@
 
   .about-cta__actions .about-btn {
     width: 100%;
+    max-width: 100%;
+    flex: none;
+    padding: 12px 20px;
+    font-size: 1rem;
+    min-height: 44px;
+  }
+
+  .about-cta__actions .about-btn--lg {
+    padding: 12px 20px;
+    font-size: 1rem;
+    min-height: 44px;
   }
 }

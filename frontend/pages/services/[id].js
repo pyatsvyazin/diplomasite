@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { getService } from '../../lib/api';
@@ -34,34 +33,34 @@ export default function ServiceDetailPage() {
   if (!router.isReady) {
     return (
       <div className="page services-detail-page">
-        <p>Загрузка…</p>
+        <section className="page-section block-section services-detail-page__sheet">
+          <p>Загрузка…</p>
+        </section>
       </div>
     );
   }
 
   return (
     <div className="page services-detail-page">
-      <p className="services-detail-page__back">
-        <Link href="/">← На главную</Link>
-      </p>
+      <section className="page-section block-section services-detail-page__sheet">
+        {loading && <p>Загрузка…</p>}
+        {error && !loading && <p className="services-detail-page__error">{error}</p>}
 
-      {loading && <p>Загрузка…</p>}
-      {error && !loading && <p className="services-detail-page__error">{error}</p>}
-
-      {!loading && service && (
-        <>
-          <p className="services-detail-page__category">{service.category}</p>
-          <h1 className="services-detail-page__title">{service.name}</h1>
-          <p className="services-detail-page__price">{service.formatted_price}</p>
-          {service.full_description ? (
-            <div className="services-detail-page__body">{service.full_description}</div>
-          ) : service.short_description ? (
-            <p className="services-detail-page__body">{service.short_description}</p>
-          ) : (
-            <p className="services-detail-page__muted">Подробное описание скоро появится.</p>
-          )}
-        </>
-      )}
+        {!loading && service && (
+          <>
+            <p className="services-detail-page__category">{service.category}</p>
+            <h1 className="page-heading services-detail-page__title">{service.name}</h1>
+            <p className="services-detail-page__price">{service.formatted_price}</p>
+            {service.full_description ? (
+              <div className="services-detail-page__body">{service.full_description}</div>
+            ) : service.short_description ? (
+              <p className="services-detail-page__body">{service.short_description}</p>
+            ) : (
+              <p className="services-detail-page__muted">Подробное описание скоро появится.</p>
+            )}
+          </>
+        )}
+      </section>
       <HomeFooter />
     </div>
   );

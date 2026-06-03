@@ -135,7 +135,7 @@ export default function Navigation() {
                     <div className="nav__profile-actions">
                       {isAdminOrLawyer && (
                         <Link
-                          href="/admin/users"
+                          href="/admin/requests"
                           className="nav__profile-action nav__profile-action--admin"
                           onClick={() => setOpenPanel(null)}
                         >

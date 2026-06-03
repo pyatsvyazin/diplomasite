@@ -72,6 +72,24 @@ textarea {
 .page {
   padding: 0;
 }
+
+/* Прокрутка списков: без горизонтальной полосы и «среза» контента */
+.ui-scroll-y {
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+.ui-scroll-y--no-bar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.ui-scroll-y--no-bar::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
 /* блоки */
 .block-section {
   background-color: white;

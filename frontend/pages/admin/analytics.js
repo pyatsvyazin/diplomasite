@@ -225,10 +225,16 @@ function AnalyticsCharts({ data }) {
       <div className="admin-analytics__chart-card admin-analytics__chart-card--wide">
         <h3>Популярные темы обращений</h3>
         <ResponsiveContainer width="100%" height={280}>
-          <BarChart data={barData} layout="vertical" margin={{ left: 8, right: 16 }}>
+            <BarChart data={barData} layout="vertical" margin={{ left: 4, right: 12, top: 4, bottom: 4 }}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis type="number" allowDecimals={false} />
-            <YAxis type="category" dataKey="subject" width={140} tick={{ fontSize: 11 }} />
+            <XAxis type="number" allowDecimals={false} tick={{ fontSize: 10 }} />
+            <YAxis
+              type="category"
+              dataKey="subject"
+              width={100}
+              tick={{ fontSize: 10 }}
+              tickFormatter={(v) => (String(v).length > 22 ? `${String(v).slice(0, 20)}…` : v)}
+            />
             <Tooltip />
             <Bar dataKey="count" fill="#3b82f6" name="Заявки" radius={[0, 4, 4, 0]} />
           </BarChart>
@@ -247,6 +253,7 @@ export default function AdminAnalyticsPage() {
   const [error, setError] = useState('');
   const [calendarPage, setCalendarPage] = useState(1);
   const [activityPage, setActivityPage] = useState(1);
+  const [mobileFeedTab, setMobileFeedTab] = useState('calendar');
   const readyRef = useRef(false);
 
   const load = useCallback(
@@ -290,8 +297,31 @@ export default function AdminAnalyticsPage() {
 
             <AnalyticsCharts data={data} />
 
+            <div className="admin-analytics__feed-tabs" role="tablist" aria-label="Разделы ленты">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={mobileFeedTab === 'calendar'}
+                className={`admin-analytics__feed-tab${mobileFeedTab === 'calendar' ? ' admin-analytics__feed-tab--active' : ''}`}
+                onClick={() => setMobileFeedTab('calendar')}
+              >
+                Консультации
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={mobileFeedTab === 'activity'}
+                className={`admin-analytics__feed-tab${mobileFeedTab === 'activity' ? ' admin-analytics__feed-tab--active' : ''}`}
+                onClick={() => setMobileFeedTab('activity')}
+              >
+                Последние действия
+              </button>
+            </div>
+
             <div className={`admin-analytics__bottom${listLoading ? ' admin-analytics__bottom--loading' : ''}`}>
-              <section className="admin-analytics__section">
+              <section
+                className={`admin-analytics__section admin-analytics__section--calendar${mobileFeedTab !== 'calendar' ? ' admin-analytics__section--mobile-hidden' : ''}`}
+              >
                 <h2>Консультации в этом месяце</h2>
                 {(data.calendar_meetings || []).length === 0 ? (
                   <p>Нет назначенных консультаций в текущем месяце.</p>
@@ -327,7 +357,9 @@ export default function AdminAnalyticsPage() {
                   </>
                 )}
               </section>
-              <section className="admin-analytics__section">
+              <section
+                className={`admin-analytics__section admin-analytics__section--activity${mobileFeedTab !== 'activity' ? ' admin-analytics__section--mobile-hidden' : ''}`}
+              >
                 <h2>Последние действия</h2>
                 {(data.recent_activity || []).length === 0 ? (
                   <p>Нет записей. События появятся после действий сотрудников в системе.</p>

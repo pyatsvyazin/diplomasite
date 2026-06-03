@@ -3,6 +3,9 @@ import AdminLayout from '../../../components/AdminLayout';
 import ModalShell from '../../../components/ModalShell';
 import TipTapEditor, { EMPTY_DOC } from '../../../components/admin/TipTapEditor';
 import { createAdminPost, getAdminPosts, updateAdminPost, uploadAdminPostImage } from '../../../lib/api';
+import PostsPagination from '../../../components/PostsPagination';
+
+const POSTS_LIST_PER_PAGE = 5;
 
 const TYPE_LABELS = {
   article: 'Статья',
@@ -131,6 +134,7 @@ export default function AdminContentNewsPage() {
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [listPage, setListPage] = useState(1);
   const lastSavedRef = useRef('');
   const coverInputRef = useRef(null);
   const selectedPost = useMemo(() => posts.find((p) => p.id === selectedId) || null, [posts, selectedId]);
@@ -148,6 +152,21 @@ export default function AdminContentNewsPage() {
       );
     });
   }, [posts, search, filterType, filterStatus]);
+
+  const listLastPage = Math.max(1, Math.ceil(filteredPosts.length / POSTS_LIST_PER_PAGE));
+
+  const paginatedPosts = useMemo(() => {
+    const start = (listPage - 1) * POSTS_LIST_PER_PAGE;
+    return filteredPosts.slice(start, start + POSTS_LIST_PER_PAGE);
+  }, [filteredPosts, listPage]);
+
+  useEffect(() => {
+    setListPage(1);
+  }, [search, filterType, filterStatus]);
+
+  useEffect(() => {
+    setListPage((p) => Math.min(Math.max(1, p), listLastPage));
+  }, [listLastPage]);
 
   useEffect(() => {
     setLoading(true);
@@ -309,25 +328,38 @@ export default function AdminContentNewsPage() {
             ) : filteredPosts.length === 0 ? (
               <p className="admin-empty">Посты не найдены</p>
             ) : (
-              <ul className="admin-posts__list">
-                {filteredPosts.map((post) => (
-                  <li key={post.id}>
-                    <button
-                      type="button"
-                      className={`admin-posts__item ${selectedId === post.id ? 'admin-posts__item--active' : ''}`}
-                      onClick={() => selectPost(post)}
-                    >
-                      <span className="admin-posts__item-title">{post.title}</span>
-                    <span className="admin-posts__item-meta">
-                      {TYPE_LABELS[post.type] || post.type} •{' '}
-                      <span className={`admin-status-chip admin-status-chip--${post.status}`}>
-                        {STATUS_LABELS[post.status] || post.status}
-                      </span>
-                    </span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
+              <>
+                <div className="admin-posts__list-wrap">
+                  <ul className="admin-posts__list">
+                    {paginatedPosts.map((post) => (
+                      <li key={post.id}>
+                        <button
+                          type="button"
+                          className={`admin-posts__item ${selectedId === post.id ? 'admin-posts__item--active' : ''}`}
+                          onClick={() => selectPost(post)}
+                        >
+                          <span className="admin-posts__item-title">{post.title}</span>
+                          <span className="admin-posts__item-meta">
+                            {TYPE_LABELS[post.type] || post.type} •{' '}
+                            <span className={`admin-status-chip admin-status-chip--${post.status}`}>
+                              {STATUS_LABELS[post.status] || post.status}
+                            </span>
+                          </span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                {listLastPage > 1 && (
+                  <div className="admin-posts__list-pagination">
+                    <PostsPagination
+                      page={listPage}
+                      lastPage={listLastPage}
+                      onPageChange={setListPage}
+                    />
+                  </div>
+                )}
+              </>
             )}
           </aside>
 

@@ -92,14 +92,6 @@ function ProfileCard({ user, onEditField, onAvatarChange, avatarUploading }) {
         <div className="profile-card__main">
           <h2 className="profile-card__name">{user.full_name || 'ФИО'}</h2>
           <ul className="profile-card__details">
-            <li className="profile-card__detail profile-card__detail--static">
-              <img src="/icons/profile/calendar_1.svg" alt="" width={18} height={18} aria-hidden />
-              <span>Регистрация: {createdAt}</span>
-            </li>
-            <li className="profile-card__detail profile-card__detail--static">
-              <img src="/icons/profile/id_2.svg" alt="" width={18} height={18} aria-hidden />
-              <span>Id: {user.id}</span>
-            </li>
             <li
               className="profile-card__detail profile-card__detail--editable"
               onClick={() => onEditField('full_name')}
@@ -137,6 +129,18 @@ function ProfileCard({ user, onEditField, onAvatarChange, avatarUploading }) {
               <span className="profile-card__detail-text">
                 <span className="profile-card__detail-value">Почта: {user.email || '—'}</span>
                 <span className="profile-card__detail-hint">Нажмите, чтобы изменить</span>
+              </span>
+            </li>
+            <li className="profile-card__detail profile-card__detail--static">
+              <img src="/icons/profile/calendar_1.svg" alt="" width={18} height={18} aria-hidden />
+              <span className="profile-card__detail-text">
+                <span className="profile-card__detail-value">Регистрация: {createdAt}</span>
+              </span>
+            </li>
+            <li className="profile-card__detail profile-card__detail--static">
+              <img src="/icons/profile/id_2.svg" alt="" width={18} height={18} aria-hidden />
+              <span className="profile-card__detail-text">
+                <span className="profile-card__detail-value">Id: {user.id}</span>
               </span>
             </li>
           </ul>

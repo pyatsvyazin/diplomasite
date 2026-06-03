@@ -30,24 +30,26 @@ export default function ServicesBusinessPage() {
 
   return (
     <div className="page services-list-page">
-      <h1>Услуги для бизнеса</h1>
-      {loading && <p>Загрузка…</p>}
-      {error && <p className="services-list-page__error">{error}</p>}
-      {!loading && !error && items.length === 0 && (
-        <p>В этом разделе пока нет услуг — каталог пополняется.</p>
-      )}
-      {!loading && !error && items.length > 0 && (
-        <ul className="services-list-page__list">
-          {items.map((s) => (
-            <li key={s.id}>
-              <Link href={`/services/${s.id}`} className="services-list-page__link">
-                <span className="services-list-page__name">{s.name}</span>
-                <span className="services-list-page__price">{s.formatted_price}</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
+      <section className="page-section block-section services-list-page__sheet">
+        <h1 className="page-heading">Услуги для бизнеса</h1>
+        {loading && <p>Загрузка…</p>}
+        {error && <p className="services-list-page__error">{error}</p>}
+        {!loading && !error && items.length === 0 && (
+          <p>В этом разделе пока нет услуг — каталог пополняется.</p>
+        )}
+        {!loading && !error && items.length > 0 && (
+          <ul className="services-list-page__list">
+            {items.map((s) => (
+              <li key={s.id}>
+                <Link href={`/services/${s.id}`} className="services-list-page__link">
+                  <span className="services-list-page__name">{s.name}</span>
+                  <span className="services-list-page__price">{s.formatted_price}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
       <HomeFooter />
     </div>
   );

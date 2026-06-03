@@ -16,12 +16,25 @@ class MessageSendService
 {
     private const ALLOWED_IMAGE = ['image/jpeg', 'image/png'];
 
+    private const MIME_EXTENSIONS = [
+        'image/jpeg' => 'jpg',
+        'image/png' => 'png',
+        'application/pdf' => 'pdf',
+        'application/msword' => 'doc',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'docx',
+    ];
+
     private const ALLOWED_FILE = [
         'application/pdf',
         'application/msword',
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     ];
 
+    private function extensionForMime(string $mime): string
+    {
+        return self::MIME_EXTENSIONS[$mime] ?? 'bin';
+    }
+    
     public function send(
         Conversation $conversation,
         User $sender,
@@ -56,7 +69,7 @@ class MessageSendService
                 }
             }
 
-            $ext = strtolower($file->getClientOriginalExtension() ?: 'bin');
+            $ext = $this->extensionForMime($mime);
             $safeName = Str::uuid()->toString().'.'.$ext;
             $relativePath = 'chat/'.$safeName;
             $file->storeAs('chat', $safeName, 'public');

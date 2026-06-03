@@ -211,13 +211,22 @@ class AuthController extends Controller
         ]);
 
         $key = '2fa:' . $validated['pending_2fa_id'];
+        $attemptsKey = '2fa_attempts:' . $validated['pending_2fa_id'];
         $data = Cache::get($key);
         if (!$data || !Hash::check($validated['code'], $data['code_hash'])) {
+            $attempts = (int) Cache::get($attemptsKey, 0) + 1;
+            Cache::put($attemptsKey, $attempts, now()->addMinutes(15));
+            if ($attempts >= 5) {
+                Cache::forget($key);
+                Cache::forget($attemptsKey);
+            }
+
             return response()->json([
                 'message' => 'Неверный или устаревший код. Выполните вход снова.',
             ], 400);
         }
 
+        Cache::forget($attemptsKey);
         Cache::forget($key);
         $user = User::findOrFail($data['user_id']);
         $user->tokens()->delete();
@@ -301,10 +310,10 @@ class AuthController extends Controller
     public function uploadAvatar(Request $request): JsonResponse
     {
         $request->validate([
-            'avatar' => 'required|image|max:2048',
+            'avatar' => 'required|mimes:jpeg,jpg,png|max:2048',
         ], [
             'avatar.required' => 'Выберите изображение.',
-            'avatar.image' => 'Файл должен быть изображением.',
+            'avatar.mimes' => 'Допустимы только JPG и PNG.',
             'avatar.max' => 'Размер файла не более 2 МБ.',
         ]);
 
@@ -420,16 +429,10 @@ class AuthController extends Controller
         ]);
 
         $user = User::where('email', $request->email)->first();
-        if (!$user) {
-            return response()->json([
-                'message' => 'Пользователь с таким email не зарегистрирован.',
-            ], 422);
-        }
+        $successMessage = 'Если указанный email зарегистрирован, на него отправлена ссылка для сброса пароля.';
 
-        if ($user->is_blocked) {
-            return response()->json([
-                'message' => 'Аккаунт заблокирован.',
-            ], 403);
+        if (!$user || $user->is_blocked) {
+            return response()->json(['message' => $successMessage]);
         }
 
         $plainToken = Str::random(64);
@@ -457,7 +460,7 @@ class AuthController extends Controller
         }
 
         return response()->json([
-            'message' => 'На вашу почту отправлена ссылка для сброса пароля.',
+            'message' => $successMessage,
         ]);
     }
 

@@ -45,6 +45,14 @@ class MeetingPolicy
             return false;
         }
 
+        if ($this->isAdmin($user)) {
+            return !in_array($request->status, [ClientRequest::STATUS_CLOSED, ClientRequest::STATUS_REJECTED], true);
+        }
+
+        if ((int) $request->lawyer_id !== (int) $user->id) {
+            return false;
+        }
+
         return !in_array($request->status, [ClientRequest::STATUS_CLOSED, ClientRequest::STATUS_REJECTED], true);
     }
 

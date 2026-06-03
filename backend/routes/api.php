@@ -29,13 +29,13 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/verify-email', [AuthController::class, 'verifyEmail']);
-Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
-Route::post('/reset-password', [AuthController::class, 'resetPassword']);
-Route::post('/verify-2fa', [AuthController::class, 'verify2fa']);
-Route::post('/request', [RequestController::class, 'store']);
+Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:auth-sensitive');
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:auth-login');
+Route::post('/verify-email', [AuthController::class, 'verifyEmail'])->middleware('throttle:auth-sensitive');
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->middleware('throttle:auth-sensitive');
+Route::post('/reset-password', [AuthController::class, 'resetPassword'])->middleware('throttle:auth-sensitive');
+Route::post('/verify-2fa', [AuthController::class, 'verify2fa'])->middleware('throttle:auth-sensitive');
+Route::post('/request', [RequestController::class, 'store'])->middleware('throttle:public-forms');
 Route::post('/review', [ReviewController::class, 'store']);
 Route::get('/reviews/lawyers', [ReviewController::class, 'lawyersWithPublishedReviews']);
 Route::get('/reviews', [ReviewController::class, 'index']);

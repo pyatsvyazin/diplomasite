@@ -116,7 +116,7 @@ class StaffController extends Controller
         ]);
 
         if ($request->hasFile('avatar')) {
-            $request->validate(['avatar' => 'image|max:2048'], ['avatar.image' => 'Файл должен быть изображением.', 'avatar.max' => 'Размер файла не более 2 МБ.']);
+            $request->validate(['avatar' => 'mimes:jpeg,jpg,png|max:2048'], ['avatar.mimes' => 'Допустимы только JPG и PNG.', 'avatar.max' => 'Размер файла не более 2 МБ.']);
             $path = $request->file('avatar')->store('avatars', 'public');
             if ($user->avatar_path) {
                 Storage::disk('public')->delete($user->avatar_path);

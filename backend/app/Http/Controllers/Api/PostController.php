@@ -14,17 +14,12 @@ class PostController extends Controller
     {
         $query = Post::query()->with('author:id,full_name');
         $type = (string) $request->query('type', '');
-        $status = (string) $request->query('status', '');
         $tag = trim(mb_strtolower((string) $request->query('tag', '')));
 
         if ($type !== '') {
             $query->where('type', $type);
         }
-        if ($status !== '') {
-            $query->where('status', $status);
-        } else {
-            $query->where('status', PostStatus::Published->value);
-        }
+        $query->where('status', PostStatus::Published->value);
         if ($tag !== '') {
             $query->whereJsonContains('keywords', $tag);
         }
@@ -54,6 +49,7 @@ class PostController extends Controller
         $post = Post::query()
             ->with('author:id,full_name')
             ->where('slug', $slug)
+            ->where('status', PostStatus::Published->value)
             ->firstOrFail();
 
         return response()->json(['data' => $post]);

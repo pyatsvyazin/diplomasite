@@ -32,6 +32,7 @@ import '../styles/about-page.css';
 import '../styles/page-layout.css';
 import '../styles/password-rules.css';
 import { useRouter } from 'next/router';
+import Head from 'next/head';
 import { AuthProvider } from '../context/AuthContext';
 import Navigation from '../components/Navigation';
 import YandexMetrika from '../components/YandexMetrika';
@@ -42,6 +43,11 @@ export default function App({ Component, pageProps }) {
 
   return (
     <AuthProvider>
+      <Head>
+        <link rel="icon" href="/icons/logo.svg" type="image/svg+xml" />
+        <link rel="shortcut icon" href="/icons/logo.svg" type="image/svg+xml" />
+        <link rel="apple-touch-icon" href="/icons/logo.svg" />
+      </Head>
       <YandexMetrika />
       <Navigation />
       <main className={`app-main${isAuthRoute ? ' app-main--auth' : ''}`}>

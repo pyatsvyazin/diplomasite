@@ -7,7 +7,8 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken as Middleware;
 class VerifyCsrfToken extends Middleware
 {
     /**
-     * The URIs that should be excluded from CSRF verification.
+     * CSRF только для маршрутов middleware-группы «web» (Blade).
+     * JSON API (/api/*) — отдельная группа без CSRF, авторизация Bearer Sanctum.
      *
      * @var array<int, string>
      */

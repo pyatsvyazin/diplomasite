@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
-import { getApiUrl } from '../lib/api';
+import { getApiUrl, getApiHeaders } from '../lib/api';
 import { useAuth } from '../context/AuthContext';
 
 export function useLogin() {
@@ -18,7 +18,7 @@ export function useLogin() {
     try {
       const res = await fetch(getApiUrl('/login'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getApiHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ email, password }),
       });
       const data = await res.json();

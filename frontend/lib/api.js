@@ -10,6 +10,16 @@ export function getAuthHeaders() {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
+/** Заголовки для всех запросов к Laravel API (SPA + Sanctum Bearer). */
+export function getApiHeaders(extra = {}) {
+  return {
+    Accept: 'application/json',
+    'X-Requested-With': 'XMLHttpRequest',
+    ...getAuthHeaders(),
+    ...extra,
+  };
+}
+
 export function setAuthToken(token) {
   if (typeof window !== 'undefined') {
     localStorage.setItem('auth_token', token);
@@ -26,7 +36,7 @@ export async function requestPasswordReset(email) {
   const url = getApiUrl('/forgot-password');
   const res = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: getApiHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify({ email }),
   });
   const data = await res.json().catch(() => ({}));
@@ -38,7 +48,7 @@ export async function resetPasswordWithToken(payload) {
   const url = getApiUrl('/reset-password');
   const res = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: getApiHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(payload),
   });
   const data = await res.json().catch(() => ({}));
@@ -50,7 +60,7 @@ export async function verifyEmail(token, email) {
   const url = getApiUrl('/verify-email');
   const res = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: getApiHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify({ token, email }),
   });
   const data = await res.json().catch(() => ({}));
@@ -62,7 +72,7 @@ export async function verify2fa(pending2faId, code) {
   const url = getApiUrl('/verify-2fa');
   const res = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: getApiHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify({ pending_2fa_id: pending2faId, code }),
   });
   const data = await res.json().catch(() => ({}));
@@ -74,10 +84,7 @@ export async function submitRequest(data) {
   const url = getApiUrl('/request');
   const res = await fetch(url, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...getAuthHeaders(),
-    },
+    headers: getApiHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(data),
   });
   const body = await res.json().catch(() => ({}));
@@ -93,7 +100,7 @@ export async function getAdminRequests(status = '', page = 1, per_page = 20) {
   if (page) params.set('page', String(page));
   if (per_page) params.set('per_page', String(per_page));
   const url = getApiUrl('/admin/requests') + (params.toString() ? '?' + params.toString() : '');
-  const res = await fetch(url, { headers: getAuthHeaders() });
+  const res = await fetch(url, { headers: getApiHeaders() });
   if (!res.ok) throw new Error('Не удалось загрузить заявки');
   const body = await res.json().catch(() => ({}));
   return { data: body.data || [], meta: body.meta || null };
@@ -105,7 +112,7 @@ export async function updateAdminRequest(id, payload) {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
-      ...getAuthHeaders(),
+      ...getApiHeaders(),
     },
     body: JSON.stringify(payload),
   });
@@ -127,7 +134,7 @@ export async function getAdminAnalytics(params = {}) {
   if (params.activity_page) search.set('activity_page', String(params.activity_page));
   const qs = search.toString();
   const url = getApiUrl('/admin/analytics') + (qs ? `?${qs}` : '');
-  const res = await fetch(url, { headers: getAuthHeaders() });
+  const res = await fetch(url, { headers: getApiHeaders() });
   const body = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(body.message || 'Не удалось загрузить аналитику');
   return body.data;
@@ -137,7 +144,7 @@ export async function getAdminLawyers(search = '') {
   const params = new URLSearchParams();
   if (search) params.set('search', search);
   const url = getApiUrl('/admin/lawyers') + (params.toString() ? '?' + params.toString() : '');
-  const res = await fetch(url, { headers: getAuthHeaders() });
+  const res = await fetch(url, { headers: getApiHeaders() });
   if (!res.ok) throw new Error('Не удалось загрузить юристов');
   const data = await res.json();
   return data.data || [];
@@ -145,7 +152,7 @@ export async function getAdminLawyers(search = '') {
 
 export async function getMyRequests() {
   const url = getApiUrl('/requests/mine');
-  const res = await fetch(url, { headers: getAuthHeaders() });
+  const res = await fetch(url, { headers: getApiHeaders() });
   if (!res.ok) throw new Error('Не удалось загрузить заявки');
   const data = await res.json();
   return data.data || [];
@@ -153,7 +160,7 @@ export async function getMyRequests() {
 
 export async function getAdminStaff() {
   const url = getApiUrl('/admin/staff');
-  const res = await fetch(url, { headers: getAuthHeaders() });
+  const res = await fetch(url, { headers: getApiHeaders() });
   if (!res.ok) throw new Error('Не удалось загрузить сотрудников');
   const data = await res.json();
   return data.data || [];
@@ -161,7 +168,7 @@ export async function getAdminStaff() {
 
 export async function getAdminSpecialties() {
   const url = getApiUrl('/admin/specialties');
-  const res = await fetch(url, { headers: getAuthHeaders() });
+  const res = await fetch(url, { headers: getApiHeaders() });
   if (!res.ok) throw new Error('Не удалось загрузить специальности');
   const data = await res.json();
   return data.data || [];
@@ -173,7 +180,7 @@ export async function createAdminUser(payload) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      ...getAuthHeaders(),
+      ...getApiHeaders(),
     },
     body: JSON.stringify(payload),
   });
@@ -189,7 +196,7 @@ export async function createAdminSpecialty(name) {
   const url = getApiUrl('/admin/specialties');
   const res = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+    headers: getApiHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify({ name }),
   });
   const data = await res.json().catch(() => ({}));
@@ -201,7 +208,7 @@ export async function updateAdminSpecialty(id, name) {
   const url = getApiUrl(`/admin/specialties/${id}`);
   const res = await fetch(url, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+    headers: getApiHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify({ name }),
   });
   const data = await res.json().catch(() => ({}));
@@ -213,7 +220,7 @@ export async function deleteAdminSpecialty(id) {
   const url = getApiUrl(`/admin/specialties/${id}`);
   const res = await fetch(url, {
     method: 'DELETE',
-    headers: getAuthHeaders(),
+    headers: getApiHeaders(),
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || 'Не удалось удалить');
@@ -224,7 +231,7 @@ export async function updateLawyerSpecialties(lawyerId, specialtyIds) {
   const url = getApiUrl(`/admin/staff/${lawyerId}/specialties`);
   const res = await fetch(url, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+    headers: getApiHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify({ specialty_ids: specialtyIds }),
   });
   const data = await res.json().catch(() => ({}));
@@ -235,7 +242,7 @@ export async function updateLawyerSpecialties(lawyerId, specialtyIds) {
 export async function updateAdminStaffMember(id, payload) {
   const url = getApiUrl(`/admin/staff/${id}`);
   const isFormData = payload instanceof FormData;
-  const headers = { ...getAuthHeaders() };
+  const headers = { ...getApiHeaders() };
   if (!isFormData) {
     headers['Content-Type'] = 'application/json';
   }
@@ -259,7 +266,7 @@ export async function getAdminUsers(search = '', role = '') {
   if (search) params.set('search', search);
   if (role) params.set('role', role);
   const url = getApiUrl('/admin/users') + (params.toString() ? '?' + params.toString() : '');
-  const res = await fetch(url, { headers: getAuthHeaders() });
+  const res = await fetch(url, { headers: getApiHeaders() });
   if (!res.ok) throw new Error('Не удалось загрузить пользователей');
   const data = await res.json();
   return data.users || [];
@@ -271,7 +278,7 @@ export async function updateAdminUserBlock(userId, isBlocked) {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
-      ...getAuthHeaders(),
+      ...getApiHeaders(),
     },
     body: JSON.stringify({ is_blocked: isBlocked }),
   });
@@ -286,7 +293,7 @@ export async function updateAdminUserRole(userId, role) {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
-      ...getAuthHeaders(),
+      ...getApiHeaders(),
     },
     body: JSON.stringify({ role }),
   });
@@ -305,7 +312,7 @@ export async function getServices() {
 
 export async function getAdminServicesMeta() {
   const url = getApiUrl('/admin/services/meta');
-  const res = await fetch(url, { headers: getAuthHeaders() });
+  const res = await fetch(url, { headers: getApiHeaders() });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || 'Не удалось загрузить справочники');
   return data;
@@ -317,7 +324,7 @@ export async function getAdminServices(params = {}) {
   if (params.category) qs.set('category', params.category);
   const suffix = qs.toString() ? `?${qs.toString()}` : '';
   const url = getApiUrl(`/admin/services/manage${suffix}`);
-  const res = await fetch(url, { headers: getAuthHeaders() });
+  const res = await fetch(url, { headers: getApiHeaders() });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || 'Не удалось загрузить услуги');
   return data.data || [];
@@ -327,7 +334,7 @@ export async function createAdminService(payload) {
   const url = getApiUrl('/admin/services/manage');
   const res = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+    headers: getApiHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(payload),
   });
   const data = await res.json().catch(() => ({}));
@@ -345,7 +352,7 @@ export async function updateAdminService(id, payload) {
   const url = getApiUrl(`/admin/services/manage/${id}`);
   const res = await fetch(url, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+    headers: getApiHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(payload),
   });
   const data = await res.json().catch(() => ({}));
@@ -363,7 +370,7 @@ export async function deleteAdminService(id) {
   const url = getApiUrl(`/admin/services/manage/${id}`);
   const res = await fetch(url, {
     method: 'DELETE',
-    headers: getAuthHeaders(),
+    headers: getApiHeaders(),
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || 'Не удалось удалить услугу');
@@ -420,7 +427,7 @@ export async function getAdminPosts(params = {}) {
   if (params.tag) search.set('tag', params.tag);
   const qs = search.toString();
   const url = getApiUrl('/admin/posts') + (qs ? `?${qs}` : '');
-  const res = await fetch(url, { headers: getAuthHeaders() });
+  const res = await fetch(url, { headers: getApiHeaders() });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || 'Не удалось загрузить посты');
   return data.data || [];
@@ -430,7 +437,7 @@ export async function createAdminPost(payload) {
   const url = getApiUrl('/admin/posts');
   const res = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+    headers: getApiHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(payload),
   });
   const data = await res.json().catch(() => ({}));
@@ -442,7 +449,7 @@ export async function updateAdminPost(id, payload) {
   const url = getApiUrl(`/admin/posts/${id}`);
   const res = await fetch(url, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+    headers: getApiHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(payload),
   });
   const data = await res.json().catch(() => ({}));
@@ -456,7 +463,7 @@ export async function uploadAdminPostImage(file) {
   fd.append('image', file);
   const res = await fetch(url, {
     method: 'POST',
-    headers: { ...getAuthHeaders() },
+    headers: { ...getApiHeaders() },
     body: fd,
   });
   const data = await res.json().catch(() => ({}));
@@ -468,7 +475,7 @@ export async function deleteAdminPost(id) {
   const url = getApiUrl(`/admin/posts/${id}`);
   const res = await fetch(url, {
     method: 'DELETE',
-    headers: getAuthHeaders(),
+    headers: getApiHeaders(),
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || 'Не удалось удалить пост');
@@ -502,7 +509,7 @@ export async function createReview(payload) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      ...getAuthHeaders(),
+      ...getApiHeaders(),
     },
     body: JSON.stringify(payload),
   });
@@ -517,7 +524,7 @@ export async function uploadUserAvatar(file) {
   fd.append('avatar', file);
   const res = await fetch(url, {
     method: 'POST',
-    headers: getAuthHeaders(),
+    headers: getApiHeaders(),
     body: fd,
   });
   const body = await res.json().catch(() => ({}));
@@ -529,7 +536,7 @@ export async function moveAdminService(id, direction) {
   const url = getApiUrl(`/admin/services/manage/${id}/move`);
   const res = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+    headers: getApiHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify({ direction }),
   });
   const body = await res.json().catch(() => ({}));
@@ -541,7 +548,7 @@ export async function updateCurrentUser(payload) {
   const url = getApiUrl('/user');
   const res = await fetch(url, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+    headers: getApiHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(payload),
   });
   const body = await res.json().catch(() => ({}));
@@ -553,7 +560,7 @@ export async function update2faSetting(twoFactorEnabled, currentPassword) {
   const url = getApiUrl('/user/2fa');
   const res = await fetch(url, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+    headers: getApiHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify({
       two_factor_enabled: twoFactorEnabled,
       current_password: currentPassword,
@@ -568,7 +575,7 @@ export async function requestPasswordChangeCode() {
   const url = getApiUrl('/user/request-password-change');
   const res = await fetch(url, {
     method: 'POST',
-    headers: getAuthHeaders(),
+    headers: getApiHeaders(),
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || 'Не удалось отправить код');
@@ -579,7 +586,7 @@ export async function confirmPasswordChange(payload) {
   const url = getApiUrl('/user/confirm-password-change');
   const res = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+    headers: getApiHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(payload),
   });
   const data = await res.json().catch(() => ({}));
@@ -607,7 +614,7 @@ export function getPublicStorageUrl(relativePath) {
 
 export async function getConversations() {
   const url = getApiUrl('/chats');
-  const res = await fetch(url, { headers: getAuthHeaders() });
+  const res = await fetch(url, { headers: getApiHeaders() });
   const body = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(getApiErrorMessage(body, 'Не удалось загрузить список чатов'));
   return body.data || [];
@@ -615,7 +622,7 @@ export async function getConversations() {
 
 export async function getConversationByRequestId(requestId) {
   const url = getApiUrl(`/requests/${requestId}/conversation`);
-  const res = await fetch(url, { headers: getAuthHeaders() });
+  const res = await fetch(url, { headers: getApiHeaders() });
   const body = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(getApiErrorMessage(body, 'Не удалось загрузить чат'));
   return body;
@@ -627,7 +634,7 @@ export async function getConversationMessages(conversationId, params = {}) {
   if (params.per_page) search.set('per_page', String(params.per_page));
   const qs = search.toString();
   const url = getApiUrl(`/chats/${conversationId}/messages`) + (qs ? `?${qs}` : '');
-  const res = await fetch(url, { headers: getAuthHeaders() });
+  const res = await fetch(url, { headers: getApiHeaders() });
   const body = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(getApiErrorMessage(body, 'Не удалось загрузить сообщения'));
   return body;
@@ -635,7 +642,7 @@ export async function getConversationMessages(conversationId, params = {}) {
 
 export async function postConversationRead(conversationId) {
   const url = getApiUrl(`/chats/${conversationId}/read`);
-  const res = await fetch(url, { method: 'POST', headers: getAuthHeaders() });
+  const res = await fetch(url, { method: 'POST', headers: getApiHeaders() });
   const body = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(getApiErrorMessage(body, 'Не удалось отметить прочтение'));
   return body;
@@ -650,7 +657,7 @@ export async function postConversationTextMessage(conversationId, content, reply
     headers: {
       'Content-Type': 'application/json',
       Accept: 'application/json',
-      ...getAuthHeaders(),
+      ...getApiHeaders(),
     },
     body: JSON.stringify(payload),
   });
@@ -668,7 +675,7 @@ export async function postConversationFileMessage(conversationId, type, file, ca
   if (replyToMessageId) fd.append('reply_to_message_id', String(replyToMessageId));
   const res = await fetch(url, {
     method: 'POST',
-    headers: getAuthHeaders(),
+    headers: getApiHeaders(),
     body: fd,
   });
   const body = await res.json().catch(() => ({}));
@@ -683,7 +690,7 @@ export async function patchConversationMessage(conversationId, messageId, conten
     headers: {
       'Content-Type': 'application/json',
       Accept: 'application/json',
-      ...getAuthHeaders(),
+      ...getApiHeaders(),
     },
     body: JSON.stringify({ content }),
   });
@@ -696,7 +703,7 @@ export async function deleteConversationMessage(conversationId, messageId) {
   const url = getApiUrl(`/chats/${conversationId}/messages/${messageId}`);
   const res = await fetch(url, {
     method: 'DELETE',
-    headers: { Accept: 'application/json', ...getAuthHeaders() },
+    headers: getApiHeaders(),
   });
   const body = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(getApiErrorMessage(body, 'Не удалось удалить сообщение'));
@@ -705,7 +712,7 @@ export async function deleteConversationMessage(conversationId, messageId) {
 
 export async function downloadChatAttachment(conversationId, attachmentId) {
   const url = getApiUrl(`/chats/${conversationId}/attachments/${attachmentId}/download`);
-  const res = await fetch(url, { headers: getAuthHeaders() });
+  const res = await fetch(url, { headers: getApiHeaders() });
   if (!res.ok) throw new Error('Не удалось скачать файл');
   return res.blob();
 }
@@ -724,7 +731,7 @@ export async function getMeetings(params = {}) {
   if (params.request_id) search.set('request_id', String(params.request_id));
   const qs = search.toString();
   const url = getApiUrl('/meetings') + (qs ? `?${qs}` : '');
-  const res = await fetch(url, { headers: getAuthHeaders() });
+  const res = await fetch(url, { headers: getApiHeaders() });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || 'Не удалось загрузить консультации');
   return data.data || [];
@@ -732,7 +739,7 @@ export async function getMeetings(params = {}) {
 
 export async function getRequestMeetings(requestId) {
   const url = getApiUrl(`/requests/${requestId}/meetings`);
-  const res = await fetch(url, { headers: getAuthHeaders() });
+  const res = await fetch(url, { headers: getApiHeaders() });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || 'Не удалось загрузить консультации');
   return data.data || [];
@@ -742,7 +749,7 @@ export async function createRequestMeeting(requestId, payload) {
   const url = getApiUrl(`/requests/${requestId}/meetings`);
   const res = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+    headers: getApiHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(payload),
   });
   const data = await res.json().catch(() => ({}));
@@ -754,7 +761,7 @@ export async function updateMeeting(id, payload) {
   const url = getApiUrl(`/meetings/${id}`);
   const res = await fetch(url, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+    headers: getApiHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(payload),
   });
   const data = await res.json().catch(() => ({}));
@@ -763,8 +770,9 @@ export async function updateMeeting(id, payload) {
 }
 
 async function apiFetch(url, options = {}) {
+  const headers = getApiHeaders(options.headers || {});
   try {
-    return await fetch(url, options);
+    return await fetch(url, { ...options, headers });
   } catch {
     throw new Error(
       `Не удалось связаться с API (${API_BASE}). Проверьте, что backend запущен (php artisan serve) и адрес в NEXT_PUBLIC_API_URL верный.`,
@@ -776,7 +784,7 @@ export async function confirmMeeting(id) {
   const url = getApiUrl(`/meetings/${id}/confirm`);
   const res = await apiFetch(url, {
     method: 'POST',
-    headers: { Accept: 'application/json', ...getAuthHeaders() },
+    headers: getApiHeaders(),
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || 'Не удалось подтвердить');
@@ -787,7 +795,7 @@ export async function cancelMeeting(id, cancellation_reason) {
   const url = getApiUrl(`/meetings/${id}/cancel`);
   const res = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+    headers: getApiHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify({ cancellation_reason: cancellation_reason || null }),
   });
   const data = await res.json().catch(() => ({}));
@@ -797,7 +805,7 @@ export async function cancelMeeting(id, cancellation_reason) {
 
 export async function completeMeeting(id) {
   const url = getApiUrl(`/meetings/${id}/complete`);
-  const res = await fetch(url, { method: 'POST', headers: getAuthHeaders() });
+  const res = await fetch(url, { method: 'POST', headers: getApiHeaders() });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || 'Не удалось завершить');
   return data.data;
@@ -808,7 +816,7 @@ export async function getLawyerBusySlots(lawyerId, from, to) {
   if (from) search.set('from', from);
   if (to) search.set('to', to);
   const url = getApiUrl(`/lawyers/${lawyerId}/busy-slots`) + (search.toString() ? `?${search.toString()}` : '');
-  const res = await fetch(url, { headers: getAuthHeaders() });
+  const res = await fetch(url, { headers: getApiHeaders() });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || 'Не удалось загрузить занятость');
   return data.data || [];
@@ -823,7 +831,7 @@ export async function getNotifications(params = {}) {
   if (params.offset != null) search.set('offset', String(params.offset));
   const qs = search.toString();
   const url = getApiUrl('/notifications') + (qs ? `?${qs}` : '');
-  const res = await fetch(url, { headers: getAuthHeaders() });
+  const res = await fetch(url, { headers: getApiHeaders() });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || 'Не удалось загрузить уведомления');
   return { data: data.data || [], meta: data.meta || {} };
@@ -831,7 +839,7 @@ export async function getNotifications(params = {}) {
 
 export async function markNotificationRead(id) {
   const url = getApiUrl(`/notifications/${id}/read`);
-  const res = await fetch(url, { method: 'POST', headers: getAuthHeaders() });
+  const res = await fetch(url, { method: 'POST', headers: getApiHeaders() });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || 'Ошибка');
   return data.data;
@@ -839,7 +847,7 @@ export async function markNotificationRead(id) {
 
 export async function markAllNotificationsRead() {
   const url = getApiUrl('/notifications/read-all');
-  const res = await fetch(url, { method: 'POST', headers: getAuthHeaders() });
+  const res = await fetch(url, { method: 'POST', headers: getApiHeaders() });
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
     throw new Error(data.message || 'Ошибка');

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import { useAuth } from '../../context/AuthContext';
-import { getApiUrl, getAuthHeaders, updateAdminUserBlock, updateAdminUserRole } from '../../lib/api';
+import { getApiUrl, getApiHeaders, updateAdminUserBlock, updateAdminUserRole } from '../../lib/api';
 import { formatPhone } from '../../lib/phone';
 import { roleLabel } from '../../constants/userRoles';
 import AdminCreateUserModal from '../../components/admin/AdminCreateUserModal';
@@ -35,7 +35,7 @@ export default function AdminUsersPage() {
     params.set('sort_by', sortBy);
     params.set('sort_order', sortOrder);
     fetch(getApiUrl('/admin/users') + '?' + params.toString(), {
-      headers: getAuthHeaders(),
+      headers: getApiHeaders(),
     })
       .then((res) => {
         if (res.ok) return res.json();

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
-import { getApiUrl } from '../lib/api';
+import { getApiUrl, getApiHeaders } from '../lib/api';
 import { useAuth } from '../context/AuthContext';
 import { formatPhone, normalizeDigits, parsePhoneToDigits, isValidPhoneDigits } from '../lib/phone';
 import { isPasswordPairReady, validatePassword } from '../lib/validation';
@@ -47,7 +47,7 @@ export function useRegister() {
     try {
       const res = await fetch(getApiUrl('/register'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getApiHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify(payload),
       });
       const data = await res.json();

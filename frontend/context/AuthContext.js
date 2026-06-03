@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { getApiUrl, getAuthHeaders, setAuthToken, clearAuthToken } from '../lib/api';
+import { getApiUrl, getApiHeaders, setAuthToken, clearAuthToken } from '../lib/api';
 
 const AuthContext = createContext(null);
 
@@ -15,7 +15,7 @@ export function AuthProvider({ children }) {
       setLoading(false);
       return;
     }
-    fetch(getApiUrl('/user'), { headers: getAuthHeaders() })
+    fetch(getApiUrl('/user'), { headers: getApiHeaders() })
       .then((res) => {
         if (res.ok) return res.json();
         clearAuthToken();
@@ -37,7 +37,7 @@ export function AuthProvider({ children }) {
     try {
       await fetch(getApiUrl('/logout'), {
         method: 'POST',
-        headers: getAuthHeaders(),
+        headers: getApiHeaders(),
       });
     } catch (_) {}
     clearAuthToken();
@@ -49,7 +49,7 @@ export function AuthProvider({ children }) {
     const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
     if (!token) return;
     try {
-      const res = await fetch(getApiUrl('/user'), { headers: getAuthHeaders() });
+      const res = await fetch(getApiUrl('/user'), { headers: getApiHeaders() });
       if (res.ok) {
         const data = await res.json();
         setUser(data);

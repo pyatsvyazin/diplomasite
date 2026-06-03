@@ -1,6 +1,6 @@
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
-import { getApiUrl, getAuthHeaders } from './api';
+import { getApiUrl, getApiHeaders } from './api';
 
 let echoSingleton = null;
 
@@ -35,11 +35,7 @@ export function getEcho() {
         authorize: (socketId, callback) => {
           fetch(getApiUrl('/broadcasting/auth'), {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Accept: 'application/json',
-              ...getAuthHeaders(),
-            },
+            headers: getApiHeaders({ 'Content-Type': 'application/json' }),
             body: JSON.stringify({
               socket_id: socketId,
               channel_name: channel.name,

@@ -35,7 +35,6 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { AuthProvider } from '../context/AuthContext';
 import Navigation from '../components/Navigation';
-import YandexMetrika from '../components/YandexMetrika';
 
 export default function App({ Component, pageProps }) {
   const router = useRouter();
@@ -48,7 +47,6 @@ export default function App({ Component, pageProps }) {
         <link rel="shortcut icon" href="/icons/logo.svg" type="image/svg+xml" />
         <link rel="apple-touch-icon" href="/icons/logo.svg" />
       </Head>
-      <YandexMetrika />
       <Navigation />
       <main className={`app-main${isAuthRoute ? ' app-main--auth' : ''}`}>
         <Component {...pageProps} />

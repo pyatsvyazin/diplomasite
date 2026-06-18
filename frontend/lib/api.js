@@ -94,11 +94,12 @@ export async function submitRequest(data) {
   return body;
 }
 
-export async function getAdminRequests(status = '', page = 1, per_page = 20) {
+export async function getAdminRequests(status = '', page = 1, per_page = 20, options = {}) {
   const params = new URLSearchParams();
   if (status) params.set('status', status);
   if (page) params.set('page', String(page));
   if (per_page) params.set('per_page', String(per_page));
+  if (options.mine) params.set('mine', '1');
   const url = getApiUrl('/admin/requests') + (params.toString() ? '?' + params.toString() : '');
   const res = await fetch(url, { headers: getApiHeaders() });
   if (!res.ok) throw new Error('Не удалось загрузить заявки');
@@ -399,6 +400,7 @@ export async function getPosts(params = {}) {
   if (params.type) search.set('type', params.type);
   if (params.status) search.set('status', params.status);
   if (params.tag) search.set('tag', params.tag);
+  if (params.q) search.set('q', params.q);
   if (params.page) search.set('page', String(params.page));
   if (params.per_page) search.set('per_page', String(params.per_page));
   const qs = search.toString();
@@ -406,6 +408,21 @@ export async function getPosts(params = {}) {
   const res = await fetch(url);
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || 'Не удалось загрузить посты');
+  return {
+    data: data.data || [],
+    meta: data.meta || null,
+  };
+}
+
+export async function getRelatedPosts(slug, params = {}) {
+  const search = new URLSearchParams();
+  if (params.page) search.set('page', String(params.page));
+  if (params.per_page) search.set('per_page', String(params.per_page));
+  const qs = search.toString();
+  const url = getApiUrl(`/posts/${encodeURIComponent(slug)}/related`) + (qs ? `?${qs}` : '');
+  const res = await fetch(url);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Не удалось загрузить связанные материалы');
   return {
     data: data.data || [],
     meta: data.meta || null,

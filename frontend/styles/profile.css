@@ -879,34 +879,41 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
-  align-items: stretch;
+  align-items: start;
   min-height: 0;
 }
- 
+
 .consultations-tab__calendar-block {
   display: flex;
   flex-direction: column;
   min-height: 0;
 }
- 
+
 .consultations-tab__nearest {
   display: flex;
   flex-direction: column;
   background: transparent;
-  height: 100%;
   min-height: 0;
+  align-self: start;
 }
- 
+
 .consultations-tab__nearest-grid {
-  display: grid;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
   gap: 16px;
-  flex: 1 1 auto;
-  min-height: 0;
+  width: 100%;
   overflow-x: hidden;
   overflow-y: auto;
   padding-right: 6px;
   scrollbar-width: thin;
   scrollbar-color: rgba(196, 157, 108, 0.65) rgba(196, 157, 108, 0.12);
+}
+
+.consultations-tab__nearest-grid .meeting-card {
+  flex: 0 0 auto;
+  height: auto;
+  margin-bottom: 0;
 }
 
 .consultations-tab__nearest-grid::-webkit-scrollbar {
@@ -932,16 +939,63 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
+  align-items: start;
 }
 
 .consultations-tab__cards-grid--single {
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 520px);
+}
+
+.consultations-tab__section {
+  margin-bottom: 1.5rem;
+}
+
+.consultations-tab__section-title {
+  margin: 0 0 14px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.consultations-tab__section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 16px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.consultations-tab__section-head .consultations-tab__section-title {
+  margin: 0;
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.consultations-tab__section-head + .consultations-tab__cards-grid {
+  margin-top: 0;
+}
+
+.consultations-tab__cards-grid .meeting-card {
+  margin-bottom: 0;
+  height: auto;
+}
+
+.consultations-tab__empty {
+  margin: 0;
+  font-size: 0.92rem;
+  color: #666;
+  line-height: 1.5;
 }
 
 @media (max-width: 768px) {
   .consultations-tab__main-layout {
     grid-template-columns: 1fr;
     gap: 14px;
+  }
+
+  .consultations-tab__nearest-grid {
+    max-height: none !important;
   }
 
   .consultations-tab__cards-grid {
@@ -998,8 +1052,13 @@
   }
 
   .consultations-tab .consult-cal__create-btn {
-    font-size: 0.72rem;
-    padding: 4px 8px;
+    font-size: 0.8rem;
+    padding: 6px 10px;
+  }
+
+  .consultations-tab__section-head {
+    margin-bottom: 10px;
+    gap: 8px 10px;
   }
 
   .consultations-tab .consultations-tab__filters label {

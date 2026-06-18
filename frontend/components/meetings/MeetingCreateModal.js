@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { createRequestMeeting, getAdminRequests } from '../../lib/api';
 import ModalShell from '../ModalShell';
 import MeetingForm, { toLocalInputValue } from './MeetingForm';
+import { notifyAdminMeetingUpdated } from '../../lib/adminEvents';
 
 function defaultStartFromDate(year, month, day) {
   const d = new Date(year, month - 1, day, 10, 0, 0, 0);
@@ -23,6 +24,7 @@ export default function MeetingCreateModal({
 }) {
   const { user } = useAuth();
   const isAdmin = user?.roles?.some((r) => r.name === 'admin');
+  const isLawyer = user?.roles?.some((r) => r.name === 'lawyer');
   const [requestId, setRequestId] = useState(fixedRequestId ? String(fixedRequestId) : '');
   const [request, setRequest] = useState(fixedRequest || null);
   const [requests, setRequests] = useState([]);
@@ -41,14 +43,25 @@ export default function MeetingCreateModal({
     setLoadingRequests(true);
     getAdminRequests('', 1, 1000)
       .then(({ data: list }) => {
-        const eligible = (list || []).filter(
+        let eligible = (list || []).filter(
           (r) => r.lawyer_id && !['closed', 'rejected'].includes(r.status),
         );
+        if (isLawyer && !isAdmin) {
+          eligible = eligible.filter((r) => Number(r.lawyer_id) === Number(user?.id));
+        }
         setRequests(eligible);
+        setRequestId((current) => {
+          if (!current) return '';
+          return eligible.some((r) => String(r.id) === current) ? current : '';
+        });
+        setRequest((current) => {
+          if (!current) return null;
+          return eligible.some((r) => r.id === current.id) ? current : null;
+        });
       })
       .catch(() => setRequests([]))
       .finally(() => setLoadingRequests(false));
-  }, [open, fixedRequestId]);
+  }, [open, fixedRequestId, isLawyer, isAdmin, user?.id]);
 
   const formInitial = useMemo(() => {
     const base = { title: 'Консультация' };
@@ -75,7 +88,12 @@ export default function MeetingCreateModal({
       setError('Выберите заявку');
       throw new Error('Выберите заявку');
     }
-    await createRequestMeeting(rid, payload);
+    const created = await createRequestMeeting(rid, payload);
+    notifyAdminMeetingUpdated({
+      action: 'created',
+      request_id: rid,
+      meeting_id: created?.id,
+    });
     onCreated?.();
     onClose();
   };
@@ -106,9 +124,15 @@ export default function MeetingCreateModal({
               className="meeting-modal__select"
               value={requestId}
               onChange={handleRequestChange}
-              disabled={loadingRequests}
+              disabled={loadingRequests || requests.length === 0}
             >
-              <option value="">— выберите заявку —</option>
+              <option value="">
+                {loadingRequests
+                  ? 'Загрузка…'
+                  : requests.length === 0
+                    ? '— нет доступных заявок —'
+                    : '— выберите заявку —'}
+              </option>
               {requests.map((r) => (
                 <option key={r.id} value={String(r.id)}>
                   №{r.id} — {r.subject || 'Без темы'}
@@ -116,6 +140,9 @@ export default function MeetingCreateModal({
               ))}
             </select>
           </label>
+        )}
+        {!fixedRequestId && !loadingRequests && requests.length === 0 && isLawyer && !isAdmin && (
+          <p className="meeting-modal__hint">Нет активных заявок, где вы назначены ответственным юристом.</p>
         )}
         {fixedRequest && (
           <p className="meeting-modal__hint">

@@ -19,9 +19,8 @@ function getGridTier(width) {
 }
 
 function useGridTier() {
-  const [tier, setTier] = useState(() =>
-    getGridTier(typeof window !== 'undefined' ? window.innerWidth : 1400),
-  );
+  const defaultWidth = 1400;
+  const [tier, setTier] = useState(() => getGridTier(defaultWidth));
 
   useEffect(() => {
     const update = () => setTier(getGridTier(window.innerWidth));

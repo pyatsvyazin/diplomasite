@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { submitRequest } from '../../lib/api';
+import { notifyAdminBadgeRefresh } from '../../lib/adminEvents';
 import { formatPhone, normalizeDigits, parsePhoneToDigits, isValidPhoneDigits } from '../../lib/phone';
 import { REQUEST_TOPICS } from '../../constants/requestTopics';
 import Avatar from '../Avatar';
@@ -50,6 +51,7 @@ export default function RequestFormSection() {
             message: form.message,
           };
       await submitRequest(payload);
+      notifyAdminBadgeRefresh();
       setSuccess(true);
       setForm({ name: '', email: '', phone: '', subject: '', message: '' });
       setCustomTopic('');

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { getAdminUsers, updateAdminRequest } from '../../lib/api';
 import Avatar from '../Avatar';
 import { getAvatarUrl } from '../../lib/api';
+import { notifyAdminRequestUpdated } from '../../lib/adminEvents';
 
 export default function ClientSelectMenu({ requestId, onSelect, onClose, renderTrigger }) {
   const [open, setOpen] = useState(false);
@@ -33,8 +34,9 @@ export default function ClientSelectMenu({ requestId, onSelect, onClose, renderT
 
   const handlePick = (user) => {
     updateAdminRequest(requestId, { client_id: user.id })
-      .then(() => {
-        onSelect();
+      .then((updated) => {
+        onSelect?.(updated);
+        notifyAdminRequestUpdated(updated);
         setOpen(false);
         onClose?.();
       });

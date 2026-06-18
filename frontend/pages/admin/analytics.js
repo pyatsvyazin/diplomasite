@@ -3,6 +3,7 @@ import AdminLayout from '../../components/AdminLayout';
 import PostsPagination from '../../components/PostsPagination';
 import { useAuth } from '../../context/AuthContext';
 import { getAdminAnalytics } from '../../lib/api';
+import { ADMIN_ANALYTICS_REFRESH_EVENT } from '../../lib/adminEvents';
 
 const PIE_COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#64748b'];
 
@@ -279,6 +280,22 @@ export default function AdminAnalyticsPage() {
     load(calendarPage, activityPage, initial);
   }, [authLoading, isAdmin, calendarPage, activityPage, load]);
 
+  useEffect(() => {
+    if (!isAdmin) return undefined;
+    let debounceId = null;
+    const onRefresh = () => {
+      clearTimeout(debounceId);
+      debounceId = setTimeout(() => {
+        load(calendarPage, activityPage, false);
+      }, 400);
+    };
+    window.addEventListener(ADMIN_ANALYTICS_REFRESH_EVENT, onRefresh);
+    return () => {
+      clearTimeout(debounceId);
+      window.removeEventListener(ADMIN_ANALYTICS_REFRESH_EVENT, onRefresh);
+    };
+  }, [isAdmin, calendarPage, activityPage, load]);
+
   const handleCalendarPage = (page) => setCalendarPage(page);
   const handleActivityPage = (page) => setActivityPage(page);
 
@@ -360,7 +377,7 @@ export default function AdminAnalyticsPage() {
               <section
                 className={`admin-analytics__section admin-analytics__section--activity${mobileFeedTab !== 'activity' ? ' admin-analytics__section--mobile-hidden' : ''}`}
               >
-                <h2>Последние действия</h2>
+                <h2>Последние действия за 30 дней</h2>
                 {(data.recent_activity || []).length === 0 ? (
                   <p>Нет записей. События появятся после действий сотрудников в системе.</p>
                 ) : (

@@ -392,25 +392,38 @@
 .about-cta__actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 14px 20px;
+  gap: 12px 16px;
   justify-content: center;
-  align-items: stretch;
+  align-items: center;
   width: 100%;
-  max-width: 560px;
+  max-width: 480px;
 }
 
-.about-cta__actions .about-btn {
-  flex: 1 1 220px;
-  max-width: 280px;
-}
+@media (min-width: 641px) {
+  .about-cta__actions .about-btn {
+    flex: 0 1 auto;
+    max-width: none;
+  }
 
-.about-cta__actions .about-btn--lg {
-  padding: 16px 40px;
-  font-size: 1.25rem;
-  min-height: 56px;
+  .about-cta__actions .about-btn--lg {
+    padding: 10px 20px;
+    font-size: 0.95rem;
+    min-height: 0;
+  }
+
+  .about-cta__actions .about-btn--outline.about-btn--lg {
+    padding: 8px 18px;
+    font-size: 0.95rem;
+    font-weight: var(--home-btn-weight);
+  }
 }
 
 @media (max-width: 640px) {
+  .about-cta__actions .about-btn {
+    flex: 1 1 220px;
+    max-width: 280px;
+  }
+
   .about-service-card__action {
     justify-content: center;
     text-align: center;

@@ -11,6 +11,6 @@ return [
     | Письма регистрации / 2FA / пароля не зависят от этого флага (всегда через AuthController).
     |
     */
-    'mail_enabled' => (bool) env('NOTIFICATIONS_MAIL_ENABLED', true),
+    'mail_enabled' => (bool) env('NOTIFICATIONS_MAIL_ENABLED', false),
 
 ];

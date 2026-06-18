@@ -11,8 +11,10 @@ use App\Models\Meeting;
 use App\Models\Post;
 use App\Models\Request as ClientRequest;
 use App\Models\User;
+use App\Services\Activity\ActivityLogService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class AnalyticsController extends Controller
@@ -127,7 +129,16 @@ class AnalyticsController extends Controller
             'lawyer_name' => $m->responsibleLawyer?->full_name,
         ])->values();
 
+        $activityLog = app(ActivityLogService::class);
+        Cache::remember('activity_events:last_prune', 3600, function () use ($activityLog) {
+            $activityLog->pruneExpired();
+
+            return true;
+        });
+
+        $activityCutoff = $activityLog->retentionCutoff();
         $activityPaginator = ActivityEvent::query()
+            ->where('created_at', '>=', $activityCutoff)
             ->orderByDesc('created_at')
             ->paginate($perPage, ['*'], 'activity_page', $activityPage);
 

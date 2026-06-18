@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Services\Activity\ActivityLogService;
 use App\Services\Conversation\SystemMessageService;
 use App\Services\Notification\NotificationService;
+use App\Support\StaffBroadcast;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -79,6 +80,8 @@ class MeetingService
 
             $this->activityLog->meetingCreated($actor, $meeting);
 
+            StaffBroadcast::meeting($meeting->id, 'created');
+
             return $meeting;
         });
     }
@@ -138,6 +141,8 @@ class MeetingService
 
             $this->activityLog->meetingRescheduled($actor, $meeting);
 
+            StaffBroadcast::meeting($meeting->id, 'updated');
+
             return $meeting;
         });
     }
@@ -166,6 +171,8 @@ class MeetingService
                 'Консультация подтверждена',
                 $meeting->title.' — '.$meeting->formatted_date,
             );
+
+            StaffBroadcast::meeting($meeting->id, 'confirmed');
 
             return $meeting;
         });
@@ -199,6 +206,8 @@ class MeetingService
                 $this->activityLog->meetingCancelled($actor, $meeting);
             }
 
+            StaffBroadcast::meeting($meeting->id, 'cancelled');
+
             return $meeting;
         });
     }
@@ -224,6 +233,8 @@ class MeetingService
             );
 
             $this->activityLog->meetingCompleted($actor, $meeting);
+
+            StaffBroadcast::meeting($meeting->id, 'completed');
 
             return $meeting;
         });

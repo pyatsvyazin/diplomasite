@@ -130,18 +130,22 @@ class NotificationService
         $appName = (string) config('app.name', 'Юридический щит');
         $text .= "\n\n— ".$appName;
 
-        try {
-            $from = new Address(
-                (string) config('mail.from.address'),
-                (string) config('mail.from.name', $appName),
-            );
+        // Почтовый SMTP может отвечать медленно: отправляем после HTTP-ответа,
+        // чтобы не блокировать UI админки при смене статуса/назначениях.
+        dispatch(function () use ($user, $subject, $appName, $text): void {
+            try {
+                $from = new Address(
+                    (string) config('mail.from.address'),
+                    (string) config('mail.from.name', $appName),
+                );
 
-            Mail::raw($text, function ($message) use ($user, $subject, $appName, $from) {
-                $message->to($user->email)->subject($subject.' — '.$appName);
-                $message->from($from->address, $from->name);
-            });
-        } catch (\Throwable $e) {
-            report($e);
-        }
+                Mail::raw($text, function ($message) use ($user, $subject, $appName, $from) {
+                    $message->to($user->email)->subject($subject.' — '.$appName);
+                    $message->from($from->address, $from->name);
+                });
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        })->afterResponse();
     }
 }

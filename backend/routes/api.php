@@ -43,6 +43,7 @@ Route::get('/services', [ServiceController::class, 'index']);
 Route::get('/services/{id}', [ServiceController::class, 'show']);
 Route::get('/staff', [PublicStaffController::class, 'index']);
 Route::get('/posts', [PostController::class, 'index']);
+Route::get('/posts/{slug}/related', [PostController::class, 'related']);
 Route::get('/posts/{slug}', [PostController::class, 'show']);
 
 Route::middleware('auth:sanctum')->group(function () {

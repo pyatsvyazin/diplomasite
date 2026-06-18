@@ -25,6 +25,10 @@ class RequestController extends Controller
             $query->where('status', $status);
         }
 
+        if ($request->boolean('mine')) {
+            $query->where('lawyer_id', $request->user()->id);
+        }
+
         $perPage = (int) $request->query('per_page', 20);
         $page = (int) $request->query('page', 1);
 

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { getAdminLawyers, updateAdminRequest } from '../../lib/api';
 import Avatar from '../Avatar';
+import { notifyAdminRequestUpdated } from '../../lib/adminEvents';
 
 export default function LawyerSelectMenu({ requestId, onSelect, renderTrigger }) {
   const [open, setOpen] = useState(false);
@@ -29,8 +30,9 @@ export default function LawyerSelectMenu({ requestId, onSelect, renderTrigger })
 
   const handlePick = (lawyer) => {
     updateAdminRequest(requestId, { lawyer_id: lawyer.id, status: 'in_progress' })
-      .then(() => {
-        onSelect?.();
+      .then((updated) => {
+        onSelect?.(updated);
+        notifyAdminRequestUpdated(updated);
         setOpen(false);
       })
       .catch((err) => {

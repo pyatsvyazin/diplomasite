@@ -28,3 +28,7 @@ Broadcast::channel('conversation.{conversationId}', function ($user, $conversati
     return $conversation
         && $conversation->participantRecords()->where('user_id', $user->id)->exists();
 });
+
+Broadcast::channel('staff', function ($user) {
+    return $user->roles()->whereIn('name', ['admin', 'lawyer'])->exists();
+});

@@ -25,6 +25,10 @@
     border-color: #c59d6c;
     color: #000;
   }
+
+  .admin-requests-filter--mine {
+    margin-right: 4px;
+  }
   
   .admin-requests-loading,
   .admin-requests-empty {

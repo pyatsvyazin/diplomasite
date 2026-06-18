@@ -8,6 +8,7 @@ use App\Services\Conversation\ConversationParticipantService;
 use App\Services\Conversation\SystemMessageService;
 use App\Services\Notification\NotificationService;
 use App\Support\RequestStatusLabel;
+use App\Support\StaffBroadcast;
 
 class RequestObserver
 {
@@ -22,6 +23,7 @@ class RequestObserver
     public function created(ClientRequest $request): void
     {
         $this->conversationBootstrap->bootstrapForRequest($request);
+        StaffBroadcast::request($request->id);
     }
 
     public function updated(ClientRequest $request): void
@@ -47,5 +49,7 @@ class RequestObserver
                 report($e);
             }
         }
+
+        StaffBroadcast::request($request->id);
     }
 }

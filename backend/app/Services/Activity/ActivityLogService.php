@@ -278,4 +278,21 @@ class ActivityLogService
             default => $status,
         };
     }
+
+    public static function retentionDays(): int
+    {
+        return max(1, (int) config('activity.retention_days', 30));
+    }
+
+    public function retentionCutoff(): Carbon
+    {
+        return now()->subDays(self::retentionDays());
+    }
+
+    public function pruneExpired(): int
+    {
+        return ActivityEvent::query()
+            ->where('created_at', '<', $this->retentionCutoff())
+            ->delete();
+    }
 }

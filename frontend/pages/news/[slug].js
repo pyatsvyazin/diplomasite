@@ -1,8 +1,12 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useMemo, useState } from 'react';
-import { getPostBySlug, getPosts } from '../../lib/api';
+import { getPostBySlug, getRelatedPosts } from '../../lib/api';
+import { newsSearchHref } from '../../lib/newsLinks';
+import PostsPagination from '../../components/PostsPagination';
 import HomeFooter from '../../components/home/HomeFooter';
+
+const RELATED_PER_PAGE = 4;
 
 const TYPE_LABELS = {
   article: 'Статья',
@@ -15,19 +19,6 @@ function stripText(node) {
   if (node.type === 'text') return node.text || '';
   if (!Array.isArray(node.content)) return '';
   return node.content.map(stripText).join(' ');
-}
-
-function buildExcerpt(item) {
-  const text = (item.content?.content || []).map(stripText).join(' ').replace(/\s+/g, ' ').trim();
-  if (!text) return 'Текст публикации появится после заполнения контента.';
-  return text.slice(0, 170) + (text.length > 170 ? '…' : '');
-}
-
-function formatDate(iso) {
-  if (!iso) return 'Дата не указана';
-  const dt = new Date(iso);
-  if (Number.isNaN(dt.getTime())) return 'Дата не указана';
-  return dt.toLocaleDateString('ru-RU', { day: '2-digit', month: 'long', year: 'numeric' });
 }
 
 function blockAlignStyle(attrs) {
@@ -120,84 +111,66 @@ function renderNode(node, key) {
   return <div key={key}>{children}</div>;
 }
 
-function mergeRelatedByTags(lists, currentId) {
-  const map = new Map();
-  for (const list of lists) {
-    for (const p of list) {
-      if (!p || p.id === currentId) continue;
-      if (!map.has(p.id)) map.set(p.id, p);
-    }
+function buildRelatedExcerpt(item) {
+  if (item.excerpt?.trim()) {
+    const text = item.excerpt.trim();
+    return text.length > 140 ? `${text.slice(0, 140)}…` : text;
   }
-  return [...map.values()].sort((a, b) => {
-    const da = new Date(a.published_at || a.created_at || 0).getTime();
-    const db = new Date(b.published_at || b.created_at || 0).getTime();
-    return db - da;
-  });
+  const text = (item.content?.content || []).map(stripText).join(' ').replace(/\s+/g, ' ').trim();
+  if (!text) return '';
+  return text.length > 140 ? `${text.slice(0, 140)}…` : text;
 }
 
-function RelatedNewsCard({ item }) {
+function formatShortDate(iso) {
+  if (!iso) return '';
+  const dt = new Date(iso);
+  if (Number.isNaN(dt.getTime())) return '';
+  return dt.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function RelatedCompactCard({ item }) {
+  const excerpt = buildRelatedExcerpt(item);
+
   return (
-    <article className="news-card">
-      <div className="news-card__cover-wrap">
-        <Link href={`/news/${item.slug}`}>
-          {item.cover_image_url ? (
-            <img src={item.cover_image_url} alt={item.title} className="news-card__cover" />
-          ) : (
-            <div
-              className="news-card__cover news-card__cover--placeholder"
-              style={{ background: item.cover_color || undefined }}
-            />
-          )}
-        </Link>
-      </div>
-      <div className="news-card__body">
-        <div className="news-card__meta">
-          <span>{formatDate(item.published_at || item.created_at)}</span>
-          <span className="news-card__dot">•</span>
-          <span>{TYPE_LABELS[item.type] || item.type}</span>
-        </div>
-        <h2 className="news-card__title">
-          <Link href={`/news/${item.slug}`} className="news-card__title-link">
+    <article className="post-related-card">
+      <time className="post-related-card__date" dateTime={item.published_at || item.created_at}>
+        {formatShortDate(item.published_at || item.created_at)}
+      </time>
+      <Link href={`/news/${item.slug}`} className="post-related-card__cover" tabIndex={-1} aria-hidden>
+        {item.cover_image_url ? (
+          <img src={item.cover_image_url} alt="" className="post-related-card__img" />
+        ) : (
+          <div
+            className="post-related-card__img post-related-card__img--placeholder"
+            style={{ background: item.cover_color || undefined }}
+          />
+        )}
+      </Link>
+      <div className="post-related-card__body">
+        <p className="post-related-card__type">{TYPE_LABELS[item.type] || item.type}</p>
+        <h3 className="post-related-card__title">
+          <Link href={`/news/${item.slug}`} className="post-related-card__title-link">
             {item.title}
           </Link>
-        </h2>
-        <p className="news-card__excerpt">{buildExcerpt(item)}</p>
-        {Array.isArray(item.keywords) && item.keywords.length > 0 && (
-          <div className="news-card__tags">
-            {item.keywords.slice(0, 5).map((tag) => (
-              <Link
-                key={tag}
-                href={`/news/tag/${encodeURIComponent(tag)}`}
-                className="news-card__tag"
-              >
-                #{tag}
-              </Link>
-            ))}
-          </div>
-        )}
-        <p className="news-card__author">{item.published_name || 'Автор'}</p>
+        </h3>
+        {excerpt && <p className="post-related-card__excerpt">{excerpt}</p>}
       </div>
     </article>
   );
 }
 
-function RelatedCardSkeleton() {
+function RelatedCompactSkeleton() {
   return (
-    <article className="news-card news-card--skeleton" aria-hidden>
-      <div className="news-card__cover-wrap">
-        <div className="news-card__cover shimmer" />
-      </div>
-      <div className="news-card__body">
-        <div className="news-card__meta">
-          <span className="news-skeleton__pill shimmer" />
-          <span className="news-card__dot">•</span>
-          <span className="news-skeleton__pill news-skeleton__pill--short shimmer" />
-        </div>
-        <div className="news-skeleton__line shimmer news-skeleton__line--title" />
-        <div className="news-skeleton__line shimmer news-skeleton__line--title2" />
-        <div className="news-skeleton__line shimmer news-skeleton__line--full" />
-        <div className="news-skeleton__line shimmer news-skeleton__line--lg" />
-        <div className="news-skeleton__line shimmer news-skeleton__line--author" />
+    <article className="post-related-card post-related-card--skeleton" aria-hidden>
+      <div className="post-related-card__date shimmer" />
+      <div className="post-related-card__cover shimmer" />
+      <div className="post-related-card__body">
+        <div className="post-related-card__type shimmer" />
+        <div className="post-related-card__title-line shimmer" />
+        <div className="post-related-card__title-line shimmer" />
+        <div className="post-related-card__title-line post-related-card__title-line--short shimmer" />
+        <div className="post-related-card__excerpt-line shimmer" />
+        <div className="post-related-card__excerpt-line post-related-card__excerpt-line--short shimmer" />
       </div>
     </article>
   );
@@ -224,6 +197,8 @@ export default function NewsPostPage() {
   const { slug } = router.query;
   const [post, setPost] = useState(null);
   const [related, setRelated] = useState([]);
+  const [relatedMeta, setRelatedMeta] = useState(null);
+  const [relatedPage, setRelatedPage] = useState(1);
   const [relatedLoading, setRelatedLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -232,6 +207,8 @@ export default function NewsPostPage() {
     if (!router.isReady || !slug) return;
     setPost(null);
     setRelated([]);
+    setRelatedMeta(null);
+    setRelatedPage(1);
     setLoading(true);
     setError('');
     getPostBySlug(slug)
@@ -241,26 +218,26 @@ export default function NewsPostPage() {
   }, [router.isReady, slug]);
 
   useEffect(() => {
-    if (!post?.id) return;
-    setRelated([]);
-    const tags = Array.isArray(post.keywords) ? post.keywords.filter(Boolean).slice(0, 6) : [];
+    if (!post?.slug) return;
+    const tags = Array.isArray(post.keywords) ? post.keywords.filter(Boolean) : [];
     if (tags.length === 0) {
+      setRelated([]);
+      setRelatedMeta(null);
       setRelatedLoading(false);
       return;
     }
     setRelatedLoading(true);
-    Promise.all(
-      tags.map((tag) =>
-        getPosts({ status: 'published', tag, per_page: 20, page: 1 })
-          .then((r) => r.data)
-          .catch(() => [])
-      )
-    )
-      .then((lists) => {
-        setRelated(mergeRelatedByTags(lists, post.id).slice(0, 8));
+    getRelatedPosts(post.slug, { page: relatedPage, per_page: RELATED_PER_PAGE })
+      .then(({ data, meta }) => {
+        setRelated(data);
+        setRelatedMeta(meta);
+      })
+      .catch(() => {
+        setRelated([]);
+        setRelatedMeta(null);
       })
       .finally(() => setRelatedLoading(false));
-  }, [post]);
+  }, [post, relatedPage]);
 
   const content = useMemo(() => post?.content?.content || [], [post]);
 
@@ -287,8 +264,9 @@ export default function NewsPostPage() {
           <aside className="post-detail__aside">
             <h2 className="post-detail__aside-title">По теме</h2>
             <div className="post-detail__related-stack">
-              <RelatedCardSkeleton />
-              <RelatedCardSkeleton />
+              <RelatedCompactSkeleton />
+              <RelatedCompactSkeleton />
+              <RelatedCompactSkeleton />
             </div>
           </aside>
         </div>
@@ -308,7 +286,7 @@ export default function NewsPostPage() {
                     {post.keywords.map((tag) => (
                       <Link
                         key={tag}
-                        href={`/news/tag/${encodeURIComponent(tag)}`}
+                        href={newsSearchHref(tag)}
                         className="post-detail__tag"
                       >
                         #{tag}
@@ -323,10 +301,12 @@ export default function NewsPostPage() {
 
           <aside className="post-detail__aside" aria-label="Связанные материалы">
             <h2 className="post-detail__aside-title">По теме</h2>
+            <div className="post-detail__aside-body">
             {showRelatedSkeleton && (
               <div className="post-detail__related-stack">
-                <RelatedCardSkeleton />
-                <RelatedCardSkeleton />
+                <RelatedCompactSkeleton />
+                <RelatedCompactSkeleton />
+                <RelatedCompactSkeleton />
               </div>
             )}
             {!showRelatedSkeleton && (!post.keywords || post.keywords.length === 0) && (
@@ -340,12 +320,21 @@ export default function NewsPostPage() {
               </p>
             )}
             {!showRelatedSkeleton && related.length > 0 && (
-              <div className="post-detail__related-stack">
-                {related.map((item) => (
-                  <RelatedNewsCard key={item.id} item={item} />
-                ))}
-              </div>
+              <>
+                <div className="post-detail__related-stack">
+                  {related.map((item) => (
+                    <RelatedCompactCard key={item.id} item={item} />
+                  ))}
+                </div>
+                <PostsPagination
+                  className="posts-pagination--compact posts-pagination--aside"
+                  page={relatedMeta?.current_page || relatedPage}
+                  lastPage={relatedMeta?.last_page || 1}
+                  onPageChange={(p) => setRelatedPage(p)}
+                />
+              </>
             )}
+            </div>
           </aside>
         </div>
       )}

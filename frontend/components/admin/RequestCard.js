@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { updateAdminRequest, getAdminLawyers } from '../../lib/api';
+import { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import { updateAdminRequest } from '../../lib/api';
 import LawyerSelectMenu from './LawyerSelectMenu';
 import ClientSelectMenu from './ClientSelectMenu';
 import StarRating from '../StarRating';
@@ -8,6 +9,7 @@ import { getAvatarUrl } from '../../lib/api';
 import { formatPhone } from '../../lib/phone';
 import RequestMeetingsPanel from '../meetings/RequestMeetingsPanel';
 import RequestChatLink from '../RequestChatLink';
+import { notifyAdminRequestUpdated } from '../../lib/adminEvents';
 
 const STATUS_LABELS = {
   new: 'Новая',
@@ -17,7 +19,13 @@ const STATUS_LABELS = {
   closed: 'Закрыта',
 };
 
-function AuthorBlock({ request, onRefresh }) {
+function canViewRequestMeetings(user, request) {
+  if (!user || !request) return false;
+  if (user.roles?.some((r) => r.name === 'admin')) return true;
+  return Number(request.lawyer_id) === Number(user.id);
+}
+
+function AuthorBlock({ request, onRequestUpdated }) {
   const isAuthorized = !!request.client_id;
   const client = request.client;
   const name = client?.full_name ?? request.name ?? '—';
@@ -28,7 +36,11 @@ function AuthorBlock({ request, onRefresh }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const handleUnlink = () => {
-    updateAdminRequest(request.id, { client_id: null }).then(onRefresh);
+    updateAdminRequest(request.id, { client_id: null })
+      .then((updated) => {
+        onRequestUpdated?.(updated);
+        notifyAdminRequestUpdated(updated);
+      });
     setMenuOpen(false);
   };
 
@@ -69,7 +81,7 @@ function AuthorBlock({ request, onRefresh }) {
           ) : (
             <ClientSelectMenu
               requestId={request.id}
-              onSelect={onRefresh}
+              onSelect={onRequestUpdated}
               onClose={() => setMenuOpen(false)}
               renderTrigger={(onClick) => (
                 <button
@@ -90,7 +102,7 @@ function AuthorBlock({ request, onRefresh }) {
   );
 }
 
-function LawyerBlock({ request, onAssign, onRefresh }) {
+function LawyerBlock({ request, onRequestUpdated }) {
   const lawyer = request.lawyer;
   const [menuOpen, setMenuOpen] = useState(false);
   const [removing, setRemoving] = useState(false);
@@ -99,8 +111,9 @@ function LawyerBlock({ request, onAssign, onRefresh }) {
     if (removing) return;
     setRemoving(true);
     updateAdminRequest(request.id, { lawyer_id: null })
-      .then(() => {
-        onRefresh?.();
+      .then((updated) => {
+        onRequestUpdated?.(updated);
+        notifyAdminRequestUpdated(updated);
         setMenuOpen(false);
       })
       .catch((err) => {
@@ -147,7 +160,7 @@ function LawyerBlock({ request, onAssign, onRefresh }) {
     <div className="request-card__lawyer request-card__lawyer--empty">
       <LawyerSelectMenu
         requestId={request.id}
-        onSelect={() => onRefresh()}
+        onSelect={onRequestUpdated}
         renderTrigger={(onClick) => (
           <button type="button" className="request-card__assign-btn" onClick={onClick} title="Назначить юриста" aria-label="Назначить юриста">
             +
@@ -158,18 +171,33 @@ function LawyerBlock({ request, onAssign, onRefresh }) {
   );
 }
 
-export default function RequestCard({ request, onRefresh, onLinkClient }) {
+export default function RequestCard({ request, onRequestUpdated }) {
+  const { user } = useAuth();
+  const showMeetings = canViewRequestMeetings(user, request);
   const [status, setStatus] = useState(request.status);
-  const [updating, setUpdating] = useState(false);
+
+  useEffect(() => {
+    setStatus(request.status);
+  }, [request.status, request.lawyer_id, request.client_id, request.review]);
 
   const handleStatusChange = (e) => {
     const next = e.target.value;
+    const prev = status;
+    if (next === prev) return;
+
     setStatus(next);
-    setUpdating(true);
+    onRequestUpdated?.({ ...request, status: next });
+
     updateAdminRequest(request.id, { status: next })
-      .then(() => onRefresh())
-      .catch(() => setStatus(request.status))
-      .finally(() => setUpdating(false));
+      .then((updated) => {
+        setStatus(updated.status);
+        onRequestUpdated?.(updated);
+        notifyAdminRequestUpdated(updated);
+      })
+      .catch(() => {
+        setStatus(prev);
+        onRequestUpdated?.({ ...request, status: prev });
+      });
   };
 
   const createdAt = request.created_at
@@ -181,7 +209,7 @@ export default function RequestCard({ request, onRefresh, onLinkClient }) {
       <RequestChatLink requestId={request.id} />
       <div className="request-card__row">
         <div className="request-card__col request-card__col--author">
-          <AuthorBlock request={request} onRefresh={onRefresh} />
+          <AuthorBlock request={request} onRequestUpdated={onRequestUpdated} />
         </div>
         <div className="request-card__col request-card__col--body">
           <div className="request-card__time">{createdAt}</div>
@@ -196,7 +224,6 @@ export default function RequestCard({ request, onRefresh, onLinkClient }) {
                   className={`request-card__status request-card__status--${status}`}
                   value={status}
                   onChange={handleStatusChange}
-                  disabled={updating}
                 >
                   {Object.entries(STATUS_LABELS).map(([value, label]) => (
                     <option key={value} value={value}>{label}</option>
@@ -206,7 +233,9 @@ export default function RequestCard({ request, onRefresh, onLinkClient }) {
             </div>
           )}
           <div className="request-card__message">{request.message || '—'}</div>
-          <RequestMeetingsPanel requestId={request.id} request={request} showCreateButton />
+          {showMeetings && (
+            <RequestMeetingsPanel requestId={request.id} request={request} showCreateButton />
+          )}
             {request.review && (
               <div className="request-card__review">
                 <div className="request-card__review-title">Отзыв клиента</div>
@@ -222,7 +251,7 @@ export default function RequestCard({ request, onRefresh, onLinkClient }) {
         <div className="request-card__row2">
           <div className="request-card__col request-card__col--author" />
           <div className="request-card__col request-card__col--body">
-            <LawyerBlock request={request} onAssign={() => {}} onRefresh={onRefresh} />
+            <LawyerBlock request={request} onRequestUpdated={onRequestUpdated} />
           </div>
         </div>
       )}

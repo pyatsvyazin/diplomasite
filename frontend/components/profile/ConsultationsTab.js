@@ -1,7 +1,8 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { cancelMeeting, confirmMeeting, getMeetings } from '../../lib/api';
+import { getMeetings } from '../../lib/api';
 import MeetingCard from '../meetings/MeetingCard';
+import MeetingCardActions from '../meetings/MeetingCardActions';
 import MeetingCreateModal from '../meetings/MeetingCreateModal';
 import PostsPagination from '../PostsPagination';
 
@@ -149,47 +150,17 @@ export default function ConsultationsTab() {
     ? byDay[`${year}-${String(month).padStart(2, '0')}-${String(selectedDay).padStart(2, '0')}`] || []
     : [];
   const selectedDateLabel = selectedDay ? formatFullRussianDate(year, month, selectedDay) : '';
-
-  const handleConfirm = async (meetingId) => {
-    try {
-      await confirmMeeting(meetingId);
-      setRefreshKey((k) => k + 1);
-    } catch (e) {
-      window.alert(e?.message || 'Не удалось подтвердить консультацию');
-    }
-  };
-
-  const handleCancel = async (meetingId) => {
-    try {
-      await cancelMeeting(meetingId, '');
-      setRefreshKey((k) => k + 1);
-    } catch (e) {
-      window.alert(e?.message || 'Не удалось отменить консультацию');
-    }
-  };
-
-  const renderMeetingActions = (meeting) => {
-    const isClient = meeting.request?.client_id === user?.id;
-    const isOverdue = meeting.status === 'pending' && new Date(meeting.start_at) < new Date();
-    if (!isClient) return null;
-    return (
-      <>
-        {meeting.status === 'pending' && !isOverdue && (
-          <button type="button" className="meeting-form__btn meeting-form__btn--primary" onClick={() => handleConfirm(meeting.id)}>
-            Подтвердить
-          </button>
-        )}
-        {['pending', 'confirmed'].includes(meeting.status) && (
-          <button type="button" className="meeting-form__btn meeting-form__btn--ghost" onClick={() => handleCancel(meeting.id)}>
-            Отменить
-          </button>
-        )}
-      </>
-    );
-  };
+  const refreshMeetings = () => setRefreshKey((k) => k + 1);
+  const meetingActions = (meeting) => (
+    <MeetingCardActions meeting={meeting} onUpdated={refreshMeetings} />
+  );
 
   const cells = buildCalendarDays(year, month);
   const monthLabel = view.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' });
+  const nearestGridMaxHeight =
+    nearestMaxHeight && nearestMeetings.length > 1
+      ? Math.max(nearestMaxHeight - 44, 160)
+      : null;
 
   return (
     <div className="consultations-tab">
@@ -208,8 +179,8 @@ export default function ConsultationsTab() {
           </label>
         </div>
       )}
-      <div className="consultations-tab__main-layout" style={{ alignItems: 'stretch', minHeight: 0 }}>
-        <div className="consultations-tab__calendar-block" ref={calendarRef} style={{ minHeight: 0 }}>
+      <div className="consultations-tab__main-layout">
+        <div className="consultations-tab__calendar-block" ref={calendarRef}>
             <div className="consult-cal__nav">
               <button
                 type="button"
@@ -262,26 +233,16 @@ export default function ConsultationsTab() {
             </div>
           </div>
 
-        <aside
-          className="consultations-tab__nearest"
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            minHeight: 0,
-            height: '100%',
-            maxHeight: nearestMaxHeight ? `${nearestMaxHeight}px` : undefined,
-            overflow: 'hidden',
-          }}
-        >
+        <aside className="consultations-tab__nearest">
           <h3 className="consultations-tab__section-title">Ближайшие консультации</h3>
           <div
             className="consultations-tab__nearest-grid"
-            style={{ flex: '1 1 auto', minHeight: 0, overflowY: 'auto' }}
+            style={nearestGridMaxHeight ? { maxHeight: `${nearestGridMaxHeight}px` } : undefined}
           >
             {loading && <p className="consultations-tab__empty">Загрузка…</p>}
             {!loading && nearestMeetings.length === 0 && <p className="consultations-tab__empty">Нет ближайших консультаций.</p>}
             {nearestMeetings.map((meeting) => (
-              <MeetingCard key={meeting.id} meeting={meeting} actions={renderMeetingActions(meeting)} />
+              <MeetingCard key={meeting.id} meeting={meeting} actions={meetingActions(meeting)} />
             ))}
           </div>
         </aside>
@@ -293,7 +254,7 @@ export default function ConsultationsTab() {
             <h3 className="consultations-tab__section-title">Ожидающие подтверждения</h3>
             <div className="consultations-tab__cards-grid consultations-tab__cards-grid--single">
               {pending.map((m) => (
-                <MeetingCard key={m.id} meeting={m} actions={renderMeetingActions(m)} />
+                <MeetingCard key={m.id} meeting={m} actions={meetingActions(m)} />
               ))}
             </div>
           </section>
@@ -304,13 +265,13 @@ export default function ConsultationsTab() {
             <h3 className="consultations-tab__section-title">Подтверждённые консультации</h3>
             <div className="consultations-tab__cards-grid">
               {confirmedPast.map((m) => (
-                <MeetingCard key={m.id} meeting={m} actions={renderMeetingActions(m)} />
+                <MeetingCard key={m.id} meeting={m} actions={meetingActions(m)} />
               ))}
             </div>
           </section>
         )}
 
-        {selectedDay && selectedMeetings.length > 0 && (
+        {selectedDay && (
           <section className="consultations-tab__section">
             <div className="consultations-tab__section-head">
               <h3 className="consultations-tab__section-title">Консультации на {selectedDateLabel}</h3>
@@ -327,11 +288,23 @@ export default function ConsultationsTab() {
                 </button>
               )}
             </div>
-            <div className="consultations-tab__cards-grid">
-              {selectedMeetings.map((m) => (
-                <MeetingCard key={m.id} meeting={m} actions={renderMeetingActions(m)} />
-              ))}
-            </div>
+            {selectedMeetings.length === 0 ? (
+              <p className="consultations-tab__empty">
+                {canCreateMeeting
+                  ? 'На эту дату консультаций нет. Можно назначить новую.'
+                  : 'На эту дату консультаций нет.'}
+              </p>
+            ) : (
+              <div
+                className={`consultations-tab__cards-grid${
+                  selectedMeetings.length === 1 ? ' consultations-tab__cards-grid--single' : ''
+                }`}
+              >
+                {selectedMeetings.map((m) => (
+                  <MeetingCard key={m.id} meeting={m} actions={meetingActions(m)} />
+                ))}
+              </div>
+            )}
           </section>
         )}
 

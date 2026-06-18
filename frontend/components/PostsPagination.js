@@ -1,4 +1,4 @@
-export default function PostsPagination({ page, lastPage, onPageChange }) {
+export default function PostsPagination({ page, lastPage, onPageChange, className = '' }) {
   if (!lastPage || lastPage <= 1) return null;
 
   const pages = [];
@@ -10,8 +10,10 @@ export default function PostsPagination({ page, lastPage, onPageChange }) {
     }
   }
 
+  const rootClass = ['posts-pagination', className].filter(Boolean).join(' ');
+
   return (
-    <nav className="posts-pagination" aria-label="Страницы">
+    <nav className={rootClass} aria-label="Страницы">
       <button
         type="button"
         className="posts-pagination__btn"

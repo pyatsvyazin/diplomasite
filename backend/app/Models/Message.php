@@ -5,7 +5,6 @@ namespace App\Models;
 use App\Enums\Chat\MessageType;
 use App\Events\MessageCreated;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -15,11 +14,22 @@ class Message extends Model
     {
         static::created(function (Message $message): void {
             $message->conversation?->touch();
-            if (config('broadcasting.default') !== 'null') {
-                DB::afterCommit(function () use ($message): void {
-                    broadcast(new MessageCreated($message->fresh()));
-                });
+            if (config('broadcasting.default') === 'null') {
+                return;
             }
+
+            $messageId = $message->id;
+            dispatch(function () use ($messageId): void {
+                try {
+                    $fresh = self::query()->find($messageId);
+                    if (!$fresh) {
+                        return;
+                    }
+                    broadcast(new MessageCreated($fresh));
+                } catch (\Throwable $e) {
+                    report($e);
+                }
+            })->afterResponse();
         });
     }
 

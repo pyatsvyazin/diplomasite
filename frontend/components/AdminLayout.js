@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '../context/AuthContext';
 import SidebarLayout from './SidebarLayout';
 import { getAdminRequests } from '../lib/api';
+import { useAdminRealtime } from '../hooks/useAdminRealtime';
+import { ADMIN_BADGE_REFRESH_EVENT } from '../lib/adminEvents';
 
 const ADMIN_ICONS = [
   { href: '/admin/requests', label: 'Заявки', src: '/icons/adminpanel/apply_1.svg' },
@@ -34,24 +36,32 @@ export default function AdminLayout({ children }) {
 
   const isAdminOrLawyer = user?.roles?.some((r) => r.name === 'admin' || r.name === 'lawyer');
 
+  const refreshBadge = useCallback(() => {
+    getAdminRequests('new', 1, 1)
+      .then(({ meta }) => setNewRequestsCount(Number(meta?.total) || 0))
+      .catch(() => setNewRequestsCount(0));
+  }, []);
+
   useEffect(() => {
     if (!loading && (!user || !isAdminOrLawyer)) {
       router.replace('/');
     }
   }, [user, loading, isAdminOrLawyer, router]);
 
+  useAdminRealtime({
+    enabled: Boolean(user && isAdminOrLawyer),
+    onPoll: refreshBadge,
+  });
+
   useEffect(() => {
-    if (!user || !isAdminOrLawyer) return;
-    getAdminRequests('new', 1, 1)
-      .then(({ meta }) => setNewRequestsCount(Number(meta?.total) || 0))
-      .catch(() => setNewRequestsCount(0));
-    const id = setInterval(() => {
-      getAdminRequests('new', 1, 1)
-        .then(({ meta }) => setNewRequestsCount(Number(meta?.total) || 0))
-        .catch(() => {});
-    }, 120000);
-    return () => clearInterval(id);
-  }, [user, isAdminOrLawyer]);
+    if (!user || !isAdminOrLawyer) return undefined;
+
+    refreshBadge();
+
+    const onBadge = () => refreshBadge();
+    window.addEventListener(ADMIN_BADGE_REFRESH_EVENT, onBadge);
+    return () => window.removeEventListener(ADMIN_BADGE_REFRESH_EVENT, onBadge);
+  }, [user, isAdminOrLawyer, refreshBadge]);
 
   if (loading || !user || !isAdminOrLawyer) {
     return (

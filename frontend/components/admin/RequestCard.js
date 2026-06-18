@@ -104,6 +104,7 @@ function AuthorBlock({ request, onRequestUpdated }) {
 
 function LawyerBlock({ request, onRequestUpdated }) {
   const lawyer = request.lawyer;
+  const canModifyLawyer = request.status !== 'closed' && request.status !== 'rejected';
   const [menuOpen, setMenuOpen] = useState(false);
   const [removing, setRemoving] = useState(false);
 
@@ -124,29 +125,40 @@ function LawyerBlock({ request, onRequestUpdated }) {
   };
 
   if (lawyer) {
+    const email = lawyer.email ?? '—';
+    const phone = lawyer.phone ? formatPhone(lawyer.phone) : '—';
+
     return (
       <div className="request-card__lawyer">
         <div className="request-card__lawyer-main">
           <Avatar name={lawyer.full_name} size={40} className="request-card__avatar avatar--lawyer" src={getAvatarUrl(lawyer)} />
-          <span className="request-card__lawyer-name">{lawyer.full_name}</span>
-          <button
-            type="button"
-            className="request-card__menu-trigger"
-            onClick={() => setMenuOpen((v) => !v)}
-            title="Действия"
-            aria-label="Действия"
-          >
-            ⋮
-          </button>
-          {menuOpen && (
-            <>
-              <div className="request-card__menu-backdrop" onClick={() => setMenuOpen(false)} />
-              <div className="request-card__dropdown">
-                <button type="button" onClick={handleRemove} disabled={removing}>
-                  {removing ? 'Снятие…' : 'Снять юриста'}
-                </button>
-              </div>
-            </>
+          <div className="request-card__author-info">
+            <div className="request-card__author-name">{lawyer.full_name}</div>
+            <div className="request-card__author-meta">{email}</div>
+            <div className="request-card__author-meta">{phone}</div>
+          </div>
+          {canModifyLawyer && (
+            <div className="request-card__author-actions">
+              <button
+                type="button"
+                className="request-card__menu-trigger"
+                onClick={() => setMenuOpen((v) => !v)}
+                title="Действия"
+                aria-label="Действия"
+              >
+                ⋮
+              </button>
+              {menuOpen && (
+                <>
+                  <div className="request-card__menu-backdrop" onClick={() => setMenuOpen(false)} />
+                  <div className="request-card__dropdown">
+                    <button type="button" onClick={handleRemove} disabled={removing}>
+                      {removing ? 'Снятие…' : 'Снять юриста'}
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
           )}
         </div>
       </div>
@@ -209,7 +221,10 @@ export default function RequestCard({ request, onRequestUpdated }) {
       <RequestChatLink requestId={request.id} />
       <div className="request-card__row">
         <div className="request-card__col request-card__col--author">
-          <AuthorBlock request={request} onRequestUpdated={onRequestUpdated} />
+          <div className="request-card__participants">
+            <AuthorBlock request={request} onRequestUpdated={onRequestUpdated} />
+            <LawyerBlock request={request} onRequestUpdated={onRequestUpdated} />
+          </div>
         </div>
         <div className="request-card__col request-card__col--body">
           <div className="request-card__time">{createdAt}</div>
@@ -247,14 +262,6 @@ export default function RequestCard({ request, onRequestUpdated }) {
             )}
         </div>
       </div>
-      {!request.review && (
-        <div className="request-card__row2">
-          <div className="request-card__col request-card__col--author" />
-          <div className="request-card__col request-card__col--body">
-            <LawyerBlock request={request} onRequestUpdated={onRequestUpdated} />
-          </div>
-        </div>
-      )}
     </div>
   );
 }

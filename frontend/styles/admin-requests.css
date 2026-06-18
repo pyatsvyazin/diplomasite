@@ -67,6 +67,12 @@
   .request-card__col--author {
     width: 280px;
   }
+
+  .request-card__participants {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
   
   .request-card__col--body {
     flex: 1;
@@ -387,14 +393,9 @@
       height: 34px;
     }
 
-    .request-card__row,
-    .request-card__row2 {
+    .request-card__row {
       flex-direction: column;
       gap: 10px;
-    }
-
-    .request-card__row2 .request-card__col--author {
-      display: none;
     }
 
     .request-card__col {
